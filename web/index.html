@@ -225,6 +225,9 @@
   .res .h { font: 700 11px var(--mono); letter-spacing: .1em; display: block; margin-bottom: 4px; }
   .res.ok { border-color: rgba(44,133,89,.4); } .res.ok .h { color: var(--ok); }
   .res.no { border-color: rgba(179,38,30,.35); } .res.no .h { color: var(--bad); }
+  .res.blk { border-color: rgba(29,138,90,.35); background: var(--ok-soft); } .res.blk .h { color: var(--ok); }
+  .res .t { display: block; font: 400 19px/1.2 var(--display); color: var(--text); margin-bottom: 4px; }
+  .res code.c { display: block; margin-top: 8px; font-size: 11px; color: var(--dim); }
   .res.sk .h { color: var(--accent); }
   .res code { color: var(--text); font-size: 11.5px; }
   .res .e { color: var(--mute); display: block; margin-top: 4px; }
@@ -515,7 +518,7 @@
         <div>
           <span class="num">02 · TAMPER LAB</span>
           <h2>Attack the deployed contract</h2>
-          <p>Each forgery goes from your browser to the deployed FlightDelayCover on Base Sepolia as an <code>eth_call</code> to <code>settle()</code>: the real bytecode runs, nothing is written, no wallet or key needed. Read the revert reason, then the plain-English version below it.</p>
+          <p>Try to cheat the real contract on Base Sepolia. Each attack is sent to <code>settle()</code> as a simulation (<code>eth_call</code>): the deployed code really runs, nothing is written, no wallet needed. <b>Green = the contract blocked it.</b></p>
         </div>
       </div>
       <div class="card">
@@ -727,28 +730,40 @@ const buildFixture = () => {
 };
 
 // --- same checks as the contract, but in js
+// short human title + one plain sentence per revert
+const TITLE = {
+  NotSignedByAirnode: 'Fake signature', WrongRequest: 'Wrong flight', Stale: 'Too old', NotFinal: 'Flight not landed yet',
+  NotActive: 'Already closed', FromTheFuture: 'Time is in the future', ObservedTooEarly: 'Signed before landing',
+  ScheduleMismatch: 'Different schedule', ECDSAInvalidSignature: 'Broken signature', ECDSAInvalidSignatureLength: 'Broken signature',
+  ECDSAInvalidSignatureS: 'Broken signature', InvalidTimestamp: 'Unreadable time', FieldNotFound: 'Missing field',
+  NotBuyable: 'Flight already left', TooCloseToArrival: 'Too late to buy', Insolvent: 'Pool too small', WindowOpen: 'Too early to expire',
+  ResponseReused: 'Used twice',
+};
 const EXPLAIN = {
-  WrongRequest: (a) => `This signature answers a different question (another flight, date or projection). The contract derived this policy's two request hashes from its flight and date when it was bought; ${short(a[0], 10)} is neither of them.`,
-  NotSignedByAirnode: (a) => `The signature recovers to ${a[0]}, not the AeroDataBox Airnode ${short(AIRNODE)}. An edited byte or a forged key both end up here.`,
-  ECDSAInvalidSignature: () => 'This is not a valid secp256k1 signature.',
-  ECDSAInvalidSignatureLength: (a) => `A signature must be 65 bytes; this one is ${a[0]}.`,
-  ECDSAInvalidSignatureS: () => 'High-s signature refused (OpenZeppelin malleability guard).',
-  Stale: (a) => `Signed at ${fmtTs(a[0])}, which is older than the policy's freshness window (maxAge). Old evidence cannot settle a policy.`,
-  FromTheFuture: (a) => `Timestamp ${fmtTs(a[0])} is ahead of block time by more than 60 s.`,
-  ObservedTooEarly: (a) => `Signed at ${fmtTs(a[0])}, before the event it reports (${fmtTs(a[1])}). Evidence must be observed after the fact.`,
-  NotFinal: (a) => `Status is "${a[0]}". Only "Arrived" (arrival data) or "Canceled" (status data) can settle a policy.`,
-  NotActive: (a) => `Policy #${a[0]} is already settled or expired. One payout per policy.`,
-  ResponseReused: () => 'This exact signed response was already used once. No double payouts.',
-  NotBuyable: (a) => `Cover can only be bought before departure; the signed status was ${a[0]}.`,
-  TooCloseToArrival: () => 'Too close to scheduled arrival to buy cover.',
-  ScheduleMismatch: () => 'The signed schedule differs from the one proven at purchase.',
-  Insolvent: (a) => `The pool lacks free capital (needs ${Number(a[0]) / 1e6}, has ${Number(a[1]) / 1e6} aUSD).`,
-  WindowOpen: (a) => `The settlement window is open until ${fmtTs(a[0])}.`,
+  NotSignedByAirnode: (a) => `The signature belongs to ${short(a[0])}, not to the AeroDataBox Airnode. Someone changed the data or signed it themselves.`,
+  WrongRequest: () => 'This response is about a different flight or date. The contract only accepts data for the flight this policy covers.',
+  Stale: (a) => `Signed at ${fmtTs(a[0])}, longer ago than the policy allows. Old data can't be used to claim.`,
+  NotFinal: (a) => `The flight status is "${a[0]}". The contract only pays once the flight has landed or was cancelled.`,
+  NotActive: (a) => `Policy #${a[0]} is already closed. Every policy pays out at most once.`,
+  FromTheFuture: (a) => `The signature says ${fmtTs(a[0])}, which is in the future. Not accepted.`,
+  ObservedTooEarly: (a) => `Signed at ${fmtTs(a[0])}, before the landing it reports (${fmtTs(a[1])}). That's a guess, not proof.`,
+  ScheduleMismatch: () => 'The schedule in this data is not the one the policy was bought with.',
+  ECDSAInvalidSignature: () => 'The signature is not valid at all.',
+  ECDSAInvalidSignatureLength: (a) => `A signature has 65 bytes, this one has ${a[0]}.`,
+  ECDSAInvalidSignatureS: () => 'The signature is in a form OpenZeppelin refuses (high-s).',
+  ResponseReused: () => 'This exact response was already used. No double payouts.',
+  NotBuyable: (a) => `Cover can only be bought before departure. The signed status was "${a[0]}".`,
+  TooCloseToArrival: () => 'Too close to the scheduled arrival to buy cover.',
+  Insolvent: (a) => `The pool doesn't have enough free money (needs ${Number(a[0]) / 1e6}, has ${Number(a[1]) / 1e6} aUSD).`,
+  WindowOpen: (a) => `The settlement window is still open until ${fmtTs(a[0])}.`,
   FieldNotFound: (a) => `The signed data has no "${a[0]}" field.`,
-  InvalidTimestamp: (a) => `"${a[0]}" is not a timestamp the contract can read.`,
+  InvalidTimestamp: (a) => `"${a[0]}" is not a time the contract can read.`,
 };
 const parseReason = (s) => { const m = /^(\w+)\((.*)\)$/s.exec(String(s || '').trim()); return m ? { name: m[1], args: m[2] ? m[2].split(/,\s*/) : [] } : null; };
 const explain = (s) => { const p = parseReason(s); return p && EXPLAIN[p.name] ? EXPLAIN[p.name](p.args) : ''; };
+const titleOf = (s) => { const p = parseReason(s); return (p && TITLE[p.name]) || (p ? p.name : String(s)); };
+// long hex in a revert → 0x1234…abcd, the full value is in the tooltip
+const shortCode = (s) => String(s).replace(/0x[0-9a-fA-F]{40,64}/g, (h) => short(h, 6));
 
 function evaluate({ resp, flight, date, maxAge, now, policy }) {
   const rows = [];
@@ -894,7 +909,7 @@ function render() {
   if (r.revert) {
     const p = parseReason(r.revert);
     v.className = 'verdict revert';
-    v.innerHTML = `<div class="big">Would revert. Pays nothing.</div><div class="why"><code class="rev">${esc(r.revert)}</code></div><div class="why">${esc(explain(r.revert) || (p ? p.name : r.revert))}</div>`;
+    v.innerHTML = `<div class="big">Rejected: ${esc(titleOf(r.revert).toLowerCase())}</div><div class="why">${esc(explain(r.revert) || (p ? p.name : r.revert))}</div><div class="why"><code class="rev" title="${esc(r.revert)}">${esc(shortCode(r.revert))}</code></div>`;
   } else {
     const amt = cov != null ? ` · ${(cov * r.tier) / 100} aUSD` : '';
     v.className = 'verdict pay';
@@ -1282,12 +1297,17 @@ async function refreshKeeper() {
     try { await j('/health'); S.online = true; } catch { S.online = false; }
     if (S.online) { try { const { log } = await j('/log'); S.apiLog = log; } catch {} }
   }
-  try {
-    const r = await fetch(KEEPER_JSON, { cache: 'no-cache' });
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    S.keeper = await r.json();
-    S.evidence = (S.keeper.evidence ?? []).filter((x) => x && x.requestHash && x.signature && typeof x.data === 'string');
-  } catch (e) { S.keeperErr = e.message; }
+  // fresh file from the keeper-data branch first, else the snapshot that ships with the page (private repo / offline)
+  S.keeperSnap = false;
+  for (const [url, snap] of [[KEEPER_JSON, false], ['data/keeper.json', true]]) {
+    try {
+      const r = await fetch(url, { cache: 'no-cache' });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      S.keeper = await r.json(); S.keeperSnap = snap; S.keeperErr = null;
+      break;
+    } catch (e) { S.keeperErr = e.message; }
+  }
+  if (S.keeper) S.evidence = (S.keeper.evidence ?? []).filter((x) => x && x.requestHash && x.signature && typeof x.data === 'string');
   setStatus();
   renderLog();
   if (S.policies.length) renderPolicies(S.policies, S.free);
@@ -1310,18 +1330,18 @@ function renderLog() {
   }
   const last = runs[runs.length - 1];
   $('logCount').textContent = `${runs.length} runs`;
-  $('logSrc').innerHTML = `Last run ${esc(String(last.finishedAt || last.startedAt || '').slice(0, 16).replace('T', ' '))} UTC · published by the workflow`;
+  $('logSrc').innerHTML = `Last run ${esc(String(last.finishedAt || last.startedAt || '').slice(0, 16).replace('T', ' '))} UTC · ${S.keeperSnap ? 'snapshot shipped with the page' : 'live from the keeper runs'}`;
   $('logBody').innerHTML = runs.slice().reverse().slice(0, 30).map((run) => `<div class="run">${esc(String(run.startedAt || '').slice(5, 16).replace('T', ' '))} UTC <span>${esc(run.event === 'schedule' ? 'scheduled' : run.event === 'workflow_dispatch' ? 'manual' : run.event || '')}</span>${run.url ? `<a href="${esc(run.url)}" target="_blank" rel="noopener">run ↗</a>` : ''}</div>`
     + ((run.log ?? []).length ? run.log.map(logLine).join('') : '<div class="ln"><span></span><span></span><span class="ts">nothing logged</span></div>')).join('');
 }
 
 // --- tamper lab
 const MODES = [
-  { m: 'edit', t: 'Edited data', p: 'Rewrites the arrival time and status to claim a bigger payout. Keeps the original signature.' },
-  { m: 'wrongreq', t: 'Wrong request', p: "Points the response at another flight's request hash (LH9999) to settle this policy with it." },
-  { m: 'wrongsigner', t: 'Wrong signer', p: 'Correct request and data, signed in your browser by a fresh attacker key instead of the Airnode.' },
-  { m: 'stale', t: 'Stale evidence', p: "A genuine Airnode response older than the policy's maxAge, at today's block time." },
-  { m: 'valid', t: 'Genuine', p: 'The unmodified Airnode response. Simulated only: shows what settle() would do with it.' },
+  { m: 'edit', t: 'Edited data', p: 'Change the data (later arrival, "cancelled") but keep the original signature.' },
+  { m: 'wrongreq', t: 'Wrong request', p: 'Use a response about a different flight (LH9999) to claim this policy.' },
+  { m: 'wrongsigner', t: 'Wrong signer', p: 'Right flight and data, but signed by a random key instead of the Airnode.' },
+  { m: 'stale', t: 'Stale evidence', p: 'A real Airnode response, but older than the policy allows.' },
+  { m: 'valid', t: 'Genuine', p: 'The real Airnode response, unchanged. Only simulated, nothing is paid.' },
 ];
 $('modes').innerHTML = MODES.map((x) => `<div class="mode"><span class="mn">${x.m}</span><h4>${x.t}</h4><p>${x.p}</p>
   <button class="btn-${x.m === 'valid' ? 'primary' : 'ghost'} btn-sm" onclick="runMode('${x.m}')">${x.m === 'valid' ? 'Simulate genuine' : 'Run'}</button>
@@ -1365,11 +1385,17 @@ async function runMode(m) {
   if (!p) { el.className = 'res sk'; el.innerHTML = '<span class="h">NO POLICY</span><span class="e">Pick a target policy first.</span>'; return; }
   const base = labBase(p);
   if ((m === 'stale' || m === 'valid') && !base.genuine && !$('tUseInsp').checked) {
-    el.className = 'res sk'; el.innerHTML = `<span class="h">SKIPPED</span><span class="e">Needs a genuine Airnode response for ${esc(p.flight)}; none is published for this policy yet. Try policy #1, or tick "Use the inspector's response".</span>`; return;
+    el.className = 'res sk'; el.innerHTML = `<span class="h">SKIPPED</span><span class="e">This test needs a real signed response for ${esc(p.flight)}, and there is none yet. Pick policy #1.</span>`; return;
+  }
+  if (m === 'stale' && base.genuine) {
+    // for this one we want the oldest real response for the policy, not the newest
+    const hs = [p.arrivalRequestHash, p.statusRequestHash].map((h) => String(h).toLowerCase());
+    const old = allEvidence().filter((x) => hs.includes(String(x.requestHash).toLowerCase())).sort((x, y) => Number(x.timestamp) - Number(y.timestamp))[0];
+    if (old) base.r = old;
   }
   if (m === 'stale') {
     const age = Math.floor(Date.now() / 1000) - Number(base.r.timestamp);
-    if (age <= Number(p.maxAge)) { el.className = 'res sk'; el.innerHTML = `<span class="h">SKIPPED</span><span class="e">The base is only ${dur(age)} old; it goes stale after ${dur(Number(p.maxAge))}.</span>`; return; }
+    if (age <= Number(p.maxAge)) { el.className = 'res sk'; el.innerHTML = `<span class="h">SKIPPED</span><span class="e">The response is only ${dur(age)} old, it only gets too old after ${dur(Number(p.maxAge))}.</span>`; return; }
   }
   const r = mutate(m, base, p);
   el.className = 'res'; el.innerHTML = '<span class="e">eth_call settle() on Base Sepolia…</span>';
@@ -1379,15 +1405,17 @@ async function runMode(m) {
     const via = out.used?.length ? `<span class="e">simulated with ${esc(out.used.join(', '))}</span>` : '';
     if (out.ok) {
       const v = evaluate({ resp: r, flight: p.flight, date: p.date, maxAge: Number(p.maxAge), now: at ?? Math.floor(Date.now() / 1000), policy: null });
-      el.className = 'res ok';
-      el.innerHTML = `<span class="h">ACCEPTED · eth_call</span>settle() would ${v.tier ? `pay ${v.tier}% (${(Number(p.coverage) / 1e6) * v.tier / 100} aUSD) to the holder` : 'close the policy with no payout'}.${via}`;
+      el.className = m === 'valid' ? 'res ok' : 'res no';
+      el.innerHTML = m === 'valid'
+        ? `<span class="h">✓ ACCEPTED</span><b class="t">${v.tier ? `Would pay ${v.tier}%` : 'Accepted, no payout'}</b><span class="e">${v.tier ? `${(Number(p.coverage) / 1e6) * v.tier / 100} aUSD straight to the holder.` : 'Real data, but the delay is under 2 h.'}</span>${via}`
+        : `<span class="h">⚠ NOT BLOCKED</span><b class="t">The contract accepted this</b><span class="e">That should never happen for a forgery.</span>${via}`;
     } else if (out.error) {
       el.className = 'res sk';
       el.innerHTML = `<span class="h">RPC ERROR</span><span class="e">${esc(out.error)}${out.used?.length ? ' (this node may not support eth_call overrides; untick them and retry)' : ''}</span>`;
     } else {
-      const e = explain(out.reason);
-      el.className = 'res no';
-      el.innerHTML = `<span class="h">REVERTED</span><code>${esc(out.reason)}</code>${e ? `<span class="e">${esc(e)}</span>` : ''}${via}`;
+      const e = explain(out.reason), genuine = m === 'valid';
+      el.className = genuine ? 'res sk' : 'res blk';
+      el.innerHTML = `<span class="h">${genuine ? 'NO PAYOUT' : '🛡 BLOCKED'}</span><b class="t">${esc(titleOf(out.reason))}</b>${e ? `<span class="e">${esc(e)}</span>` : ''}<code class="c" title="${esc(out.reason)}">${esc(shortCode(out.reason))}</code>${via}`;
     }
   } catch (e) {
     el.className = 'res no';
