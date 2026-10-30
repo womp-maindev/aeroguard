@@ -6,6 +6,9 @@ import { concat, encodePacked, type Hex, hexToBytes, keccak256, recoverPublicKey
 import { publicKeyToAddress } from 'viem/accounts';
 import type { SignedResponse } from '../../keeper/src/airnode-v2.ts';
 
+/** Compressed key of the AeroDataBox Airnode 0x83FE…F2Ec, recovered from its live signature (checked in tests). */
+export const AERODATABOX_AIRNODE_PUBKEY = '0x0221225a114acb73845984f6b386cba8459ce7132b84174ac601a3c8665930862c' as const;
+
 export const ETH_PREFIX = toHex('\x19Ethereum Signed Message:\n32');
 
 /** Compressed secp256k1 key of the Airnode, recovered once off chain from any of its signatures. */

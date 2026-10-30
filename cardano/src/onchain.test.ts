@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import type { Hex } from 'viem';
 import { requestHashFor } from '../../keeper/src/flight.ts';
-import { addressOf, compressedSigner, messageHash, minutesOf, payoutOf, plutusVerify, projectedData } from './onchain.ts';
+import { addressOf, AERODATABOX_AIRNODE_PUBKEY, compressedSigner, messageHash, minutesOf, payoutOf, plutusVerify, projectedData } from './onchain.ts';
 import { testVectors } from './vectors.ts';
 
 const real = JSON.parse(readFileSync(new URL('../evidence/IB1314-2026-10-30-status.json', import.meta.url), 'utf8'));
@@ -12,6 +12,7 @@ test('the real Airnode signature verifies with Plutus primitives (no ecrecover)'
   const pubkey = await compressedSigner(real);
   assert.equal(pubkey.length, 2 + 66);
   assert.equal(addressOf(pubkey), real.airnode);
+  assert.equal(pubkey, AERODATABOX_AIRNODE_PUBKEY);
   // The validator rebuilds the data from typed fields instead of parsing JSON.
   assert.equal(projectedData('2026-10-30 21:25Z', 'Expected'), real.data);
   assert.equal(real.requestHash, requestHashFor('IB1314', '2026-10-30', 'status'));

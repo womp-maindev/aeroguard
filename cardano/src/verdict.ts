@@ -17,7 +17,14 @@ export const EVIDENCE_DIRS = [
 // Committed evidence files also carry `flight` and `date`, so /flights can list them.
 type Evidence = SignedResponse & { paymentTx?: string; flight?: string; date?: string };
 
+// Re-read at most every few seconds: every request (including free 404s) looks evidence up, and new proofs still appear.
+const cache = new Map<string, { at: number; byHash: Map<string, Evidence> }>();
+const CACHE_MS = 5_000;
+
 const loadEvidence = (dirs: string[]) => {
+  const key = dirs.join('\0');
+  const hit = cache.get(key);
+  if (hit && Date.now() - hit.at < CACHE_MS) return hit.byHash;
   const byHash = new Map<string, Evidence>();
   for (const dir of dirs.filter(existsSync)) {
     for (const file of readdirSync(dir).filter((f) => f.endsWith('.json'))) {
@@ -27,6 +34,7 @@ const loadEvidence = (dirs: string[]) => {
       } catch { /* not a signed response */ }
     }
   }
+  cache.set(key, { at: Date.now(), byHash });
   return byHash;
 };
 
