@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-10-30T21:58:37.836Z",
+  "updatedAt": "2026-10-30T22:56:15.212Z",
   "contract": "0x257054204c4Cd43846C4553eBe6D709841980a80",
   "runs": [
     {
@@ -93,6 +93,72 @@
           "msg": "policy #4 BA955: nothing due, next check ≥ 22:20Z"
         }
       ]
+    },
+    {
+      "startedAt": "2026-10-30T22:27:40.126Z",
+      "finishedAt": "2026-10-30T22:27:52.835Z",
+      "event": "workflow_dispatch",
+      "url": "https://github.com/womp-maindev/aeroguard/actions/runs/41138239566",
+      "log": [
+        {
+          "at": "2026-10-30T22:27:40.126Z",
+          "level": "info",
+          "msg": "policy #2: LH1816 2026-10-30 sched 21:55Z, check 1/20"
+        },
+        {
+          "at": "2026-10-30T22:27:43.831Z",
+          "level": "pay",
+          "msg": "bought signed arrival for LH1816 via x402",
+          "link": "https://sepolia.basescan.org/tx/0x557e5d5b3d60626c9d23593fada9d43c81de82e5f6e02b8663336f6a03635156"
+        },
+        {
+          "at": "2026-10-30T22:27:45.134Z",
+          "level": "chain",
+          "msg": "policy #2 settled ClosedNoPayout: Arrived, 11 min late, payout 0 aUSD",
+          "link": "https://sepolia.basescan.org/tx/0x5270aa58d63db79af041e74bb40115a801381f28caca028d90c285280594c535"
+        },
+        {
+          "at": "2026-10-30T22:27:45.134Z",
+          "level": "info",
+          "msg": "policy #3: EI357 2026-10-30 sched 21:55Z, check 1/20"
+        },
+        {
+          "at": "2026-10-30T22:27:46.422Z",
+          "level": "pay",
+          "msg": "bought signed arrival for EI357 via x402",
+          "link": "https://sepolia.basescan.org/tx/0x856458f50e565ae958ecc5ec385bd01b954f28daf20be41daa07b342bea24e15"
+        },
+        {
+          "at": "2026-10-30T22:27:47.356Z",
+          "level": "chain",
+          "msg": "policy #3 settled ClosedNoPayout: Arrived, 0 min late, payout 0 aUSD",
+          "link": "https://sepolia.basescan.org/tx/0x5a5e4fc750464b0f4043aa2318da55705ae0eb94603adf17d417068de4f2ff9a"
+        },
+        {
+          "at": "2026-10-30T22:27:47.357Z",
+          "level": "info",
+          "msg": "policy #4: BA955 2026-10-30 sched 21:50Z, check 1/20"
+        },
+        {
+          "at": "2026-10-30T22:27:48.523Z",
+          "level": "pay",
+          "msg": "bought signed arrival for BA955 via x402",
+          "link": "https://sepolia.basescan.org/tx/0x764671bfb440405891e8190fe99168cded5f51acaede70273ce5b4fa18bbc8c3"
+        },
+        {
+          "at": "2026-10-30T22:27:49.748Z",
+          "level": "chain",
+          "msg": "policy #4 settled ClosedNoPayout: Arrived, 0 min late, payout 0 aUSD",
+          "link": "https://sepolia.basescan.org/tx/0x973e29d8195ce6bfe7bde0b749b308cfe1e8200e2465c849810a0a01dd01c7ee"
+        }
+      ]
+    },
+    {
+      "startedAt": "2026-10-30T22:56:15.212Z",
+      "finishedAt": "2026-10-30T22:56:15.212Z",
+      "event": "schedule",
+      "url": "https://github.com/womp-maindev/aeroguard/actions/runs/41141307178",
+      "log": []
     }
   ],
   "evidence": [
@@ -154,6 +220,57 @@
       "date": "2026-10-30",
       "kind": "arrival",
       "settleTx": "0xf0aa5db2e08a9b9aa7298c92853642b39d7ff330fe3e42cd8b441aa136246b44",
+      "outcome": "ClosedNoPayout",
+      "payout": 0,
+      "delayMinutes": 0
+    },
+    {
+      "airnode": "0x83FE2E8F24E66520B1902C3507De4F471248f2Ec",
+      "requestHash": "0xc5cce0ffb09d9ba038ac37b1fc0753e50b6571fd177410dfbbc25208858ce2c9",
+      "timestamp": 1793399263,
+      "data": "{\"actual\":\"2026-10-30 22:06Z\",\"scheduled\":\"2026-10-30 21:55Z\",\"status\":\"Arrived\"}",
+      "signature": "0x28ebcfb3dff69e4234967a8974e3862f8a5ffecd0018a7edef6381722395f0d20ff1badf1b4b373c65bc85513cfbe279dcc473d9318f7c65b7f25ee2266ca49e1c",
+      "fetchedAt": 1793399263,
+      "paymentTx": "0x557e5d5b3d60626c9d23593fada9d43c81de82e5f6e02b8663336f6a03635156",
+      "policyId": 2,
+      "flight": "LH1816",
+      "date": "2026-10-30",
+      "kind": "arrival",
+      "settleTx": "0x5270aa58d63db79af041e74bb40115a801381f28caca028d90c285280594c535",
+      "outcome": "ClosedNoPayout",
+      "payout": 0,
+      "delayMinutes": 11
+    },
+    {
+      "airnode": "0x83FE2E8F24E66520B1902C3507De4F471248f2Ec",
+      "requestHash": "0xd3f90b5fe594b9518a3f4448c3c94c786d3ba4c5ec784bf8e54491f45ac077cd",
+      "timestamp": 1793399265,
+      "data": "{\"actual\":\"2026-10-30 21:26Z\",\"scheduled\":\"2026-10-30 21:55Z\",\"status\":\"Arrived\"}",
+      "signature": "0x2f77573c8387c3bb84c7f7313eacd6a3ef19deee4da40f4654f6afa79cdbff3a0e3cc54ce1f969abd67d76294d289bdf4a3a93eb73b45a7c6eb5133bcb44d81f1b",
+      "fetchedAt": 1793399266,
+      "paymentTx": "0x856458f50e565ae958ecc5ec385bd01b954f28daf20be41daa07b342bea24e15",
+      "policyId": 3,
+      "flight": "EI357",
+      "date": "2026-10-30",
+      "kind": "arrival",
+      "settleTx": "0x5a5e4fc750464b0f4043aa2318da55705ae0eb94603adf17d417068de4f2ff9a",
+      "outcome": "ClosedNoPayout",
+      "payout": 0,
+      "delayMinutes": 0
+    },
+    {
+      "airnode": "0x83FE2E8F24E66520B1902C3507De4F471248f2Ec",
+      "requestHash": "0x4b702f4f427c554273adfd8878668374e1d01d2063378548d4205a150d49de5b",
+      "timestamp": 1793399267,
+      "data": "{\"actual\":\"2026-10-30 21:47Z\",\"scheduled\":\"2026-10-30 21:50Z\",\"status\":\"Arrived\"}",
+      "signature": "0x8eb4fd8e7b1993fe939cf270bc16fdfa553e45457eae4d040ceaee4bf9d35aed4f4a6bcc9ab994624644d6f7421b2e2608ace5cf1571128c591f9cc2c338ce661c",
+      "fetchedAt": 1793399268,
+      "paymentTx": "0x764671bfb440405891e8190fe99168cded5f51acaede70273ce5b4fa18bbc8c3",
+      "policyId": 4,
+      "flight": "BA955",
+      "date": "2026-10-30",
+      "kind": "arrival",
+      "settleTx": "0x973e29d8195ce6bfe7bde0b749b308cfe1e8200e2465c849810a0a01dd01c7ee",
       "outcome": "ClosedNoPayout",
       "payout": 0,
       "delayMinutes": 0
