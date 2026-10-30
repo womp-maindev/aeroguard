@@ -24,13 +24,13 @@ LH1866 MUC→FCO 10:20Z · LH2472 MUC→LHR 10:25Z · EI352 DUB→MUC 09:10Z · 
 ## Night (API3 session, automatic)
 Each run: settle what landed → push notification with the first payout tx → `<FLIGHT>-settlement.json` into `contracts/test/fixtures` (activates its replay test, must pass) → tx into README "Live evidence", DEVFOLIO Links, EVIDENCE → push to main. The Cardano session reads the same final responses from `keeper-data` (22:45 UTC).
 
-## Owner checklist (Sat) — phone only, no laptop needed
-Everything runs in GitHub Actions or in the browser. The keeper key never leaves the GitHub secret.
+## Owner checklist (Sat) — morning from the phone, pitch from the laptop
+Steps 1–4 work from a phone: everything runs in GitHub Actions or in the browser, and the keeper key never leaves the GitHub secret. The pitch (step 5) is on the laptop.
 1. **GitHub (mobile browser, "Desktop site" on)** → Settings → Advanced Security: enable **Secret Protection** + **Push protection**.
 2. **By 14:00 CET**: Settings → General → Danger zone → **Change visibility → Public**. Then Actions → "Dashboard on GitHub Pages" → **Run workflow**. Open https://womp-maindev.github.io/aeroguard/ on the phone and check that the policies and the keeper log show up.
 3. **Video** (optional): screen-record the phone on the Pages dashboard (Inspector → load a real response; Tamper lab → Run the 4 attacks) plus one Basescan settle tx, about 2 min (`docs/VIDEO.md`). Upload it unlisted and send the link in this chat: it goes into README + DEVFOLIO.
 4. **By 14:30**: tum.devfolio.co on the phone → one project, tracks **API3 + Cardano**, text copied from `docs/DEVFOLIO.md` (open it on GitHub → Raw → copy).
-5. **Pitch 15:00**: `docs/PITCH.md`. Show the Pages dashboard on the phone, or on the venue screen by opening the URL. Live purchase on stage: send **"купи <FLIGHT>@<YYYY-MM-DD>"** in this chat; the API3 session runs the "Buy policies" workflow and replies with the Basescan link in about 30 s. Or tap Actions → "Buy policies" → Run workflow yourself.
+5. **Pitch 15:00, laptop**: `docs/PITCH.md`. Open the Pages dashboard in the browser (no setup), or `cd keeper && npm run api` for the local dashboard with **Cover me**. Before going on stage, check that the laptop has the repo up to date (`git pull`) and `.env` with `KEEPER_PK`. Live purchase on stage: send **"купи <FLIGHT>@<YYYY-MM-DD>"** in this chat; the API3 session runs the "Buy policies" workflow and replies with the Basescan link in about 30 s. Or tap Actions → "Buy policies" → Run workflow yourself.
 6. Payouts: the API3 session sends a push if a Saturday policy pays out; otherwise the pitch line in `docs/PITCH.md` ("no delay → no payout, and nobody can fake one") applies.
 
 ## Open issues
