@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 410 120" fill="none">
+<defs>
+<filter id="r1" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency=".04" numOctaves="2" seed="3"/><feDisplacementMap in="SourceGraphic" scale="2.6"/></filter>
+<filter id="r2" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency=".05" numOctaves="2" seed="11"/><feDisplacementMap in="SourceGraphic" scale="3.2"/></filter>
+<linearGradient id="f" x1="0" x2="1"><stop offset="0" stop-color="#7d8696" stop-opacity="0"/><stop offset=".55" stop-color="#7d8696" stop-opacity=".55"/><stop offset="1" stop-color="#7d8696" stop-opacity=".85"/></linearGradient>
+</defs>
+<path d="M300 58 C258 60 236 74 196 70 C150 66 132 48 92 52 C58 55 34 70 0 66" stroke="url(#f)" stroke-width="1.6" stroke-linecap="round" stroke-dasharray="7 7" filter="url(#r2)"/>
+<g transform="translate(300 10)" stroke-linecap="round" stroke-linejoin="round">
+<path d="M96 50 C94 47.6 90 46.6 84 46.6 L58 46.6 L40 22 L33.5 22 L44 46.6 L21 46.6 L13 36.5 L7.5 36.5 L11.5 46.9 C8.6 47.6 8.6 52.4 11.5 53.1 L7.5 63.5 L13 63.5 L21 53.4 L44 53.4 L33.5 78 L40 78 L58 53.4 L84 53.4 C90 53.4 94 52.4 96 50 Z" fill="#fbfcfd"/>
+<g stroke="#5b6475" stroke-width="1.5" filter="url(#r1)"><path d="M96 50 C94 47.6 90 46.6 84 46.6 L58 46.6 L40 22 L33.5 22 L44 46.6 L21 46.6 L13 36.5 L7.5 36.5 L11.5 46.9 C8.6 47.6 8.6 52.4 11.5 53.1 L7.5 63.5 L13 63.5 L21 53.4 L44 53.4 L33.5 78 L40 78 L58 53.4 L84 53.4 C90 53.4 94 52.4 96 50 Z"/><ellipse cx="50.5" cy="37.5" rx="5.2" ry="2.1"/><ellipse cx="50.5" cy="62.5" rx="5.2" ry="2.1"/><path d="M88 47.6 C90.5 48.3 91.5 49.2 91.8 50 C91.5 50.8 90.5 51.7 88 52.4"/><path d="M62 50 h2 M67 50 h2 M72 50 h2 M77 50 h2" stroke-dasharray="0"/></g>
+<g stroke="#5b6475" stroke-width=".8" opacity=".55" filter="url(#r2)" transform="translate(.7 .5)"><path d="M96 50 C94 47.6 90 46.6 84 46.6 L58 46.6 L40 22 L33.5 22 L44 46.6 L21 46.6 L13 36.5 L7.5 36.5 L11.5 46.9 C8.6 47.6 8.6 52.4 11.5 53.1 L7.5 63.5 L13 63.5 L21 53.4 L44 53.4 L33.5 78 L40 78 L58 53.4 L84 53.4 C90 53.4 94 52.4 96 50 Z"/></g>
+<path d="M45 30 L52 40 M42 34 L48 43 M45 70 L52 60 M42 66 L48 57" stroke="#5b6475" stroke-width=".7" opacity=".5" filter="url(#r1)"/>
+</g></svg>
