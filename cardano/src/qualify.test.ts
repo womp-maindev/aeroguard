@@ -18,6 +18,7 @@ test('npm run qualify: preflight, serve, pay, record — as a separate process',
     timeout: 60_000,
   });
   assert.equal(state.submitted.length, 1, stdout);
+  assert.match(stdout, /402 → pay 1 tADA on cardano:preprod/);
   const tx = state.submitted[0]!.hash;
   assert.match(stdout, new RegExp(`link https://preprod\\.cardanoscan\\.io/transaction/${tx}`));
   assert.match(readFileSync(join(dir, 'EVIDENCE.md'), 'utf8'), new RegExp(`IB1314 2026-10-30 \\| Expected \\| \\[${tx.slice(0, 16)}`));

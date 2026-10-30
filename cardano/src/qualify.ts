@@ -5,7 +5,7 @@ import { parseArgs } from 'node:util';
 import { blockfrost, BLOCKFROST_URL, env, payingFetch, sellerAddress, txLink, walletFor } from './cardano.ts';
 import { SalesLog } from './payments.ts';
 import { printChecks, preflight } from './preflight.ts';
-import { buyVerdict, recordEvidence } from './buy.ts';
+import { buyVerdict, recordEvidence, showOffer } from './buy.ts';
 import { createApp, localFacilitator } from './server.ts';
 
 const { values } = parseArgs({
@@ -28,7 +28,9 @@ const origin = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
 
 try {
   console.log(`\n3/4 paying for ${values.flight} ${values.date} (this waits for the block, ~20–60 s)`);
+  await showOffer(origin, values.flight!, values.date!);
   const wallet = walletFor(env('BUYER_MNEMONIC'), blockfrost());
+  console.log('  wallet signs a Cardano transaction (never broadcasts it) and retries with PAYMENT-SIGNATURE');
   const { body, tx } = await buyVerdict({ server: origin, flight: values.flight!, date: values.date!, pay: payingFetch(wallet) });
   recordEvidence(body, tx, process.env.EVIDENCE_MD || undefined);
   console.log(`\n4/4 done: ${body.flight} ${body.date} → ${body.verdict.status}; Airnode signer ${body.verify.signerRecovered}`);
