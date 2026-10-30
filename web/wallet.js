@@ -77,7 +77,7 @@
     } catch {
       W.account = null;
     }
-    render();
+    await afterWalletChange();
   }
 
   async function connect() {
@@ -90,7 +90,7 @@
     } catch (e) {
       note(e.code === 4001 ? 'Connection rejected in the wallet.' : `Could not connect: ${e.message}`);
     }
-    render();
+    await afterWalletChange();
   }
 
   async function switchChain() {
@@ -102,7 +102,7 @@
       else throw e;
     }
     W.chainId = parseInt(await eth().request({ method: 'eth_chainId' }), 16);
-    render();
+    await afterWalletChange();
   }
 
   // ------------------------------------------------------------------------------------------ transactions
@@ -176,6 +176,9 @@
     } catch (e) {
       return result(box, 'no', 'NOT SENDABLE', escape(e.message));
     }
+    if (lowGas()) {
+      return result(box, 'sk', 'NO GAS', `<span class="e">This wallet has too little Base Sepolia ETH to pay for gas. Get ${faucetLink}, then send again.</span>`);
+    }
     W.busy = true;
     render();
     try {
@@ -196,6 +199,7 @@
       else result(box, 'no', 'ERROR', escape(e.message || String(e)));
     } finally {
       W.busy = false;
+      await updateBalance();
       render();
     }
   }
@@ -288,6 +292,218 @@
     result('own', '', 'LOADED', `<span class="e">${escape(label)}. Edit anything, then check or send it.</span>`);
   }
 
+  // ------------------------------------------------------------------------------------- after a wallet change
+
+  const FAUCETS = 'https://docs.base.org/get-started/get-funds';
+  const faucetLink = `<a href="${FAUCETS}" target="_blank" rel="noopener">free Base Sepolia ETH from a faucet</a>`;
+  const ready = () => !missing.length && eth() && W.account && W.chainId === CHAIN_ID;
+  const lowGas = () => W.balance != null && W.gasNeeded != null && W.balance < W.gasNeeded;
+
+  // Gas check: one settle() at the fixed gas limit and the current gas price.
+  async function updateBalance() {
+    if (!ready()) {
+      W.balance = W.gasNeeded = null;
+      return;
+    }
+    try {
+      const [balance, price] = await Promise.all([
+        eth().request({ method: 'eth_getBalance', params: [W.account, 'latest'] }),
+        eth().request({ method: 'eth_gasPrice' }),
+      ]);
+      W.balance = BigInt(balance);
+      W.gasNeeded = BigInt(GAS_LIMIT) * BigInt(price);
+    } catch {
+      W.balance = W.gasNeeded = null;
+    }
+  }
+
+  async function afterWalletChange() {
+    if (W.account) W.note = W.note === 'Wallet disconnected.' ? null : W.note;
+    await updateBalance();
+    decoratePolicies();
+    fillHolder();
+    render();
+  }
+
+  // ------------------------------------------------------------------------------------------- my policies
+
+  const mine = (p) => W.account && String(p.holder).toLowerCase() === W.account.toLowerCase();
+
+  // Marks the rows of the Policies table that the connected wallet holds, and lists them above the table. Runs on
+  // every redraw of the table (MutationObserver), so it survives the page's 20 s refresh without wrapping it.
+  function decoratePolicies() {
+    const body = el('pol');
+    const all = typeof S !== 'undefined' && Array.isArray(S.policies) ? S.policies : [];
+    if (!body) return;
+    for (const row of body.querySelectorAll('tr')) {
+      const id = row.cells[0]?.textContent.trim();
+      const p = all.find((x) => String(x.id) === id);
+      const yours = !!(p && mine(p));
+      row.classList.toggle('wmine', yours);
+      const holderCell = row.cells[7];
+      const badge = holderCell?.querySelector('.wyou');
+      if (yours && holderCell && !badge) holderCell.insertAdjacentHTML('beforeend', ' <span class="pill wyou">yours</span>');
+      if (!yours && badge) badge.remove();
+    }
+    const bar = el('wMine');
+    if (!bar) return;
+    if (!W.account) {
+      bar.hidden = true;
+      return;
+    }
+    const held = all.filter(mine);
+    bar.hidden = false;
+    bar.innerHTML = held.length
+      ? `<b>Your wallet holds ${held.length} ${held.length === 1 ? 'policy' : 'policies'}:</b> ${held
+          .map((p) => `#${escape(p.id)} ${escape(p.flight || 'private')} <span class="pill ${escape(p.statusName)}">${escape(statusText(p))}</span>`)
+          .join(' · ')}`
+      : `No policy on this contract is held by <code>${short(W.account)}</code>. Cover bought with this address as the payout address shows up here.`;
+  }
+
+  const statusText = (p) =>
+    ({ Active: 'Active, waiting for the flight', PaidHalf: 'Paid 50%', PaidFull: 'Paid 100%', ClosedNoPayout: 'Closed, no payout', Expired: 'Expired' })[p.statusName] ?? p.statusName;
+
+  function mountPolicies() {
+    const table = document.querySelector('#policies .card');
+    if (!table || el('wMine')) return;
+    table.insertAdjacentHTML('beforebegin', '<div id="wMine" class="wmine-bar" hidden></div>');
+    const body = el('pol');
+    if (body) new MutationObserver(decoratePolicies).observe(body, { childList: true });
+  }
+
+  // ----------------------------------------------------------------------------------------- buying cover
+
+  // Turns what the keeper API answers into one sentence a judge can act on. The raw text stays underneath.
+  function friendlyBuyError(message) {
+    const m = String(message);
+    if (/no keeper API/i.test(m)) return 'Buying runs through the keeper API, which is not running for this page. Start it with cd keeper && npm run api, then open localhost:8787.';
+    if (/Failed to fetch|NetworkError|Load failed/i.test(m)) return 'The keeper API did not answer. Check that npm run api is still running.';
+    const departed = m.match(/(\S+) is (\w+); cover can only be bought before departure/);
+    if (departed) return `${departed[1]} is already ${departed[2]}. Cover can only be bought before departure: the contract checks a fresh signed status.`;
+    const contractError = m.match(/\b([A-Z][A-Za-z0-9]+)\(([^()]*)\)/);
+    if (contractError) {
+      const own = {
+        BadFlight: 'The flight number must be 3 to 8 capital letters and digits, such as LH1816.',
+        BadDate: 'The date must be the local departure date as YYYY-MM-DD.',
+        BadCoverage: 'Cover must be more than 0 and at most the pool maximum.',
+      }[contractError[1]];
+      const explain = g('explain');
+      const plain = own || (typeof explain === 'function' ? explain(contractError[0]) : '');
+      if (plain) return plain;
+    }
+    if (/responded with 4\d\d|not found|no flight/i.test(m)) return 'AeroDataBox has no such flight on that date. Check the flight number and the local departure date.';
+    if (/\b402\b|payment/i.test(m)) return 'The keeper could not pay for the signed schedule over x402. Its aUSD balance may be too low.';
+    return '';
+  }
+
+  function validateCover() {
+    const problems = [];
+    const flight = el('flight');
+    const date = el('date');
+    const holder = el('holder');
+    const cov = el('cov');
+    const mark = (input, bad) => input?.setAttribute('aria-invalid', bad ? 'true' : 'false');
+
+    const f = flight?.value.trim() ?? '';
+    const badFlight = !/^[A-Z0-9]{3,8}$/.test(f);
+    if (badFlight) problems.push('Flight number: 3 to 8 capital letters and digits, such as LH1816.');
+    mark(flight, badFlight);
+
+    const d = date?.value ?? '';
+    const day = Date.parse(`${d}T00:00:00Z`);
+    const today = Date.parse(new Date().toISOString().slice(0, 10) + 'T00:00:00Z');
+    const badDate = !/^\d{4}-\d{2}-\d{2}$/.test(d) || Number.isNaN(day) || day < today - 86400000 || day > today + 330 * 86400000;
+    if (badDate) problems.push('Departure date: today or later, as the local date at the departure airport.');
+    mark(date, badDate);
+
+    const h = holder?.value.trim() ?? '';
+    const cs = typeof checksum !== 'undefined' ? checksum : undefined;
+    let badHolder = !/^0x[0-9a-fA-F]{40}$/.test(h);
+    if (!badHolder && /[a-f]/.test(h.slice(2)) && /[A-F]/.test(h.slice(2)) && cs && cs(h) !== h) badHolder = true;
+    if (badHolder) problems.push('Payout address: a 0x address with 40 hex digits (mixed case must match its checksum).');
+    mark(holder, badHolder);
+
+    const c = Number(cov?.value);
+    const max = Number(cov?.max) || Infinity;
+    const badCov = !(c > 0 && c <= max);
+    if (badCov) problems.push(`Cover: more than 0 and at most ${max} aUSD.`);
+    mark(cov, badCov);
+    return problems;
+  }
+
+  function fillHolder() {
+    const holder = el('holder');
+    if (holder && W.account && !holder.value.trim()) {
+      holder.value = typeof checksum !== 'undefined' ? checksum(W.account) : W.account;
+      holder.dispatchEvent(new Event('input'));
+    }
+    const use = el('wHolder');
+    if (use) use.hidden = !W.account;
+  }
+
+  // Replaces the page's buy() (the "Cover me" button calls it by name) with the same keeper call plus validation,
+  // a pending state with elapsed time, and readable errors. If the page lacks post(), the original stays.
+  function mountCover() {
+    const form = el('coverForm');
+    if (!form || el('wHolder')) return;
+    el('flight')?.addEventListener('input', (e) => {
+      const v = e.target.value.toUpperCase().replace(/\s+/g, '');
+      if (v !== e.target.value) e.target.value = v;
+    });
+    const holderLabel = el('holder')?.closest('label');
+    holderLabel?.insertAdjacentHTML('beforeend', '<button class="btn-ghost btn-sm whold" type="button" id="wHolder" hidden>Use my wallet</button>');
+    el('wHolder')?.addEventListener('click', () => {
+      el('holder').value = '';
+      fillHolder();
+    });
+
+    const postFn = typeof post !== 'undefined' ? post : undefined;
+    if (typeof buy === 'undefined' || !postFn) return;
+    window.buy = async function buyChecked() {
+      const out = el('buyOut');
+      if (!out) return;
+      out.hidden = false;
+      const problems = validateCover();
+      if (problems.length) {
+        out.className = 'out err';
+        out.innerHTML = `<b>Fix before buying:</b><ul class="wlist">${problems.map((p) => `<li>${escape(p)}</li>`).join('')}</ul>`;
+        return;
+      }
+      const buttons = form.querySelectorAll('.needs-api');
+      buttons.forEach((b) => (b.disabled = true));
+      const started = Date.now();
+      const pending = () => {
+        out.className = 'out';
+        out.innerHTML = `<b>Buying… ${Math.round((Date.now() - started) / 1000)} s</b><ol class="wlist">
+          <li>The keeper pays 0.05 aUSD over x402 for the flight's AeroDataBox status, signed by the Airnode.</li>
+          <li>buyPolicy checks the signature, the request and that the flight has not left, then opens the policy.</li></ol>`;
+      };
+      pending();
+      const timer = setInterval(pending, 1000);
+      try {
+        const p = await postFn('/cover', {
+          flight: el('flight').value.trim(),
+          date: el('date').value,
+          holder: el('holder').value.trim(),
+          coverage: +el('cov').value,
+        });
+        const link = typeof scanLink !== 'undefined' ? scanLink('tx', p.txHash, 'Basescan ↗') : escape(p.txHash);
+        out.className = 'out';
+        out.innerHTML = `<b>Policy #${escape(p.policyId)} is Active</b> for ${escape(p.flight)} · scheduled arrival ${escape(p.scheduled)} · premium ${Number(p.premium) / 1e6} aUSD · ${link}<br>
+          It settles by itself after landing: the keeper buys the signed arrival and calls settle(). Watch it in Policies below.`;
+        const refresh = g('refreshChain');
+        if (typeof refresh === 'function') refresh();
+      } catch (e) {
+        const plain = friendlyBuyError(e.message);
+        out.className = 'out err';
+        out.innerHTML = `<b>Not bought.</b> ${escape(plain || e.message)}${plain ? `<br><small>${escape(e.message)}</small>` : ''}`;
+      } finally {
+        clearInterval(timer);
+        buttons.forEach((b) => (b.disabled = false));
+      }
+    };
+  }
+
   // ---------------------------------------------------------------------------------------------------- UI
 
   function result(mode, cls, head, html) {
@@ -319,6 +535,7 @@
     } else {
       status.innerHTML = `Connected <code>${short(W.account)}</code> on <b>Base Sepolia</b>. Each attack costs a little Base Sepolia ETH in gas.`;
     }
+    if (ready && lowGas()) status.innerHTML += ` <span class="warn">Too little ETH for gas.</span> Get ${faucetLink}.`;
     if (W.note) status.innerHTML += ` <span class="warn">${escape(W.note)}</span>`;
     if (btn) {
       btn.hidden = !!missing.length || !eth() || (W.account && W.chainId === CHAIN_ID);
@@ -344,6 +561,12 @@
       #wPanel .wown > p { font-size: 13px; color: var(--mute, #556071); margin: 4px 0 10px; }
       #wPanel .wown textarea { width: 100%; min-height: 120px; box-sizing: border-box; font: 12px/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
       #wPanel .wrow { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
+      .wmine-bar { margin: 0 0 10px; padding: 10px 14px; border-radius: 10px; background: var(--blue-soft, rgba(47,98,214,.1)); font-size: 13px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+      #pol tr.wmine td { background: var(--blue-soft, rgba(47,98,214,.1)); }
+      .pill.wyou { color: var(--accent-ink, #fff); background: var(--blue, #2f62d6); margin-left: 4px; }
+      #coverForm .whold { margin-top: 6px; align-self: flex-start; justify-self: start; width: auto; }
+      #coverForm [aria-invalid="true"] { outline: 2px solid var(--bad, #d0342c); outline-offset: 1px; }
+      .wlist { margin: 6px 0 0; padding-left: 20px; }
       @media (max-width: 480px) { #wPanel .wtop button { width: 100%; } }`;
     document.head.appendChild(style);
 
@@ -397,18 +620,20 @@
       eth().on('accountsChanged', (a) => {
         W.account = a[0] ?? null;
         if (!W.account) note('Wallet disconnected.');
-        render();
+        afterWalletChange();
       });
       eth().on('chainChanged', (c) => {
         W.chainId = parseInt(c, 16);
-        render();
+        afterWalletChange();
       });
     }
+    mountPolicies();
+    mountCover();
     refreshWallet();
   }
 
   // Exposed for tests and the console.
-  window.AGWallet = { settleCalldata, send, connect, switchChain, state: W, missing };
+  window.AGWallet = { settleCalldata, send, connect, switchChain, validateCover, friendlyBuyError, state: W, missing };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount);
   else mount();
 })();
