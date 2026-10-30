@@ -81,14 +81,16 @@ test('an agent pays 1 tADA and receives the Airnode-signed verdict; the sale is 
   assert.match(listed[0].explorer, /^https:\/\/preprod\.cardanoscan\.io\/transaction\/[0-9a-f]{64}$/);
 });
 
-test('a spent payment cannot buy a second verdict', async (t) => {
-  const { origin, state, pay } = await setup(t);
+test('every verdict is paid separately: no free answers after a sale', async (t) => {
+  const { origin, state, pay, sales } = await setup(t);
   assert.equal((await pay(origin + VERDICT)).status, 200);
-  // The buyer's only UTxO is gone, so it cannot pay again; the server must not answer for free either.
-  const second = await fetch(origin + VERDICT);
-  assert.equal(second.status, 402);
-  await assert.rejects(pay(`${origin}${VERDICT}&requestId=again`));
-  assert.equal(state.submitted.length, 1);
+  // Paying once does not unlock the resource for anyone else.
+  assert.equal((await fetch(origin + VERDICT)).status, 402);
+  // A second operation needs a second payment from a fresh UTxO.
+  assert.equal((await pay(`${origin}${VERDICT}&requestId=again`)).status, 200);
+  assert.equal(state.submitted.length, 2);
+  assert.notEqual(state.submitted[0]!.hash, state.submitted[1]!.hash);
+  assert.equal(sales.all().length, 2);
 });
 
 test('the sale hook runs after settlement and its result is logged', async (t) => {
