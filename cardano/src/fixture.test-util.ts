@@ -35,6 +35,12 @@ export const fakeBlockfrost = async (t: TestContext, funded: string[]) => {
     amount: [{ unit: 'lovelace', quantity: u.lovelace }], block: 'c'.repeat(64), data_hash: null, inline_datum: null,
     reference_script_hash: null, collateral: false, consumed_by_tx: state.spent.get(u.hash) ?? null });
   const bf = express();
+  bf.get('/', (_q, r) => { r.json({ url: 'https://blockfrost.io/', version: 'fixture' }); });
+  bf.get('/addresses/:address', (q, r) => {
+    const mine = all.filter((u) => u.address === q.params.address && !state.spent.has(u.hash));
+    if (!mine.length) { r.status(404).json({ status_code: 404, error: 'Not Found', message: 'not found' }); return; }
+    r.json({ address: q.params.address, amount: [{ unit: 'lovelace', quantity: String(mine.reduce((n, u) => n + BigInt(u.lovelace), 0n)) }] });
+  });
   bf.get('/epochs/latest/parameters', (_q, r) => { r.json(protocol); });
   bf.get('/addresses/:address/utxos', (q, r) => {
     r.json(all.filter((u) => u.address === q.params.address && !state.spent.has(u.hash)).map(output));

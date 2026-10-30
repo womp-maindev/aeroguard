@@ -13,6 +13,8 @@
     "agent": "node --env-file-if-exists=.env src/agent.ts",
     "vectors": "node src/vectors.ts",
     "mcp": "node --env-file-if-exists=.env src/mcp.ts",
+    "preflight": "node --env-file-if-exists=.env src/preflight.ts",
+    "qualify": "node --env-file-if-exists=.env src/qualify.ts",
     "balance": "node --env-file-if-exists=.env src/balance.ts",
     "test": "node --test \"src/**/*.test.ts\""
   },
