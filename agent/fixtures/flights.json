@@ -1,0 +1,6 @@
+{
+  "LH1234@2026-10-31": { "status": "Arrived", "scheduled": "2026-10-31 14:05Z", "actual": "2026-10-31 17:20Z" },
+  "LH2002@2026-10-31": { "status": "Arrived", "scheduled": "2026-10-31 09:30Z", "actual": "2026-10-31 11:45Z" },
+  "BA117@2026-10-31": { "status": "Arrived", "scheduled": "2026-10-31 12:00Z", "actual": "2026-10-31 12:10Z" },
+  "KL1395@2026-10-31": { "status": "Canceled", "scheduled": "2026-10-31 18:00Z" }
+}

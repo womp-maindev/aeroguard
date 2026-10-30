@@ -7,6 +7,7 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {AirnodeV2Attestation} from "./AirnodeV2Attestation.sol";
 import {ProjectedJson} from "./ProjectedJson.sol";
+import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
 /// @title AeroGuard FlightDelayCover
 /// @notice Parametric flight-delay cover that pays out only on AeroDataBox data signed by its AirnodeHub Airnode.
@@ -34,6 +35,13 @@ contract FlightDelayCover is Ownable, ReentrancyGuard {
     uint32 public constant FULL_PAYOUT_DELAY = 180 minutes;
     uint256 public constant SETTLEMENT_WINDOW = 3 days; // after scheduled arrival; then policy can be expired
     uint256 public constant MAX_FUTURE_SKEW = 60; // seconds a signature may be ahead of block time
+    /// @notice Max age of the signed status response a public buyer attaches as purchase proof.
+    uint256 public constant PURCHASE_MAX_AGE = 15 minutes;
+    /// @notice Private policies: the signed scheduled arrival at settlement must be within this distance of the
+    /// buyer-supplied one (the agent rounds it to the hour). Public policies store the signed value: tolerance 0.
+    uint256 public constant SCHEDULE_TOLERANCE = 1 hours;
+    /// @notice A private policy cannot anchor its expiry further than this from now (bounds capital lock-up).
+    uint256 public constant MAX_HORIZON = 400 days;
 
     // ---------------------------------------------------------------- types
 
@@ -68,11 +76,15 @@ contract FlightDelayCover is Ownable, ReentrancyGuard {
     uint16 public premiumBps; // premium as share of coverage
     uint32 public defaultMaxAge;
     uint128 public maxCoverage;
+    /// @notice Cover must be bought at least this long before the scheduled arrival. Default 2h; 0 is for demos only
+    /// (it lets anyone buy cover for a flight minutes before landing).
+    uint32 public minLeadTime = 2 hours;
     uint256 public reserved; // sum of coverage of Active policies
     uint256 public nextId = 1;
 
     mapping(uint256 => Policy) internal _policies;
-    mapping(bytes32 => bool) public usedResponse; // keccak256(signature) => used
+    /// @notice Private policies: keccak256(abi.encode(flight, date, salt)); zero for public policies.
+    mapping(uint256 => bytes32) public commitmentOf;
 
     // ---------------------------------------------------------------- events / errors
 
@@ -90,9 +102,21 @@ contract FlightDelayCover is Ownable, ReentrancyGuard {
     event Settled(
         uint256 indexed id, Status status, uint256 delayMinutes, bool cancelled, uint256 payout, bytes32 responseId
     );
+    /// @notice A private policy: no flight, no date, no request hashes until it settles.
+    event PrivatePolicyBought(
+        uint256 indexed id,
+        address indexed holder,
+        bytes32 commitment,
+        uint256 premium,
+        uint256 coverage,
+        bytes32 cardanoJobRef
+    );
+    /// @notice Emitted by settlePrivate once the commitment opened (the flight is public in that calldata anyway).
+    event PrivatePolicyRevealed(uint256 indexed id, string flight, string date);
     event Expired(uint256 indexed id);
     event PoolFunded(address indexed from, uint256 amount);
     event ParamsUpdated(uint16 premiumBps, uint32 defaultMaxAge, uint128 maxCoverage);
+    event MinLeadTimeUpdated(uint32 minLeadTime);
 
     error WrongRequest(bytes32 got);
     error Stale(uint256 timestamp);
@@ -100,12 +124,18 @@ contract FlightDelayCover is Ownable, ReentrancyGuard {
     error ObservedTooEarly(uint256 signedAt, uint256 observedAt);
     error NotFinal(string status);
     error NotActive(uint256 id);
-    error ResponseReused(bytes32 responseId);
     error Insolvent(uint256 needed, uint256 free);
     error BadFlight();
     error BadDate();
     error BadCoverage();
     error WindowOpen(uint256 until);
+    error ScheduleMismatch(uint256 signedScheduled, uint256 storedScheduled);
+    error BadSchedule();
+    error BadCommitment();
+    error PrivatePolicy(uint256 id);
+    error NotPrivate(uint256 id);
+    error NotBuyable(string status);
+    error TooCloseToArrival(uint256 scheduled, uint256 earliestAllowed);
 
     constructor(IERC20 token_, address airnode_, uint16 premiumBps_, uint32 defaultMaxAge_, uint128 maxCoverage_)
         Ownable(msg.sender)
@@ -148,46 +178,107 @@ contract FlightDelayCover is Ownable, ReentrancyGuard {
         );
     }
 
+    /// @notice Commitment a buyer passes to buyPrivatePolicy. `salt` must be 32 random bytes kept off-chain until
+    /// settlement; with a guessable salt anyone can brute-force today's flight list against the commitment.
+    function commitmentFor(string memory flight, string memory date, bytes32 salt) public pure returns (bytes32) {
+        return keccak256(abi.encode(flight, date, salt));
+    }
+
     // ---------------------------------------------------------------- core
 
     /// @notice Buy cover for `holder`. Caller pays the premium in `token`.
+    /// @dev Purchase proof: a fresh AeroDataBox STATUS-projection response ({scheduled,status}) signed by the Airnode
+    /// for requestHashFor(flight, date, false). It proves the flight exists, has not left the gate yet (no delay,
+    /// cancellation or landing is known) and fixes scheduledArrival to the signed value, not a caller input.
+    /// A proof for another flight/date/projection fails as NotSignedByAirnode (the hash is derived, not passed in).
     /// @param flight IATA/ICAO flight number, uppercase letters and digits only, e.g. "LH1234"
     /// @param date local departure date "YYYY-MM-DD" (as AeroDataBox dateLocal)
+    /// @param timestamp, data, signature the signed status response, exactly as AirnodeHub returned it
     function buyPolicy(
         string calldata flight,
         string calldata date,
-        uint64 scheduledArrival,
         uint128 coverage,
         address holder,
-        bytes32 cardanoJobRef
+        bytes32 cardanoJobRef,
+        uint256 timestamp,
+        bytes calldata data,
+        bytes calldata signature
     ) external nonReentrant returns (uint256 id) {
         _checkFlight(flight);
         _checkDate(date);
-        if (coverage == 0 || coverage > maxCoverage || holder == address(0)) revert BadCoverage();
+        uint64 scheduled = _checkPurchaseProof(requestHashFor(flight, date, false), timestamp, data, signature);
+        id = _openPublic(flight, date, scheduled, coverage, holder, cardanoJobRef);
+    }
 
-        uint128 premium = quote(coverage);
-        token.safeTransferFrom(msg.sender, address(this), premium);
-        uint256 free = freeCapital();
-        if (free < coverage) revert Insolvent(coverage, free); // premium already counted in balance
-        reserved += coverage;
-
-        id = nextId++;
-        Policy storage p = _policies[id];
-        p.holder = holder;
-        p.scheduledArrival = scheduledArrival;
-        p.maxAge = defaultMaxAge;
-        p.status = Status.Active;
-        p.premium = premium;
-        p.coverage = coverage;
+    function _openPublic(
+        string calldata flight,
+        string calldata date,
+        uint64 scheduled,
+        uint128 coverage,
+        address holder,
+        bytes32 cardanoJobRef
+    ) internal returns (uint256 id) {
+        Policy storage p;
+        (id, p) = _open(scheduled, coverage, holder, cardanoJobRef);
         p.arrivalRequestHash = requestHashFor(flight, date, true);
         p.statusRequestHash = requestHashFor(flight, date, false);
-        p.cardanoJobRef = cardanoJobRef;
         p.flight = flight;
         p.date = date;
+        _emitBought(id, p);
+    }
 
+    function _emitBought(uint256 id, Policy storage p) internal {
         emit PolicyBought(
-            id, holder, flight, date, premium, coverage, p.arrivalRequestHash, p.statusRequestHash, cardanoJobRef
+            id, p.holder, p.flight, p.date, p.premium, p.coverage, p.arrivalRequestHash, p.statusRequestHash, p.cardanoJobRef
         );
+    }
+
+    /// @dev Signer + request + freshness + pre-departure status + lead time. Returns the signed scheduled arrival.
+    function _checkPurchaseProof(bytes32 statusHash, uint256 timestamp, bytes calldata data, bytes calldata signature)
+        internal
+        view
+        returns (uint64)
+    {
+        AirnodeV2Attestation.verify(airnode, statusHash, timestamp, data, signature);
+        if (timestamp > block.timestamp + MAX_FUTURE_SKEW) revert FromTheFuture(timestamp);
+        if (timestamp + PURCHASE_MAX_AGE < block.timestamp) revert Stale(timestamp);
+        string memory status = ProjectedJson.readString(data, "status");
+        // pre-departure only: Delayed/Departed/EnRoute/Arrived/Canceled/Diverted… all leak (or are) the outcome
+        if (!(_eq(status, "Expected") || _eq(status, "Unknown") || _eq(status, "CheckIn") || _eq(status, "Boarding")))
+        {
+            revert NotBuyable(status);
+        }
+        uint256 scheduled = ProjectedJson.readTimestamp(data, "scheduled");
+        _checkLead(scheduled);
+        return SafeCast.toUint64(scheduled);
+    }
+
+    function _checkLead(uint256 scheduled) internal view {
+        uint256 earliest = block.timestamp + minLeadTime;
+        if (scheduled < earliest) revert TooCloseToArrival(scheduled, earliest);
+    }
+
+    /// @notice Buy cover without revealing the flight. Only `commitment` = commitmentFor(flight, date, salt) is stored;
+    /// flight, date and both request hashes stay empty until settlePrivate opens the commitment. Coverage, holder and
+    /// scheduledArrival are public: round scheduledArrival to the hour so it does not narrow down the flight;
+    /// settlement tolerates SCHEDULE_TOLERANCE (1h) of difference against the signed value.
+    /// @dev Residual risk: no purchase proof is possible without revealing the flight, so a private buyer could insure
+    /// an already-delayed flight. Bounded by minLeadTime before (scheduled ± 1h); production fix is a ZK proof of the
+    /// purchase-time signed status against the commitment.
+    function buyPrivatePolicy(
+        bytes32 commitment,
+        uint128 coverage,
+        address holder,
+        bytes32 cardanoJobRef,
+        uint64 scheduledArrival
+    ) external nonReentrant returns (uint256 id) {
+        if (commitment == bytes32(0)) revert BadCommitment();
+        if (scheduledArrival > block.timestamp + MAX_HORIZON) revert BadSchedule();
+        _checkLead(scheduledArrival);
+        Policy storage p;
+        (id, p) = _open(scheduledArrival, coverage, holder, cardanoJobRef);
+        commitmentOf[id] = commitment;
+        emit PrivatePolicyBought(id, holder, commitment, p.premium, coverage, cardanoJobRef);
     }
 
     /// @notice Settle with a signed AeroDataBox response. Callable by anyone: the data, not the caller, is trusted.
@@ -199,8 +290,57 @@ contract FlightDelayCover is Ownable, ReentrancyGuard {
     {
         Policy storage p = _policies[id];
         if (p.status != Status.Active) revert NotActive(id);
+        if (p.arrivalRequestHash == bytes32(0)) revert PrivatePolicy(id); // only unrevealed private ones lack it
+        _settle(id, p, requestHash, timestamp, data, signature, 0);
+    }
 
-        // 1. intended request (flight, date, operation, projection) — derived on-chain at purchase
+    /// @notice Settle a private policy: opens the commitment, derives both request hashes from the revealed flight and
+    /// date exactly as buyPolicy does (and stores them on the policy), then runs the very same checks as settle.
+    /// If any check fails the whole call reverts, the hashes are not kept and the policy stays private on-chain
+    /// (though the reverted calldata is still visible to anyone watching the mempool).
+    function settlePrivate(
+        uint256 id,
+        string calldata flight,
+        string calldata date,
+        bytes32 salt,
+        bytes32 requestHash,
+        uint256 timestamp,
+        bytes calldata data,
+        bytes calldata signature
+    ) external nonReentrant {
+        Policy storage p = _reveal(id, flight, date, salt);
+        _settle(id, p, requestHash, timestamp, data, signature, SCHEDULE_TOLERANCE);
+    }
+
+    /// @dev Opens a private policy's commitment and writes the request hashes derived from it.
+    function _reveal(uint256 id, string calldata flight, string calldata date, bytes32 salt)
+        internal
+        returns (Policy storage p)
+    {
+        p = _policies[id];
+        if (p.status != Status.Active) revert NotActive(id);
+        bytes32 c = commitmentOf[id];
+        if (c == bytes32(0)) revert NotPrivate(id);
+        if (commitmentFor(flight, date, salt) != c) revert BadCommitment();
+        // same character rules as buyPolicy, so the derived hash is exactly what AirnodeHub hashes
+        _checkFlight(flight);
+        _checkDate(date);
+        p.arrivalRequestHash = requestHashFor(flight, date, true);
+        p.statusRequestHash = requestHashFor(flight, date, false);
+        emit PrivatePolicyRevealed(id, flight, date);
+    }
+
+    /// @dev Shared by settle and settlePrivate. Caller has checked the policy is Active.
+    function _settle(
+        uint256 id,
+        Policy storage p,
+        bytes32 requestHash,
+        uint256 timestamp,
+        bytes calldata data,
+        bytes calldata signature,
+        uint256 tolerance
+    ) internal {
+        // 1. intended request (flight, date, operation, projection) — derived on-chain, never taken from the caller
         bool isArrival = requestHash == p.arrivalRequestHash;
         if (!isArrival && requestHash != p.statusRequestHash) revert WrongRequest(requestHash);
 
@@ -211,16 +351,39 @@ contract FlightDelayCover is Ownable, ReentrancyGuard {
         if (timestamp > block.timestamp + MAX_FUTURE_SKEW) revert FromTheFuture(timestamp);
         if (timestamp + p.maxAge < block.timestamp) revert Stale(timestamp);
 
-        // 4. no duplicate execution
-        bytes32 responseId = keccak256(signature);
-        if (usedResponse[responseId]) revert ResponseReused(responseId);
-        usedResponse[responseId] = true;
-
+        // 4. no duplicate execution: per policy. Only Active policies reach here, and _close moves the policy out of
+        // Active before any transfer, so each policy settles at most once. The same signed response may settle every
+        // policy on that flight+date (same request hash => same truth), which is deliberate: one paid lookup, one
+        // outcome, all its policies. responseId only labels the evidence in the Settled event.
         // 5. decide from signed fields only
+        _finish(id, p, isArrival, timestamp, data, tolerance, keccak256(signature));
+    }
+
+    function _finish(
+        uint256 id,
+        Policy storage p,
+        bool isArrival,
+        uint256 timestamp,
+        bytes calldata data,
+        uint256 tolerance,
+        bytes32 responseId
+    ) internal {
+        (uint256 delay, bool cancelled) = _decide(isArrival, timestamp, data, p.scheduledArrival, tolerance);
+        _close(id, p, delay, cancelled, responseId);
+    }
+
+    /// @dev Reads the signed fields and returns the delay (seconds) or a cancellation. Reverts unless final.
+    function _decide(bool isArrival, uint256 timestamp, bytes calldata data, uint256 storedScheduled, uint256 tolerance)
+        internal
+        pure
+        returns (uint256 delay, bool cancelled)
+    {
         string memory status = ProjectedJson.readString(data, "status");
         uint256 scheduled = ProjectedJson.readTimestamp(data, "scheduled");
-        uint256 delay;
-        bool cancelled;
+        // the stored scheduledArrival anchors expiry and lead time; it must describe this flight, or no payout.
+        // Public: stored = signed at purchase, so exact. Private: buyer-supplied, within SCHEDULE_TOLERANCE.
+        uint256 diff = scheduled > storedScheduled ? scheduled - storedScheduled : storedScheduled - scheduled;
+        if (diff > tolerance) revert ScheduleMismatch(scheduled, storedScheduled);
 
         if (isArrival) {
             if (!_eq(status, "Arrived")) revert NotFinal(status);
@@ -234,7 +397,9 @@ contract FlightDelayCover is Ownable, ReentrancyGuard {
             if (timestamp + 1 days < scheduled) revert ObservedTooEarly(timestamp, scheduled);
             cancelled = true;
         }
+    }
 
+    function _close(uint256 id, Policy storage p, uint256 delay, bool cancelled, bytes32 responseId) internal {
         uint256 payout;
         Status next;
         if (cancelled || delay >= FULL_PAYOUT_DELAY) {
@@ -275,6 +440,12 @@ contract FlightDelayCover is Ownable, ReentrancyGuard {
         _setParams(premiumBps_, defaultMaxAge_, maxCoverage_);
     }
 
+    /// @notice 0 is for demos only (allows buying minutes before landing). Applies to new purchases.
+    function setMinLeadTime(uint32 minLeadTime_) external onlyOwner {
+        minLeadTime = minLeadTime_;
+        emit MinLeadTimeUpdated(minLeadTime_);
+    }
+
     /// @notice Owner can only withdraw capital NOT backing active policies.
     function withdrawFree(uint256 amount, address to) external onlyOwner {
         uint256 free = freeCapital();
@@ -283,6 +454,31 @@ contract FlightDelayCover is Ownable, ReentrancyGuard {
     }
 
     // ---------------------------------------------------------------- internal
+
+    /// @dev Takes the premium, reserves coverage and writes the fields both policy kinds share.
+    function _open(uint64 scheduledArrival, uint128 coverage, address holder, bytes32 cardanoJobRef)
+        internal
+        returns (uint256 id, Policy storage p)
+    {
+        if (coverage == 0 || coverage > maxCoverage || holder == address(0)) revert BadCoverage();
+
+        uint128 premium = quote(coverage);
+        token.safeTransferFrom(msg.sender, address(this), premium);
+        uint256 free = freeCapital();
+        if (free < coverage) revert Insolvent(coverage, free); // premium already counted in balance
+        reserved += coverage;
+
+        id = nextId++;
+        p = _policies[id];
+        p.holder = holder;
+        p.scheduledArrival = scheduledArrival;
+        p.maxAge = defaultMaxAge;
+        p.status = Status.Active;
+        p.premium = premium;
+        p.coverage = coverage;
+        p.cardanoJobRef = cardanoJobRef;
+    }
+
 
     function _setParams(uint16 premiumBps_, uint32 defaultMaxAge_, uint128 maxCoverage_) internal {
         require(premiumBps_ <= 10_000 && defaultMaxAge_ > 0);

@@ -39,6 +39,12 @@ export const tamper = async (id: bigint, mode: string, base?: SignedResponse) =>
       break;
     case 'stale': {
       // a GENUINE, correctly signed response that is older than the policy's maxAge (pass it with --response old.json)
+      if (process.env.FIXTURE_MODE === 'true' && process.env.FIXTURE_SIGNER_PK) {
+        // fixture signer is ours: produce a GENUINELY signed response that is 2h old
+        r.timestamp = String(Number(r.timestamp) - 7200);
+        r.signature = await forgeSign(process.env.FIXTURE_SIGNER_PK as Hex, r);
+        break;
+      }
       const age = Math.floor(Date.now() / 1000) - Number(r.timestamp);
       if (age <= Number(p.maxAge))
         return { accepted: false, skipped: `response is only ${age}s old; pass --response with one older than ${p.maxAge}s (e.g. agent/fixtures/*.json)` };

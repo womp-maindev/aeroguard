@@ -57,6 +57,34 @@ export const spendLog: PaidCall[] = [];
 
 /** Buys one signed flight status via x402. Returns undefined when the Airnode can't answer this projection
  *  (e.g. a cancelled flight has no revisedTime → 400). maxCacheAge lets callers reuse a recent answer. */
+// ---- FIXTURE MODE (FR-09): deterministic responses signed by a LOCAL test key, same shape + same contract path.
+// Only works against a contract deployed with that test key as `airnode` (local anvil demo). On the real deployment
+// the contract rejects them with NotSignedByAirnode — which is itself a live demonstration of the signer check.
+type FixtureFlight = { status: string; scheduled: string; actual?: string; before?: string };
+const fixtureFlights = (): Record<string, FixtureFlight> => {
+  const f = new URL('../fixtures/flights.json', import.meta.url).pathname;
+  return existsSync(f) ? JSON.parse(readFileSync(f, 'utf8')) : {};
+};
+const signFixture = async (flight: string, date: string, kind: Kind): Promise<CachedResponse | undefined> => {
+  const { privateKeyToAccount } = await import('viem/accounts');
+  const { encodePacked, keccak256, toHex } = await import('viem');
+  let rec = fixtureFlights()[`${normalizeFlight(flight)}@${date}`];
+  if (!rec) throw new Error(`no fixture for ${flight}@${date}`);
+  // before scheduled arrival the fixture flight is still pre-departure (purchase phase)
+  const early = Date.now() < Date.parse(rec.scheduled.replace(' ', 'T')) - 3600_000;
+  if (early) rec = { ...rec, status: rec.before ?? 'Expected', actual: undefined };
+  if (kind === 'arrival' && !rec.actual) return undefined; // mirrors the Airnode's 400 on a missing pointer
+  const obj: Record<string, string> = kind === 'arrival' ? { actual: rec.actual!, scheduled: rec.scheduled, status: rec.status } : { scheduled: rec.scheduled, status: rec.status };
+  const data = JSON.stringify(obj); // keys already in code point order
+  const requestHash = requestHashFor(flight, date, kind);
+  const timestamp = String(Math.floor(Date.now() / 1000));
+  const acct = privateKeyToAccount(process.env.FIXTURE_SIGNER_PK as Hex);
+  const signature = await acct.signMessage({ message: { raw: keccak256(encodePacked(['bytes32', 'uint256', 'bytes'], [requestHash, BigInt(timestamp), toHex(data)])) } });
+  spendLog.push({ kind, flight, date, ok: true, at: Date.now(), paymentTx: 'fixture' });
+  return { airnode: acct.address, requestHash, timestamp, data, signature, fetchedAt: Number(timestamp), paymentTx: undefined };
+};
+export const fixtureMode = () => process.env.FIXTURE_MODE === 'true';
+
 export const fetchSignedFlight = async (
   flight: string,
   date: string,
@@ -64,6 +92,7 @@ export const fetchSignedFlight = async (
   payingFetch: typeof fetch,
   maxCacheAgeSec = 0,
 ): Promise<CachedResponse | undefined> => {
+  if (fixtureMode()) return signFixture(flight, date, kind);
   const request = buildRequest(flight, date, kind);
   const hash = deriveRequestHash(request);
   const cached = readCache(hash);

@@ -1,0 +1,11 @@
+{
+  "_note": "SYNTHETIC: signed with the test key 0xA11CE, not the real Airnode. Exercises the loader; replace/augment with aerodatabox-arrival.json captured from AirnodeHub.",
+  "flight": "LH1234",
+  "date": "2026-10-30",
+  "kind": "arrival",
+  "airnode": "0xe05fcC23807536bEe418f142D19fa0d21BB0cfF7",
+  "requestHash": "0x6d376ef61924ac3a846acd95d860c0187a127248ab6c91567f3b7fb94c27704a",
+  "timestamp": 1793381400,
+  "data": "{\"actual\":\"2026-10-30 17:20Z\",\"scheduled\":\"2026-10-30 14:05Z\",\"status\":\"Arrived\"}",
+  "signature": "0xa7f3dd2e93cf50c4c1921d2131c09d271be78c44e554420c3a3191fd14737baa63cc9c941b8bdfa4c70d8d9ca38a0b79eeaa6c1b457e147eb7d2dc3cb68b2b1b1b"
+}

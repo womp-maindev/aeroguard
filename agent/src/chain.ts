@@ -13,14 +13,15 @@ import {
 import { privateKeyToAccount } from 'viem/accounts';
 import { baseSepolia } from 'viem/chains';
 import type { SignedResponse } from './airnode-v2.ts';
-import { AUSD_ADDRESS } from './x402.ts';
 
 export const coverAbi = parseAbi([
-  'function buyPolicy(string flight, string date, uint64 scheduledArrival, uint128 coverage, address holder, bytes32 cardanoJobRef) returns (uint256)',
+  'function buyPolicy(string flight, string date, uint128 coverage, address holder, bytes32 cardanoJobRef, uint256 timestamp, bytes data, bytes signature) returns (uint256)',
+  'function minLeadTime() view returns (uint32)',
   'function settle(uint256 id, bytes32 requestHash, uint256 timestamp, bytes data, bytes signature)',
   'function expire(uint256 id)',
   'function fundPool(uint256 amount)',
   'function quote(uint128 coverage) view returns (uint128)',
+  'function token() view returns (address)',
   'function nextId() view returns (uint256)',
   'function reserved() view returns (uint256)',
   'function freeCapital() view returns (uint256)',
@@ -41,6 +42,10 @@ export const coverAbi = parseAbi([
   'error BadDate()',
   'error BadCoverage()',
   'error WindowOpen(uint256 until)',
+  'error NotBuyable(string status)',
+  'error TooCloseToArrival(uint256 scheduled, uint256 earliestAllowed)',
+  'error ScheduleMismatch(uint256 signedScheduled, uint256 storedScheduled)',
+  'error PrivatePolicy(uint256 id)',
   'error NotSignedByAirnode(address signer)',
   'error ECDSAInvalidSignature()',
   'error ECDSAInvalidSignatureLength(uint256 length)',
@@ -80,19 +85,21 @@ export const jobRef = (cardanoJobId: string): Hex => (cardanoJobId ? keccak256(t
 export const ensureAllowance = async (amount: bigint) => {
   const w = walletClient();
   const p = publicClient();
-  const a = await p.readContract({ address: AUSD_ADDRESS, abi: erc20Abi, functionName: 'allowance', args: [w.account.address, coverAddress()] });
+  const token = await p.readContract({ address: coverAddress(), abi: coverAbi, functionName: 'token' });
+  const a = await p.readContract({ address: token, abi: erc20Abi, functionName: 'allowance', args: [w.account.address, coverAddress()] });
   if (a >= amount) return;
-  const h = await w.writeContract({ address: AUSD_ADDRESS, abi: erc20Abi, functionName: 'approve', args: [coverAddress(), 2n ** 255n] });
+  const h = await w.writeContract({ address: token, abi: erc20Abi, functionName: 'approve', args: [coverAddress(), 2n ** 255n] });
   await p.waitForTransactionReceipt({ hash: h });
 };
 
+/** Purchase needs a fresh (≤15 min) signed STATUS response proving the flight hasn't departed yet. */
 export const buyPolicy = async (a: {
   flight: string;
   date: string;
-  scheduledArrival: number;
   coverage: bigint;
   holder: Hex;
   cardanoJobId?: string;
+  proof: SignedResponse;
 }) => {
   const p = publicClient();
   const premium = await p.readContract({ address: coverAddress(), abi: coverAbi, functionName: 'quote', args: [a.coverage] });
@@ -101,7 +108,7 @@ export const buyPolicy = async (a: {
     address: coverAddress(),
     abi: coverAbi,
     functionName: 'buyPolicy',
-    args: [a.flight, a.date, BigInt(a.scheduledArrival), a.coverage, a.holder, jobRef(a.cardanoJobId ?? '')],
+    args: [a.flight, a.date, a.coverage, a.holder, jobRef(a.cardanoJobId ?? ''), BigInt(a.proof.timestamp), toHex(a.proof.data), a.proof.signature],
   });
   const rc = await p.waitForTransactionReceipt({ hash });
   const [ev] = parseEventLogs({ abi: coverAbi, logs: rc.logs, eventName: 'PolicyBought' });

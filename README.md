@@ -47,6 +47,12 @@ Two projections per policy keep the signed payload tiny and cover both outcomes:
 **Trust assumptions:** the signature proves the AeroDataBox Airnode returned exactly this at this time. It does not prove AeroDataBox is right about the real world. We pick a recognised aviation source and require a final status.
 **Data we wanted but couldn't find on AirnodeHub:** EU261 eligibility (delay cause, extraordinary circumstances), airline compensation registries, a second independent flight source to require 2‑of‑2 agreement.
 
+### Signed data at BOTH ends — no adverse selection
+Buying cover also needs AirnodeHub-signed evidence. `buyPolicy` takes a fresh (≤15 min) signed AeroDataBox **status** response for that exact flight+date: the contract checks signer + request + freshness, accepts only pre-departure statuses (`Expected / Unknown / CheckIn / Boarding`), reads the scheduled arrival **from the signature** and requires it to be ≥ `minLeadTime` away. Nobody can insure a flight that is already late, and nobody can lie about its schedule; settlement must show the exact same signed schedule.
+
+### Private policies (commit–reveal)
+`buyPrivatePolicy(commitment, …)` stores only `keccak256(abi.encode(flight, date, salt))`. Observers can't tell which flight is insured until `settlePrivate` reveals it, then the same verification runs. Residual risk (documented): without a purchase proof a private buyer is bounded only by lead time and a ±1 h schedule window; production fix = ZK proof of purchase-time status.
+
 ### Autonomous agent (API3 bonus)
 `pnpm --dir agent keeper` runs unattended. Every minute it scans active policies on‑chain, decides **when** data is worth buying (≥30 min after scheduled arrival; one early look 3 h before for cancellations; at most 6 paid lookups per policy, because the shared AeroDataBox quota is ~2,000 lookups for all teams), pays via x402, simulates `settle`, and only then sends the transaction. It survives restarts (state = chain + cache).
 
@@ -74,7 +80,7 @@ Each forgery is simulated against the deployed contract and prints the revert re
 | signed by an unexpected key | `NotSignedByAirnode(attacker)` |
 | valid, fresh, final | ✅ `Settled` → payout |
 
-Also rejected: replay on another policy (`ResponseReused`), settling twice (`NotActive`), future timestamps (`FromTheFuture`), "Arrived" signed before the landing it reports (`ObservedTooEarly`), non‑final status (`NotFinal`), selling cover the pool can't back (`Insolvent`).
+Also rejected: buying after departure (`NotBuyable`), buying too close to arrival (`TooCloseToArrival`), schedule switched after purchase (`ScheduleMismatch`), settling twice (`NotActive`), future timestamps (`FromTheFuture`), "Arrived" signed before the landing it reports (`ObservedTooEarly`), non‑final status (`NotFinal`), selling cover the pool can't back (`Insolvent`).
 
 ## Run it
 Requires Node ≥ 22.18, [Foundry](https://getfoundry.sh).
@@ -82,7 +88,7 @@ Requires Node ≥ 22.18, [Foundry](https://getfoundry.sh).
 git clone --recurse-submodules https://github.com/womp-maindev/aeroguard && cd aeroguard
 cp .env.example .env
 # contracts
-cd contracts && forge test                       # 19 tests incl. fuzzed payout tiers
+cd contracts && forge test                       # 49 tests: tamper suite, purchase proof, private policies, fuzzed tiers
 forge script script/Deploy.s.sol --rpc-url $BASE_SEPOLIA_RPC --broadcast --private-key $DEPLOYER_PK
 # agent + dashboard (http://localhost:8787)
 cd ../agent && npm i && npm run api              # API + keeper + dashboard
@@ -91,6 +97,13 @@ npm run cli -- policies
 # Cardano coworker
 cd ../masumi && npm ci && npm start              # model agent;  in 2nd terminal: npm run worker
 ```
+
+## Local end-to-end rehearsal (no testnet funds needed)
+```bash
+anvil --chain-id 84532 &          # then:
+cd agent && npm run e2e:local      # deploys, buys 5 policies with signed proofs, runs 4 tamper attacks + valid, keeper settles all
+```
+Fixture mode signs with a local test key and is labelled everywhere; on the real deployment such responses are rejected with `NotSignedByAirnode`.
 
 ## Repo
 ```

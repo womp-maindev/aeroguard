@@ -28,7 +28,7 @@ const payer = () => {
 /** One paid lookup (status projection, always answerable) → scheduled arrival + current status. */
 export const resolveFlight = async (flight: string, date: string) => {
   flight = normalizeFlight(flight);
-  const r = await fetchSignedFlight(flight, date, 'status', payer(), 15 * 60);
+  const r = await fetchSignedFlight(flight, date, 'status', payer(), 10 * 60); // contract accepts proofs ≤15 min old
   if (!r) throw new Error(`AeroDataBox has no ${flight} on ${date}`);
   if (r.paymentTx) say('pay', `bought schedule for ${flight} ${date} via x402 (0.05 aUSD)`, explorerTx(r.paymentTx));
   const v = readVerdict(r);
@@ -51,8 +51,9 @@ export const verdict = async (flight: string, date: string, maxCacheAgeSec = 10 
 
 export const cover = async (a: { flight: string; date: string; holder: Hex; coverage?: bigint; cardanoJobId?: string }) => {
   const r = await resolveFlight(a.flight, a.date);
-  if (['Arrived', 'Canceled'].includes(r.status)) throw new Error(`${r.flight} is already ${r.status}; cover must be bought before the outcome is known`);
-  const res = await buyPolicy({ ...a, flight: r.flight, scheduledArrival: r.scheduledArrival, coverage: a.coverage ?? 2_000_000n });
+  if (!['Expected', 'Unknown', 'CheckIn', 'Boarding'].includes(r.status))
+    throw new Error(`${r.flight} is ${r.status}; cover can only be bought before departure (the contract checks the signed status)`);
+  const res = await buyPolicy({ ...a, flight: r.flight, coverage: a.coverage ?? 2_000_000n, proof: r.evidence });
   say('chain', `policy #${res.policyId} for ${r.flight} ${a.date} (sched ${r.scheduled})`, explorerTx(res.txHash));
   return { ...res, flight: r.flight, date: a.date, scheduled: r.scheduled, status: r.status };
 };
@@ -85,7 +86,7 @@ export const keeperTick = async () => {
     s.next = now + RETRY;
     try {
       say('info', `policy #${key}: checking ${p.flight} ${p.date} (try ${s.tries}/${MAX_TRIES})`);
-      const v = await verdict(p.flight, p.date, 0);
+      const v = await verdict(p.flight, p.date, 600); // one paid lookup serves every policy on that flight
       s.last = describe(v.verdict);
       if (!v.verdict.final) {
         say('info', `policy #${key}: ${s.last} — not final, next look in ${RETRY / 60} min`);
