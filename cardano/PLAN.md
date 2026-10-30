@@ -138,6 +138,16 @@
 | 7.8 | Скрипт как reference script (дешевле settle), пул полисов на один UTxO | ⬜ после хакатона |
 | 7.9 | CI: `npm test` + `aiken check` в GitHub Actions (`.github/` — зона другой сессии) | ⬜ |
 
+## Фаза 8. Cardano платит за страховку на Base + ревью (пт 22:00)
+| # | Задача | Статус |
+|---|---|---|
+| 8.1 | `GET /policy`: премия в tADA → полис FlightDelayCover на Base, `cardanoJobRef = keccak("cardano:<tx>")` | ✅ |
+| 8.2 | Покупка на Base только после settle на Cardano; сбой → `refundDue`; повтор оплаты не покупает дважды | ✅ |
+| 8.3 | `npm run buy-policy`, `npm run server:policies`, MCP-tool `buy_flight_cover` | ✅ |
+| 8.4 | Ревью кода: 10 находок исправлено (гонка двойной покупки, потерянные заказы, свежесть в Aiken как в EVM, reclaim, min UTxO) | ✅ |
+| 8.5 | Живой `/policy` в preprod+Base: нужен рейс ≥ 2 ч до вылета и ключи keeper'а (`npm run server:policies`) | ⬜ твой запуск |
+| 8.6 | Возврат tADA по `refundDue` (сейчас вручную) | ⬜ после хакатона |
+
 ## Риски
 | Риск | Митигация |
 |---|---|
