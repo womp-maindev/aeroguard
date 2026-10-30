@@ -38,7 +38,7 @@ The same forgeries were also run against the **deployed** contract with a real A
 **3 · Run it yourself (90 s, no keys, no funds).**
 ```bash
 git clone --recurse-submodules https://github.com/womp-maindev/aeroguard && cd aeroguard
-cd contracts && forge test                       # 59 tests, incl. all 4 live policies replayed, purchase to settlement, on their real Airnode signatures
+cd contracts && forge test                       # 86 tests, incl. all 4 live policies replayed, purchase to settlement, on their real Airnode signatures
 cd ../keeper && npm ci && npm test
 anvil --chain-id 84532 & npm run rehearse        # local deploy, 5 signed purchases, 4 attacks + valid, keeper settles all
 ```
@@ -157,7 +157,7 @@ Node ≥ 22.18 and [Foundry](https://getfoundry.sh).
 git clone --recurse-submodules https://github.com/womp-maindev/aeroguard && cd aeroguard
 cp .env.example .env                    # set KEEPER_PK (Base Sepolia ETH + aUSD)
 
-cd contracts && forge test              # 59 tests incl. the full live lifecycle of all 4 policies
+cd contracts && forge test              # 86 tests incl. the full live lifecycle of all 4 policies
 forge script script/Deploy.s.sol --rpc-url $BASE_SEPOLIA_RPC --broadcast --private-key $DEPLOYER_PK
 
 cd ../keeper && npm i
