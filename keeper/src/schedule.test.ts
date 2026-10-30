@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { DENSE_UNTIL, due, FIRST_CHECK, MAX_CHECKS, migrate, record, TAIL_UNTIL } from './schedule.ts';
+import { DENSE_UNTIL, due, expirable, FIRST_CHECK, MAX_CHECKS, migrate, record, SETTLEMENT_WINDOW, TAIL_UNTIL } from './schedule.ts';
 
 const S = Date.parse('2026-10-30T21:25:00Z') / 1000; // policy #1, IB1314
 const min = 60;
@@ -72,4 +72,10 @@ test('hard cap on paid lookups even with a run every minute', () => {
   const { looks } = simulate(every);
   assert.ok(looks.filter((l) => l.kind === 'after').length <= MAX_CHECKS);
   assert.equal(looks.filter((l) => l.kind === 'early').length, 1);
+});
+
+test('expire only after the contract settlement window, never during the lookup schedule', () => {
+  assert.equal(expirable(S + TAIL_UNTIL, S), false);
+  assert.equal(expirable(S + SETTLEMENT_WINDOW, S), false, 'contract requires block.timestamp > until');
+  assert.equal(expirable(S + SETTLEMENT_WINDOW + 1, S), true);
 });

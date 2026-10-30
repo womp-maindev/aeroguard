@@ -2,9 +2,9 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import type { Hex } from 'viem';
-import { allPolicies, buyPolicy, coverAddress, explorerTx, revertReason, settle } from './chain.ts';
+import { allPolicies, buyPolicy, coverAddress, expirePolicy, explorerTx, revertReason, settle } from './chain.ts';
 import { fetchSignedFlight, normalizeFlight, readVerdict, type Verdict } from './flight.ts';
-import { type Attempt, due, MAX_CHECKS, migrate, nextCheckAt, record } from './schedule.ts';
+import { type Attempt, due, expirable, MAX_CHECKS, migrate, nextCheckAt, record } from './schedule.ts';
 import { createPayingFetch } from './x402.ts';
 
 export interface LogLine {
@@ -88,9 +88,19 @@ export const keeperTick = async ({ force = false } = {}) => {
   const now = Math.floor(Date.now() / 1000);
   for (const p of await allPolicies()) {
     if (p.status !== 1) continue; // Active only
+    const sched = Number(p.scheduledArrival);
+    if (expirable(now, sched)) {
+      try {
+        say('chain', `policy #${p.id} expired after the settlement window, coverage released`, explorerTx(await expirePolicy(p.id)));
+      } catch (e) {
+        say('warn', `policy #${p.id}: expire failed: ${revertReason(e)}`);
+      }
+      continue;
+    }
+    // a private policy stores no flight: only its holder can reveal it (settlePrivate); never pay for a blank lookup
+    if (!p.flight) continue;
     const key = `${coverAddress()}:${p.id}`;
     const a = (state[key] ??= migrate(undefined));
-    const sched = Number(p.scheduledArrival);
     const kind = due(now, sched, a, force);
     if (!kind) {
       const at = nextCheckAt(sched, a);

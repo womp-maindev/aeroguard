@@ -156,6 +156,15 @@ export const settleCost = async (n: number) => {
   return { maxFeePerGas, cost: BigInt(n) * SETTLE_GAS * maxFeePerGas };
 };
 
+/** Releases an unsettled policy's coverage after the settlement window. Simulated first, like settle. */
+export const expirePolicy = async (id: bigint) => {
+  const p = publicClient();
+  await p.simulateContract({ address: coverAddress(), abi: coverAbi, functionName: 'expire', args: [id], account: walletClient().account });
+  const hash = await walletClient().writeContract({ address: coverAddress(), abi: coverAbi, functionName: 'expire', args: [id] });
+  await p.waitForTransactionReceipt({ hash });
+  return hash;
+};
+
 export const getPolicy = (id: bigint) =>
   publicClient().readContract({ address: coverAddress(), abi: coverAbi, functionName: 'policy', args: [id] });
 

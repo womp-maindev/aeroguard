@@ -4,6 +4,7 @@
 //   scheduled − 3 h ........ one early look (cancellations are known early); never counted against the limit
 //   scheduled + 30 min ..... first real check, then every 30 min until scheduled + 6 h (delays that pay are 2–3 h+)
 //   scheduled + 6 h ........ every 3 h until scheduled + 24 h (very late landings still pay in full)
+//   scheduled + 3 days ..... expire (gas only): no evidence came, the reserved capital goes back to the pool
 
 export const EARLY_LOOK = 3 * 3600;
 export const FIRST_CHECK = 30 * 60;
@@ -11,6 +12,8 @@ export const DENSE_UNTIL = 6 * 3600;
 export const DENSE_EVERY = 30 * 60;
 export const TAIL_UNTIL = 24 * 3600;
 export const TAIL_EVERY = 3 * 3600;
+/** Contract SETTLEMENT_WINDOW: after scheduled + 3 days anyone may expire an unsettled policy, releasing its capital. */
+export const SETTLEMENT_WINDOW = 3 * 24 * 3600;
 /** A run a few minutes early still counts: cron jitter, a 15-min cron hitting a 30-min rhythm, manual runs. */
 export const SLACK = 5 * 60;
 /** Hard cap on post-arrival lookups per policy (the AeroDataBox quota is shared by every team). */
@@ -62,3 +65,6 @@ export const record = (now: number, kind: 'early' | 'after', a: Attempt) => {
     a.lastAt = now;
   }
 };
+
+/** Past the settlement window: no lookup can help any more, so expire (gas only) and free the reserved capital. */
+export const expirable = (now: number, scheduled: number) => now > scheduled + SETTLEMENT_WINDOW;

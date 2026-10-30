@@ -16,7 +16,7 @@ About 280 words, so it fits at a calm pace. Have the screen ready: dashboard on 
 > The signed data is the whole decision. The contract rebuilds the AirnodeHub request hash itself from the policy's flight and date, so a genuine response about a different flight does not count. We use signed data at both ends. To buy cover, you attach a fresh signed status saying the flight hasn't left yet, and the scheduled arrival is read from that signature. So nobody insures a flight that is already late, and nobody lies about the schedule.
 
 **1:20 — Proof (30 s)** *(README "Live evidence" → a settlement tx, then the tamper table; terminal already showing `npm run rehearse` output)*
-> These are four real policies on last night's flights from Munich, bought with signed proofs. Our keeper settled them on its own. Here is a payout. Before landing, we attacked policy #1 on the deployed contract with a real Airnode response. Edit one value: NotSignedByAirnode. Another flight: WrongRequest. An attacker key: rejected. A genuine but old response: Stale. And here is the same run locally, in two seconds: only the valid, final response pays.
+> These are four real policies on last night's flights from Munich, bought with signed proofs. Our keeper settled them; nobody filed a claim. Here is a payout. Before landing, we attacked policy #1 on the deployed contract with a real Airnode response. Edit one value: NotSignedByAirnode. Another flight: WrongRequest. An attacker key: rejected. A genuine but old response: Stale. And here is the same run locally, in two seconds: only the valid, final response pays.
 
 > Do **not** run `npm run tamper` on policies #1–#4 live: once a policy is settled, every attempt answers `NotActive` before any oracle check. The live on-chain proof is the recorded table; the live terminal demo is `anvil --chain-id 84532 & npm run rehearse`.
 
@@ -36,6 +36,9 @@ Every sale checks `freeCapital() >= coverage` after the premium is paid in. `res
 
 **"Why can anyone call settle? Isn't that dangerous?"**
 It is what makes the cover claim-free. `settle` has no discretion: the payout is computed from signed fields and always goes to the stored holder. A caller can only provide evidence, and the contract rejects any evidence that is not right. Each policy settles exactly once (`NotActive` on the second try). If our keeper goes down, anyone can settle, including the traveller.
+
+**"Was the keeper really autonomous?"**
+It decides on its own what to buy, when, and whether the evidence is final, then settles. What starts a pass differs: `npm run keeper` is a plain unattended loop, and in GitHub Actions a pass runs on a schedule. On 30 Oct GitHub's scheduler never fired for this new workflow, so those passes were started with the Run button. Same code, same decisions, and because `settle` gives the caller no power, any of these triggers (or a stranger) is fine.
 
 **"Can a keeper pick a favourable response?"**
 Only among genuine, fresh, final responses for this exact flight. Once a flight has landed, those all say the same thing. Responses that are old, early or not final are rejected.
