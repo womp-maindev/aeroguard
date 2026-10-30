@@ -1,11 +1,11 @@
 // pnpm cli <command>   — see README "Commands"
 import { readFileSync, writeFileSync } from 'node:fs';
-import { formatEther, formatGwei, type Hex, keccak256, toHex } from 'viem';
+import { decodeFunctionData, formatEther, formatGwei, type Hex, hexToString, keccak256, toHex } from 'viem';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import type { SignedResponse } from './airnode-v2.ts';
 import { cover, describe, keeperTick, log, resolveFlight, runKeeper, verdict } from './keeper.ts';
-import { allPolicies, balances, explorerTx, settleCost, getPolicy, revertReason, settle, STATUS } from './chain.ts';
-import { requestHashFor } from './flight.ts';
+import { allPolicies, balances, coverAbi, explorerTx, getPolicy, publicClient, revertReason, settle, settleCost, STATUS } from './chain.ts';
+import { AERODATABOX_AIRNODE, requestHashFor } from './flight.ts';
 
 const [cmd, ...rest] = process.argv.slice(2);
 const flag = (n: string) => {
@@ -114,6 +114,19 @@ const main = async () => {
         console.log(`#${p.id} ${p.flight} ${p.date} ${STATUS[p.status]} cover ${usd(p.coverage)} sched ${new Date(Number(p.scheduledArrival) * 1000).toISOString()}`);
       return;
     }
+    case 'proof': {
+      // The signed purchase proof of a public policy, read back from its buyPolicy calldata, in the
+      // contracts/test/fixtures format: `cli proof <buyPolicy tx hash>…` (read-only, no key, no AeroDataBox lookup).
+      for (const hash of rest.filter((a) => /^0x[0-9a-fA-F]{64}$/.test(a)) as Hex[]) {
+        const tx = await publicClient().getTransaction({ hash });
+        const { functionName, args } = decodeFunctionData({ abi: coverAbi, data: tx.input });
+        if (functionName !== 'buyPolicy') throw new Error(`${hash} calls ${functionName}, not buyPolicy`);
+        const [flight, date, , , , timestamp, data, signature] = args;
+        const proof = { flight, date, kind: 'status', airnode: AERODATABOX_AIRNODE, requestHash: requestHashFor(flight, date, 'status'), timestamp: Number(timestamp), data: hexToString(data), signature, purchaseTx: hash };
+        console.log(JSON.stringify(proof, null, 2));
+      }
+      return;
+    }
     case 'tick': { // --force: check now, ignoring the 30-min rhythm · --policy N: only that policy
       const only = flag('policy') || process.env.KEEPER_ONLY;
       await keeperTick({ force: rest.includes('--force') || process.env.KEEPER_FORCE === 'true', only: only ? BigInt(only) : undefined });
@@ -132,7 +145,7 @@ const main = async () => {
       return;
     }
     default:
-      console.log('commands: wallet | hash | resolve | verdict | buy | policies | status | tick | keeper | tamper');
+      console.log('commands: wallet | hash | resolve | verdict | buy | policies | status | proof | tick | keeper | tamper');
   }
 };
 
