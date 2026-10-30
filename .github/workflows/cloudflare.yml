@@ -1,8 +1,6 @@
 name: Dashboard on Cloudflare Pages
-# Deploys web/ to Cloudflare Pages on every push that touches it: main → production
-# (https://aeroguard.pages.dev), any other branch → its own preview URL (<branch>.aeroguard.pages.dev).
-# Setup: repo secrets CLOUDFLARE_API_TOKEN (permission "Cloudflare Pages: Edit") and CLOUDFLARE_ACCOUNT_ID.
-# Without them the job is skipped.
+# web/ → cloudflare pages on every push that touches it. main = aeroguard.pages.dev, other branches get previews.
+# needs secrets CLOUDFLARE_API_TOKEN ("Cloudflare Pages: Edit") + CLOUDFLARE_ACCOUNT_ID, otherwise it just skips
 
 on:
   push:
@@ -26,7 +24,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         if: env.CLOUDFLARE_API_TOKEN != ''
-      - name: Create the Pages project once (no-op when it exists)
+      - name: create the pages project (fine if it exists)
         if: env.CLOUDFLARE_API_TOKEN != ''
         run: npx --yes wrangler@3 pages project create aeroguard --production-branch main || true
       - name: Deploy web/
