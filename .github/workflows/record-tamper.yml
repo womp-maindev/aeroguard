@@ -1,0 +1,57 @@
+name: Record tamper lab video
+
+# Opens the dashboard from main in a headless browser, runs the 4 attacks on policy #1 against
+# the deployed FlightDelayCover (eth_call only, nothing is sent) and uploads the screen recording.
+on:
+  push:
+    branches: [claude/bold-ride-xhu8s8]
+    paths: [.github/workflows/record-tamper.yml]
+  workflow_dispatch:
+
+jobs:
+  record:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install Playwright
+        run: |
+          mkdir -p /tmp/rec && cd /tmp/rec && npm init -y >/dev/null && npm i playwright@1.48.2 >/dev/null
+          npx playwright install --with-deps chromium >/dev/null
+      - name: Record
+        run: |
+          (cd web && python3 -m http.server 8000 >/dev/null 2>&1 &)
+          sleep 2
+          cat > /tmp/rec/rec.js <<'JS'
+          const { chromium } = require('playwright');
+          (async () => {
+            const b = await chromium.launch();
+            const ctx = await b.newContext({ viewport: { width: 1440, height: 900 }, recordVideo: { dir: '/tmp/out', size: { width: 1440, height: 900 } } });
+            const p = await ctx.newPage();
+            p.on('console', (m) => console.log('[page]', m.text()));
+            await p.goto('http://localhost:8000/index.html');
+            await p.waitForTimeout(3000);
+            await p.waitForSelector('#tPolicy option[value="1"]', { state: 'attached', timeout: 90000 });
+            await p.locator('#lab').scrollIntoViewIfNeeded();
+            await p.waitForTimeout(1500);
+            await p.selectOption('#tPolicy', '1');
+            await p.waitForTimeout(1500);
+            await p.click('#runAll');
+            await p.waitForTimeout(25000);
+            await p.locator('#lab').screenshot({ path: '/tmp/out/tamper-lab-policy1.png' });
+            console.log((await p.locator('#modes').innerText()).slice(0, 2000));
+            await p.waitForTimeout(3000);
+            await ctx.close();
+            await b.close();
+          })();
+          JS
+          mkdir -p /tmp/out && cd /tmp/rec && node rec.js
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tamper-lab-recording
+          path: /tmp/out
