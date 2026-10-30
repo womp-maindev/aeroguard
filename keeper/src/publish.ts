@@ -5,12 +5,13 @@
 // deduplicated by signature; runs are capped.
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const MAX_RUNS = 300;
 
 const out = process.argv[2];
 if (!out) throw new Error('usage: node keeper/src/publish.ts <keeper.json>');
-const cache = new URL('../.cache/', import.meta.url).pathname;
+const cache = fileURLToPath(new URL('../.cache/', import.meta.url));
 const read = (f: string) => JSON.parse(readFileSync(f, 'utf8'));
 const jsonIn = (dir: string) => (existsSync(dir) ? readdirSync(dir).filter((f) => f.endsWith('.json')).map((f) => join(dir, f)) : []);
 
