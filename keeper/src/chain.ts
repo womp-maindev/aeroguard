@@ -127,6 +127,23 @@ export const settle = async (id: bigint, r: SignedResponse) => {
   return { txHash: hash, payout: ev?.args.payout ?? 0n, status: STATUS[ev?.args.status ?? 0], delayMinutes: ev?.args.delayMinutes };
 };
 
+/** Everything a keeper needs to stay solvent: gas, x402 money, pool capital. All amounts in base units. */
+export const balances = async () => {
+  const p = publicClient();
+  const keeper = walletClient().account.address;
+  const token = await p.readContract({ address: coverAddress(), abi: coverAbi, functionName: 'token' });
+  const aUsd = (a: Hex) => p.readContract({ address: token, abi: erc20Abi, functionName: 'balanceOf', args: [a] });
+  const read = (functionName: 'reserved' | 'freeCapital') => p.readContract({ address: coverAddress(), abi: coverAbi, functionName });
+  const [keeperEth, keeperAusd, pool, reserved, free] = await Promise.all([
+    p.getBalance({ address: keeper }),
+    aUsd(keeper),
+    aUsd(coverAddress()),
+    read('reserved'),
+    read('freeCapital'),
+  ]);
+  return { keeper, keeperEth, keeperAusd, pool, reserved, free };
+};
+
 export const getPolicy = (id: bigint) =>
   publicClient().readContract({ address: coverAddress(), abi: coverAbi, functionName: 'policy', args: [id] });
 

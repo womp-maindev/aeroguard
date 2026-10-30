@@ -1,5 +1,5 @@
 // Local end-to-end rehearsal on anvil (chain id 84532 so the Base Sepolia client works unchanged).
-//   anvil --chain-id 84532 &   then:   node src/e2e-local.ts
+//   anvil --chain-id 84532 &   then:   npm run rehearse
 // Deploys MockUSD + FlightDelayCover (airnode = local FIXTURE signer), buys 5 policies with signed purchase proofs,
 // runs the keeper once (fixture mode), then runs the 4 tamper attacks + valid against the deployed bytecode.
 import { readFileSync } from 'node:fs';

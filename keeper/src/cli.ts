@@ -1,10 +1,10 @@
 // pnpm cli <command>   — see README "Commands"
 import { readFileSync } from 'node:fs';
-import { type Hex, keccak256, toHex } from 'viem';
+import { formatEther, type Hex, keccak256, toHex } from 'viem';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import type { SignedResponse } from './airnode-v2.ts';
 import { cover, describe, keeperTick, resolveFlight, runKeeper, verdict } from './keeper.ts';
-import { allPolicies, explorerTx, getPolicy, revertReason, settle, STATUS } from './chain.ts';
+import { allPolicies, balances, explorerTx, getPolicy, revertReason, settle, STATUS } from './chain.ts';
 import { requestHashFor } from './flight.ts';
 
 const [cmd, ...rest] = process.argv.slice(2);
@@ -100,6 +100,15 @@ const main = async () => {
     case 'policies':
       for (const p of await allPolicies()) console.log(`#${p.id} ${p.flight} ${p.date} ${STATUS[p.status]} cover ${Number(p.coverage) / 1e6}`);
       return;
+    case 'status': {
+      const b = await balances();
+      const usd = (v: bigint) => (Number(v) / 1e6).toFixed(2);
+      console.log(`keeper ${b.keeper}: ${formatEther(b.keeperEth)} ETH, ${usd(b.keeperAusd)} aUSD`);
+      console.log(`pool: ${usd(b.pool)} aUSD, reserved ${usd(b.reserved)}, free ${usd(b.free)}`);
+      for (const p of await allPolicies())
+        console.log(`#${p.id} ${p.flight} ${p.date} ${STATUS[p.status]} cover ${usd(p.coverage)} sched ${new Date(Number(p.scheduledArrival) * 1000).toISOString()}`);
+      return;
+    }
     case 'tick':
       await keeperTick();
       return;
@@ -114,7 +123,7 @@ const main = async () => {
       return;
     }
     default:
-      console.log('commands: wallet | hash | resolve | verdict | buy | policies | tick | keeper | tamper');
+      console.log('commands: wallet | hash | resolve | verdict | buy | policies | status | tick | keeper | tamper');
   }
 };
 
