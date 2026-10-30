@@ -25,6 +25,10 @@ createServer(async (req, res) => {
       res.writeHead(200, { 'content-type': 'text/html' });
       return res.end(readFileSync(new URL('../../web/index.html', import.meta.url)));
     }
+    if (url.pathname === '/wallet.js') {
+      res.writeHead(200, { 'content-type': 'text/javascript' });
+      return res.end(readFileSync(new URL('../../web/wallet.js', import.meta.url)));
+    }
     if (url.pathname === '/health')
       return json(res, 200, { ok: true, contract: coverAddress(), network: networkName(), explorer: isLocalRpc() ? null : 'https://sepolia.basescan.org' });
     if (url.pathname === '/policies') return json(res, 200, (await allPolicies()).map((p) => ({ ...p, statusName: STATUS[p.status] })));
