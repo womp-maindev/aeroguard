@@ -2,8 +2,8 @@
 
 Agents pay per request on Cardano for flight outcomes any contract can verify.
 
-`GET /verdict?flight=IB1314&date=2026-10-30` answers **402** with a price on `cardano:preprod`: **1 tADA** for a
-pre-departure status proof, **2 tADA** for a final arrival proof (tUSDM offered too). The agent's wallet signs a Cardano
+`GET /verdict?flight=IB1314&date=2026-10-30` answers **402** with a price on `cardano:preprod`: **1 tADA** while the
+flight is live (scheduled, en route…), **2 tADA** once the proof is final (arrived or cancelled); tUSDM offered too. The agent's wallet signs a Cardano
 transaction (never broadcasts it), retries with `PAYMENT-SIGNATURE`, the facilitator verifies and submits it, and the
 server returns:
 
@@ -27,6 +27,9 @@ facilitator runs in the server process (no keys, no funds); set `FACILITATOR_URL
 - **One payment, one answer.** A replayed payment returns the same body; it never buys a second operation. A flight
   without evidence gets a free 404, never a charge.
 - **Quota-safe.** Evidence comes from disk only (`evidence/`, then `keeper/.cache/`); this service never calls the Airnode.
+  It resells what the keeper already bought: `npm run import-evidence -- keeper.json` imports the keeper's published
+  answers (`keeper-data` branch) after checking each signature. Today's catalog: live answers for all four policies
+  (IB1314, LH1816, EI357, BA955); the newest answer per request wins.
 - **On-chain anchor** (`ANCHOR=true`): after each sale the seller writes the sold proof into Cardano tx metadata (label
   674 message + label 8402 proof bytes), so the evidence is findable on Cardano itself.
 
@@ -70,7 +73,7 @@ model of that path; its tests verify the **real** Airnode signature with Plutus 
 `0x83FE…F2Ec`. `npm run vectors` regenerates `onchain/lib/aeroguard/vectors.ak` (then `aiken fmt`).
 
 ```bash
-cd onchain && aiken check      # 23 tests: real Airnode signature, 4 forgeries, time, payout rule, validator paths
+cd onchain && aiken check      # 26 tests: real Airnode signatures, forgeries, time, payout rule, validator paths
 aiken build                    # plutus.json
 ```
 
@@ -79,7 +82,7 @@ aiken build                    # plutus.json
 | Compiler / stdlib | Aiken v1.1.24, stdlib v2.2.0, Plutus V3 |
 | Script hash | `58d832a40020e79da24d7b444845ff27fe22ccd4a19f5b50971dfa27` (2,022 bytes) |
 | Preprod script address | `addr_test1wpvdsv4yqqsw08dzf4a5gjz9lunlugkv6jse7k6sjuwl5fchwmjh4` |
-| Real Airnode signature check | ≈ 34k mem / 59M cpu; a full settlement ≈ 0.46M mem / 0.19B cpu (tx limit 14M / 10B) |
+| Real Airnode signature check | ≈ 34–48k mem / 59–64M cpu; a full settlement ≈ 0.46M mem / 0.19B cpu (tx limit 14M / 10B) |
 
 **Off-chain** (`src/cover.ts`, `npm run cover`): the insurer (seller wallet, needs a few tADA) opens a cover; anyone
 settles it with the JSON body an agent bought from `/verdict`; the insurer reclaims after the deadline.
@@ -94,8 +97,11 @@ npm run cover -- reclaim --open <openTx>                         # after the dea
 Every build runs the validator locally with Aiken's UPLC evaluator (`@evolution-sdk/aiken-uplc`), so a transaction the
 script would reject is never submitted.
 
-Settlement redeemer for the live IB1314 pre-departure proof is rejected (`NotFinal`), exactly like `FlightDelayCover`;
-final-outcome tests use a public test key until the real arrival proofs land.
+Real Airnode signatures in the Aiken tests: the IB1314 pre-departure status and a live arrival answer (`EnRoute`, with
+`actual`), both verify on-chain-style and both are refused for settlement (`NotFinal`), exactly like `FlightDelayCover`;
+relabelling the en-route answer as `Arrived` breaks the signature. Final-outcome paths use a public test key until the
+keeper buys a final answer; then `npm run vectors` writes `real_final_test.ak` and the TS lifecycle test settles a cover
+on the real signature automatically.
 
 ## Test without network or funds
 
@@ -103,7 +109,7 @@ final-outcome tests use a public test key until the real arrival proofs land.
 npm test
 ```
 
-34 tests. The buyer signs real Cardano transactions with the SDK's reference signer and the server's facilitator
+38 tests. The buyer signs real Cardano transactions with the SDK's reference signer and the server's facilitator
 verifies and submits them; the Aiken cover's transactions are built and **executed** with Aiken's UPLC evaluator
 (PlutusV3 cost model). Only Blockfrost is a local fixture (as in the official demo's tests). Covers the 402 offer,
 refusals, discovery, paid verdicts, replay, sales log, anchor transaction, claims agent, MCP, preflight, the whole
