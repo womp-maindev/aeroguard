@@ -32,7 +32,7 @@ a UTxO holding the cover is released only by an Airnode proof that the flight is
 rule as the EVM contract (cancelled or ≥ 180 min: full, ≥ 120 min: half, else back to the insurer). Plutus has no
 `ecrecover`, so it checks `verifyEcdsaSecp256k1Signature` against the Airnode's compressed key over
 `keccak_256(prefix ‖ keccak_256(requestHash ‖ timestamp ‖ data))`, rebuilding the signed bytes instead of parsing
-JSON. 32 Aiken tests pass, including **real** AeroDataBox Airnode signatures (a pre-departure status and a live
+JSON. 35 Aiken tests pass, including **real** AeroDataBox Airnode signatures (a pre-departure status and a live
 arrival answer bought by our keeper), forgeries and the same freshness rules as the EVM contract (stale, from the future,
 observed before the landing); payouts are tagged
 with the policy input against double satisfaction. A settlement costs ≈ 0.46M mem / 0.19B cpu. The off-chain side
@@ -47,6 +47,11 @@ failed purchase is recorded as a refund due, and no policy is ever bought withou
 **Agents.** `npm run agent` is a claims agent with a budget: free catalog check, buys only final proofs, decides by
 the contract rule, logs each Cardano receipt. `npm run mcp` exposes `list_flights` (free) and `get_flight_verdict`
 (paid) as MCP tools for LLM agents.
+
+**One signed answer, the same verdict on two chains.** Policy #1 (IB1314) landed 25 min early. The keeper's signed
+`Arrived` answer closed the live Base Sepolia policy with no payout ([0xf0aa5db2…](https://sepolia.basescan.org/tx/0xf0aa5db2e08a9b9aa7298c92853642b39d7ff330fe3e42cd8b441aa136246b44)); the very same
+signature, verified with Plutus V3 builtins, settles the Aiken cover the same way (no payout, cover back to the insurer),
+and paying the holder with it is rejected. Tests: `real_final_test.ak` and the TS lifecycle test.
 
 **Real data, no extra quota.** The service resells the signed answers our keeper already bought for the four live
 policies (imported from the keeper's published `keeper-data`, each signature re-checked); a live answer costs 1 tADA,
