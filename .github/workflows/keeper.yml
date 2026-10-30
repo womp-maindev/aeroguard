@@ -1,8 +1,11 @@
 name: AeroGuard keeper
+# The autonomous keeper: every ~15 min it reads active policies on Base Sepolia, buys signed AeroDataBox data via x402
+# once a flight should have landed, and settles on-chain. GitHub runs schedules only from the default branch and on a
+# best-effort basis; minutes off :00/:15/:30/:45 are dropped less often under load.
 
 on:
   schedule:
-    - cron: "*/15 * * * *"
+    - cron: "7,22,37,52 * * * *"
   workflow_dispatch:
 
 concurrency:
@@ -13,6 +16,10 @@ jobs:
   tick:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    env:
+      KEEPER_PK: ${{ secrets.KEEPER_PK }}
+      FLIGHT_COVER_ADDRESS: "0x257054204c4Cd43846C4553eBe6D709841980a80"
+      BASE_SEPOLIA_RPC: https://sepolia.base.org
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -26,10 +33,9 @@ jobs:
       - name: Install
         working-directory: keeper
         run: npm ci
+      - name: Balances and policies
+        working-directory: keeper
+        run: node src/cli.ts status
       - name: Keeper tick
         working-directory: keeper
-        env:
-          KEEPER_PK: ${{ secrets.KEEPER_PK }}
-          FLIGHT_COVER_ADDRESS: "0x257054204c4Cd43846C4553eBe6D709841980a80"
-          BASE_SEPOLIA_RPC: https://sepolia.base.org
         run: node src/cli.ts tick
