@@ -57,6 +57,12 @@ export const preflight = async (env: NodeJS.ProcessEnv, o: { baseUrl: string; fl
       add({ name: 'Buyer balance', ok: false, detail: String(e), fix: 'Check the Blockfrost key' });
     }
   }
+  // The anchor transaction is paid by the seller: its change must stay above the minimum UTxO after the fee.
+  if (env.ANCHOR === 'true' && seller) {
+    const have = await lovelaceAt(o.baseUrl, projectId, seller, f).catch(() => 0n);
+    add({ name: 'Seller balance', ok: have >= 2_000_000n, detail: `${Number(have) / 1e6} tADA (ANCHOR needs ≥ 2)`,
+      fix: `Fund ${seller} from the faucet, or run without ANCHOR=true` });
+  }
   return checks;
 };
 

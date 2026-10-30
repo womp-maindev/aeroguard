@@ -32,3 +32,13 @@ test('an unfunded buyer and a rejected key are caught before paying', async (t) 
   assert.deepEqual(failed(await preflight(env, { baseUrl: await blockfrost(t, '1', 403) })), ['Blockfrost reachable']);
   assert.deepEqual(failed(await preflight(env, { baseUrl: await blockfrost(t, '10000000000'), flight: 'XX1' })), ['Signed evidence']);
 });
+
+test('with ANCHOR=true an unfunded seller is caught', async (t) => {
+  const funded = await blockfrost(t, '10000000000');
+  assert.deepEqual(failed(await preflight({ ...env, ANCHOR: 'true' }, { baseUrl: funded })), []);
+  const bf = express();
+  const buyer = walletFor(BUYER).getAddress();
+  bf.get('/', (_q, r) => { r.json({ url: 'https://blockfrost.io/' }); });
+  bf.get('/addresses/:a', (q, r) => { if (q.params.a !== buyer) { r.status(404).json({}); return; } r.json({ amount: [{ unit: 'lovelace', quantity: '10000000000' }] }); });
+  assert.deepEqual(failed(await preflight({ ...env, ANCHOR: 'true' }, { baseUrl: await listen(bf, t) })), ['Seller balance']);
+});

@@ -7,7 +7,7 @@ Agents pay per request on Cardano for flight outcomes any contract can verify.
 **For judges (3 min, no funds, no keys):**
 
 ```bash
-cd cardano && npm i && npm test     # 38 tests: real signed Cardano txs, x402 round trips, Aiken cover executed via UPLC
+cd cardano && npm i && npm test     # 39 tests: real signed Cardano txs, x402 round trips, Aiken cover executed via UPLC
 cd onchain && aiken check           # 26 tests, incl. real AeroDataBox Airnode signatures verified with Plutus builtins
 ```
 
@@ -42,7 +42,7 @@ facilitator runs in the server process (no keys, no funds); set `FACILITATOR_URL
   It resells what the keeper already bought: `npm run import-evidence -- keeper.json` imports the keeper's published
   answers (`keeper-data` branch) after checking each signature. Today's catalog: live answers for all four policies
   (IB1314, LH1816, EI357, BA955); the newest answer per request wins.
-- **On-chain anchor** (`ANCHOR=true`): after each sale the seller writes the sold proof into Cardano tx metadata (label
+- **On-chain anchor** (`ANCHOR=true`, seller wallet needs ≥ 2 tADA from the faucet): after each sale the seller writes the sold proof into Cardano tx metadata (label
   674 message + label 8402 proof bytes), so the evidence is findable on Cardano itself.
 
 ## Run (Cardano preprod)
@@ -121,7 +121,7 @@ on the real signature automatically.
 npm test
 ```
 
-38 tests. The buyer signs real Cardano transactions with the SDK's reference signer and the server's facilitator
+39 tests. The buyer signs real Cardano transactions with the SDK's reference signer and the server's facilitator
 verifies and submits them; the Aiken cover's transactions are built and **executed** with Aiken's UPLC evaluator
 (PlutusV3 cost model). Only Blockfrost is a local fixture (as in the official demo's tests). Covers the 402 offer,
 refusals, discovery, paid verdicts, replay, sales log, anchor transaction, claims agent, MCP, preflight, the whole

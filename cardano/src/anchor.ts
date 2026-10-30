@@ -1,6 +1,6 @@
 // After a sale, the seller writes the sold verdict into a Cardano transaction's metadata, so anyone can find the
 // Airnode-signed evidence on Cardano itself, next to the payment that bought it. Enable with ANCHOR=true.
-import { Assets, Client, preprod, TransactionHash } from '@evolution-sdk/evolution';
+import { Client, preprod, TransactionHash } from '@evolution-sdk/evolution';
 import type { TransactionMetadatum } from '@evolution-sdk/evolution/TransactionMetadatum';
 import { toBytes } from 'viem';
 import { blockfrost, env } from './cardano.ts';
@@ -61,10 +61,8 @@ export const anchorSale = async (sale: Sale, provider = blockfrost(), mnemonic =
   if (!verdict) throw new Error(`No evidence to anchor for ${sale.flight} ${sale.date}`);
   const { message, proof } = buildAnchorMetadata(verdict, sale.tx);
   const seller = Client.make(preprod).withBlockfrost(provider).withSeed({ mnemonic });
-  const address = await seller.address();
-  // A minimal self-payment carries the metadata; the seller pays only the fee out of what it just earned.
+  // No explicit output: the change back to the seller carries the value, so the seller pays only the fee.
   const signed = await seller.newTx()
-    .payToAddress({ address, assets: Assets.fromLovelace(1_000_000n) })
     .attachMetadata({ label: MESSAGE_LABEL, metadata: message })
     .attachMetadata({ label: PROOF_LABEL, metadata: proof })
     .build();
