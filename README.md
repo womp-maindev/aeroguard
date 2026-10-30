@@ -104,10 +104,14 @@ cd keeper && npm run rehearse   # deploy locally, buy 5 policies with signed pro
 ```
 Rehearsal responses are signed with a local test key and labelled; the real deployment rejects them with `NotSignedByAirnode`.
 
+## Cardano: pay per request via x402
+Agents pay per request on Cardano for flight outcomes any contract can verify. `GET /verdict?flight=&date=` answers 402 with 2 tADA on `cardano:preprod` (`@x402/cardano` `exact` scheme, `@x402/express`, Blockfrost); once paid it returns the verdict plus the Airnode-signed proof that `FlightDelayCover` verifies unchanged. Run and test: [`cardano/README.md`](cardano/README.md) · paid preprod txs: [`cardano/EVIDENCE.md`](cardano/EVIDENCE.md).
+
 ## Repo
 ```
 contracts/  FlightDelayCover.sol + AirnodeHub libraries (api3dao/airnodehub-hackathon-starter), Foundry tests, threat model
 keeper/     x402 AirnodeHub client, AeroDataBox requests, buy/settle, autonomous keeper, tamper CLI, HTTP API
+cardano/    x402 on Cardano preprod: paid /verdict endpoint, buyer agent, offline e2e test
 web/        dashboard: in-browser Security Inspector, tamper lab, policies, keeper log (single file, works offline)
 ```
 
