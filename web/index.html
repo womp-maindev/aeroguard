@@ -5,7 +5,23 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>AeroGuard · flight-delay cover settled by signed API3 data</title>
 <meta name="description" content="Autonomous flight-delay cover. Pays only on AeroDataBox data signed by its API3 AirnodeHub Airnode. Hackathon prototype on Base Sepolia, not insurance." />
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230a0c10'/%3E%3Cpath d='M6 19l20-7-4 10-5-3-3 4v-5z' fill='%23ffb23e'/%3E%3C/svg%3E" />
+<meta name="theme-color" content="#090b0f" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="AeroGuard" />
+<meta property="og:title" content="AeroGuard · your flight is late, you're already paid" />
+<meta property="og:description" content="Flight-delay cover that settles itself on AeroDataBox data signed by its API3 Airnode. Live on Base Sepolia: verify the signed evidence and attack the contract from your browser." />
+<meta property="og:url" content="https://womp-maindev.github.io/aeroguard/" />
+<meta property="og:image" content="https://womp-maindev.github.io/aeroguard/og.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="AeroGuard: flight-delay cover settled by signed API3 data" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="AeroGuard · your flight is late, you're already paid" />
+<meta name="twitter:description" content="Flight-delay cover that settles itself on AeroDataBox data signed by its API3 Airnode. Live on Base Sepolia." />
+<meta name="twitter:image" content="https://womp-maindev.github.io/aeroguard/og.png" />
+<link rel="icon" type="image/svg+xml" href="favicon.svg" />
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png" />
+<link rel="apple-touch-icon" href="apple-touch-icon.png" />
 <style>
   :root {
     --bg: #090b0f; --bg2: #0d1016; --card: #11151c; --card2: #151a23; --line: #1f2531; --line2: #2a3242;
@@ -214,20 +230,74 @@
   footer.site code { color: var(--text); word-break: break-all; }
   .disclaimer { color: var(--accent); font-weight: 600; }
 
+  /* network + evidence chips */
+  .src { font: 600 10.5px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--dim); }
+  .src a { color: var(--mute); text-decoration: underline; text-underline-offset: 2px; }
+  .txl { display: inline-flex; gap: 8px; }
+  .lab-note { padding: 12px 18px; border-bottom: 1px solid var(--line); font-size: 13px; color: var(--mute); display: grid; gap: 4px; }
+  .lab-note b { color: var(--text); font-weight: 600; }
+  .lab-note .warn { color: var(--accent); }
+  .log .run { padding: 10px 18px 4px; display: flex; gap: 10px; align-items: baseline; color: var(--text); font-weight: 600; border-top: 1px solid var(--line); }
+  .log .run:first-child { border-top: 0; }
+  .log .run span { color: var(--dim); font-weight: 500; }
+  .log .run a { margin-left: auto; font-weight: 500; }
+  .panel-f { padding: 11px 18px; border-top: 1px solid var(--line); font-size: 12.5px; color: var(--mute); display: flex; gap: 12px; flex-wrap: wrap; justify-content: space-between; }
+
+  /* cardano */
+  .steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .step { padding: 18px; border-right: 1px solid var(--line); display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+  .step:last-child { border-right: 0; }
+  .step .sn { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .step .sn b { font: 600 11px var(--mono); letter-spacing: .12em; color: var(--accent); }
+  .step h4 { margin: 0; font-size: 17px; letter-spacing: -.01em; }
+  .step p { margin: 0; color: var(--mute); font-size: 13.5px; }
+  .http { font: 12.5px/1.6 var(--mono); background: var(--bg2); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; overflow-wrap: anywhere; }
+  .http .st { font-weight: 700; } .http .st.c402 { color: var(--accent); } .http .st.c200 { color: var(--ok); }
+  .kv { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font: 12.5px/1.5 var(--mono); }
+  .kv dt { color: var(--dim); } .kv dd { margin: 0; overflow-wrap: anywhere; }
+  .kv dd.big { font: 700 22px/1.1 var(--mono); color: var(--accent); }
+  .step .grow { flex: 1; }
+  .step .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .cmd { font: 12px/1.6 var(--mono); background: var(--bg2); border: 1px dashed var(--line2); border-radius: 10px; padding: 10px 12px; color: var(--text); overflow-x: auto; white-space: pre; }
+  .arrow-row { display: none; }
+  details.paste { border-top: 1px solid var(--line); }
+  details.paste summary { padding: 13px 18px; cursor: pointer; font-size: 13px; color: var(--mute); list-style: none; }
+  details.paste summary::before { content: "▸ "; } details.paste[open] summary::before { content: "▾ "; }
+  details.paste > div { padding: 0 18px 16px; display: grid; gap: 8px; }
+  details.paste textarea { min-height: 120px; font-size: 12px; }
+
   @media (max-width: 1020px) {
     .hero, .insp, .two-col, footer.site .wrap { grid-template-columns: 1fr; }
     .modes { grid-template-columns: 1fr 1fr; } .mode { border-bottom: 1px solid var(--line); }
     .flow { grid-template-columns: 1fr 1fr; } .flow > div { border-bottom: 1px solid var(--line); }
+    .steps { grid-template-columns: 1fr; } .step { border-right: 0; border-bottom: 1px solid var(--line); } .step:last-child { border-bottom: 0; }
     .navlinks { display: none; }
   }
   @media (max-width: 620px) {
     .wrap { padding: 0 16px; }
     .ctx, .fields .two, .form, .decoded, .stats { grid-template-columns: 1fr 1fr; }
-    .modes, .flow { grid-template-columns: 1fr; }
+    .modes, .flow { grid-template-columns: 1fr; } .mode p { min-height: 0; }
     .stat:nth-child(2) { border-right: 0; }
+    .decoded div:nth-child(2n) { border-right: 0; }
     .apistat span { display: none; }
     .tag.api3 { display: none; }
     .hero { padding-top: 36px; }
+    /* hero buttons: stacked, same width */
+    .ctas { flex-direction: column; align-items: stretch; }
+    .ctas .btn { width: 100%; justify-content: center; padding: 14px 15px; }
+    .lab-top { align-items: stretch; flex-direction: column; } .lab-top label.f { min-width: 0; }
+    .lab-top button { justify-content: center; }
+    .srcrow button { flex: 1 1 auto; justify-content: center; }
+    .clock { grid-template-columns: auto 1fr; } .clock #clockTxt { grid-column: 1 / -1; }
+    .tech dl { grid-template-columns: 1fr; }
+    .log .ln { grid-template-columns: 62px 48px 1fr; padding: 3px 14px; }
+    .sh { align-items: start; }
+    nav .wrap { gap: 10px; }
+    .tag.testnet { padding: 6px; }
+  }
+  @media (max-width: 400px) {
+    .ctx, .fields .two, .decoded { grid-template-columns: 1fr; }
+    .decoded div { border-right: 0; border-bottom: 1px solid var(--line); padding: 10px 18px; }
   }
 </style>
 </head>
@@ -240,12 +310,12 @@
       AeroGuard
     </a>
     <div class="navlinks">
-      <a href="#inspector">Inspector</a><a href="#lab">Tamper lab</a><a href="#cover">Get covered</a><a href="#policies">Policies</a><a href="#log">Keeper log</a>
+      <a href="#inspector">Inspector</a><a href="#lab">Tamper lab</a><a href="#policies">Policies</a><a href="#log">Keeper log</a><a href="#cardano">Cardano x402</a>
     </div>
     <div class="navright">
       <span class="tag api3">API3 · AirnodeHub</span>
       <span class="tag testnet" title="Base Sepolia testnet. No real money.">Testnet · Base Sepolia</span>
-      <span class="apistat" id="apistat"><i class="dot" id="apidot"></i><span id="apitxt">checking keeper…</span></span>
+      <span class="apistat" id="apistat"><i class="dot" id="apidot"></i><span id="apitxt">connecting…</span></span>
     </div>
   </div>
 </nav>
@@ -259,7 +329,7 @@
         <p class="lede">An autonomous keeper sells the cover and settles it. The contract pays <b>only</b> on AeroDataBox data signed by its API3 Airnode: right flight, right date, fresh, final, never reused. Don't trust us. <b>Verify a signed response yourself, right here in your browser.</b></p>
         <div class="ctas">
           <a class="btn btn-primary" href="#inspector" onclick="setTimeout(loadFixture, 350)">Open the security inspector →</a>
-          <a class="btn btn-ghost" href="#cover">Get covered</a>
+          <a class="btn btn-ghost" href="#lab">Attack the live contract</a>
         </div>
       </div>
       <aside class="pass" aria-label="Payout rules">
@@ -284,7 +354,7 @@
       <div class="stat"><b id="sPol">–</b><span>policies on-chain</span></div>
       <div class="stat"><b id="sAct">–</b><span>active, being watched</span></div>
       <div class="stat"><b id="sPaid">–</b><span>aUSD paid out</span></div>
-      <div class="stat"><b id="sSpend">–</b><span>signed data calls bought via x402</span></div>
+      <div class="stat"><b id="sFree">–</b><span>aUSD free in the pool</span></div>
     </div>
 
     <!-- ============================================================ INSPECTOR -->
@@ -305,7 +375,8 @@
           </div>
           <div class="srcrow">
             <button class="btn-primary btn-sm" onclick="loadFixture()">Load demo (FIXTURE)</button>
-            <button class="btn-ghost btn-sm needs-api" id="fetchBtn" onclick="fetchEvidence()" title="The keeper buys a signed response via x402 (0.05 aUSD on Base Sepolia, cached 10 min)">Fetch real evidence</button>
+            <button class="btn-ghost btn-sm" onclick="loadRealProof()" title="The real AirnodeHub-signed status of IB1314 that bought policy #1">Load real Airnode proof</button>
+            <button class="btn-ghost btn-sm" id="fetchBtn" onclick="fetchEvidence()" title="A signed response the keeper bought for this flight and date">Keeper evidence</button>
             <button class="btn-ghost btn-sm" onclick="document.getElementById('file').click()">Open .json</button>
             <input type="file" id="file" accept=".json,application/json" hidden />
           </div>
@@ -384,23 +455,26 @@
         <div>
           <span class="num">02 · TAMPER LAB</span>
           <h2>Attack the deployed contract</h2>
-          <p>Each forgery is sent to the real FlightDelayCover on Base Sepolia as a simulated <code>settle()</code> call (no gas). Read the revert reason, then the plain-English version below it.</p>
+          <p>Each forgery goes from your browser to the deployed FlightDelayCover on Base Sepolia as an <code>eth_call</code> to <code>settle()</code>: the real bytecode runs, nothing is written, no wallet or key needed. Read the revert reason, then the plain-English version below it.</p>
         </div>
       </div>
       <div class="card">
         <div class="lab-top">
-          <label class="f">Target policy<select id="tPolicy" class="needs-api"><option value="">Keeper API offline</option></select></label>
+          <label class="f">Target policy<select id="tPolicy"><option value="">Reading Base Sepolia…</option></select></label>
           <label class="chk"><input type="checkbox" id="tUseInsp" /> Use the inspector's response as the base</label>
-          <button class="btn-primary needs-api" onclick="runAttacks()">Run the 4 attacks</button>
+          <label class="chk" title="eth_call state override: the policy's status slot reads Active for this call only"><input type="checkbox" id="tReopen" checked /> Reopen a settled policy for the simulation</label>
+          <label class="chk" title="eth_call block override: block.timestamp = signature time + 2 min, for Genuine only"><input type="checkbox" id="tRewind" checked /> Genuine: block time = signed + 2 min</label>
+          <button class="btn-primary" id="runAll" onclick="runAttacks()">Run the 4 attacks</button>
         </div>
+        <div class="lab-note" id="labNote"></div>
         <div class="modes" id="modes"></div>
-        <div class="cli">Bring your own response: <code>cd keeper && npm run tamper -- --policy N --response your.json</code>. The <b>Genuine</b> mode really settles the policy if every check passes.</div>
+        <div class="cli">Every call is an <code>eth_call</code> (a simulation). To send a real transaction with your own response: <code>cd keeper && npm run tamper -- --policy N --response your.json</code>.</div>
       </div>
     </section>
 
     <!-- ============================================================ COVER + LOG -->
     <section class="block" id="cover">
-      <div class="sh"><div><span class="num">03 · GET COVERED</span><h2>Cover a flight</h2><p>The keeper buys the signed schedule, quotes the premium (8% of cover) and opens the policy on-chain. Cover must be bought before the outcome is known.</p></div></div>
+      <div class="sh"><div><span class="num">03 · GET COVERED</span><h2>Cover a flight</h2><p>The keeper buys the signed schedule, quotes the premium (8% of cover) and opens the policy on-chain. Cover must be bought before the outcome is known. Buying needs the keeper's wallet, so this form only works with the keeper API running.</p></div></div>
       <div class="two-col">
         <div class="card pad">
           <div class="form">
@@ -418,16 +492,41 @@
         </div>
         <div class="card" id="log">
           <div class="panel-h"><h3>Keeper log</h3><span class="tag" id="logCount">–</span></div>
-          <div class="log" id="logBody"><div class="empty" style="display:block">Waiting for the keeper…</div></div>
+          <div class="log" id="logBody"><div class="empty" style="display:block">Loading the keeper's run log…</div></div>
+          <div class="panel-f"><span id="logSrc">GitHub Actions runs the keeper every ~15 min.</span><a href="https://github.com/womp-maindev/aeroguard/actions/workflows/keeper.yml" target="_blank" rel="noopener">All runs in Actions ↗</a></div>
         </div>
       </div>
     </section>
 
     <section class="block" id="policies">
-      <div class="sh"><div><span class="num">04 · POLICIES</span><h2>Live from Base Sepolia</h2><p>Read straight from the contract. Click <b>Inspect</b> to check a policy's evidence against its on-chain request hashes.</p></div><a class="btn btn-ghost btn-sm" id="contractLink" target="_blank" rel="noopener" hidden>Contract on Basescan ↗</a></div>
+      <div class="sh"><div><span class="num">04 · POLICIES</span><h2>Live from Base Sepolia</h2><p>Read straight from the contract with <code>eth_call</code>, from your browser, every 20 s. Click <b>Inspect</b> to check a policy's evidence against its on-chain request hashes.</p></div><a class="btn btn-ghost btn-sm" id="contractLink" href="https://sepolia.basescan.org/address/0x257054204c4Cd43846C4553eBe6D709841980a80" target="_blank" rel="noopener">Contract on Basescan ↗</a></div>
       <div class="card scroll">
-        <table class="tbl"><thead><tr><th>#</th><th>Flight</th><th>Date</th><th>Sched. arrival</th><th>Cover</th><th>Premium</th><th>Status</th><th>Holder</th><th>Ref</th><th></th></tr></thead>
-        <tbody id="pol"><tr><td colspan="10"><div class="empty">Waiting for the keeper…</div></td></tr></tbody></table>
+        <table class="tbl"><thead><tr><th>#</th><th>Flight</th><th>Date</th><th>Sched. arrival</th><th>Cover</th><th>Premium</th><th>Status</th><th>Holder</th><th>Txs</th><th></th></tr></thead>
+        <tbody id="pol"><tr><td colspan="10"><div class="empty">Reading Base Sepolia…</div></td></tr></tbody></table>
+      </div>
+    </section>
+
+    <!-- ============================================================ CARDANO -->
+    <section class="block" id="cardano">
+      <div class="sh">
+        <div>
+          <span class="num">05 · CARDANO · PAY PER VERDICT</span>
+          <h2>Agents buy the verdict over x402 on Cardano</h2>
+          <p>The same signed evidence, sold per request: <code>GET /verdict</code> answers <b>402</b>, the agent pays 2 tADA on Cardano preprod, and gets back the verdict plus the Airnode's signature. Open that answer in the inspector and check it yourself.</p>
+        </div>
+        <span class="src" id="cdSrc">–</span>
+      </div>
+      <div class="card">
+        <div class="steps">
+          <div class="step" id="cd1"></div>
+          <div class="step" id="cd2"></div>
+          <div class="step" id="cd3"></div>
+        </div>
+        <details class="paste">
+          <summary>Paste a paid answer: the JSON that <code>npm run buy</code> prints</summary>
+          <div><textarea id="cdPaste" spellcheck="false" placeholder='{"flight":"IB1314","date":"2026-10-30","kind":"status","verdict":{…},"evidence":{…},"paidWith":{"txHash":"…"}}'></textarea>
+          <span id="cdPasteMsg" class="hint" style="color:var(--mute)"></span></div>
+        </details>
       </div>
     </section>
   </div>
@@ -441,7 +540,8 @@
     </div>
     <div>
       <p><strong>Trusted signer</strong><br /><code>0x83FE2E8F24E66520B1902C3507De4F471248f2Ec</code> (AeroDataBox Airnode)</p>
-      <p><strong>Contract</strong><br /><code id="footContract">shown when the keeper API is online</code></p>
+      <p><strong>Contract</strong><br /><code id="footContract"><a href="https://sepolia.basescan.org/address/0x257054204c4Cd43846C4553eBe6D709841980a80" target="_blank" rel="noopener">0x257054204c4Cd43846C4553eBe6D709841980a80</a> · Base Sepolia</code></p>
+      <p><strong>Source</strong><br /><a href="https://github.com/womp-maindev/aeroguard" target="_blank" rel="noopener">github.com/womp-maindev/aeroguard</a></p>
     </div>
   </div>
 </footer>
@@ -463,11 +563,12 @@ const PROJ = {
   arrival: [['actual', '/0/arrival/revisedTime/utc'], ['scheduled', '/0/arrival/scheduledTime/utc'], ['status', '/0/status']],
   status: [['scheduled', '/0/arrival/scheduledTime/utc'], ['status', '/0/status']],
 };
-const API = new URLSearchParams(location.search).get('api') ?? (location.port === '8787' ? '' : 'http://localhost:8787');
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const short = (a, n = 6) => (a && a.length > 2 * n + 2 ? a.slice(0, n) + '…' + a.slice(-4) : a || '');
-const scan = (kind, v) => `https://sepolia.basescan.org/${kind}/${v}`;
+let EXPLORER = 'https://sepolia.basescan.org'; // from GET /health when a keeper API is present (null on a local anvil)
+const scan = (kind, v) => `${EXPLORER}/${kind}/${v}`;
+const scanLink = (kind, v, text) => (EXPLORER ? `<a href="${scan(kind, v)}" target="_blank" rel="noopener">${text}</a>` : text);
 
 /* ------------------------------------------------------------------ crypto */
 const enc = new TextEncoder();
@@ -669,7 +770,7 @@ function evaluate({ resp, flight, date, maxAge, now, policy }) {
 }
 
 /* ------------------------------------------------------------------ inspector state + render */
-const S = { policies: [], policy: null, original: null, source: null, online: false, clock: 0 };
+const S = { policies: [], policy: null, original: null, source: null, online: false, chain: null, clock: 0, free: null, keeper: null, evidence: [], apiLog: [], cardano: { run: null, pasted: null, live: null } };
 const F = { airnode: $('fAirnode'), requestHash: $('fRequestHash'), timestamp: $('fTimestamp'), data: $('fData'), signature: $('fSignature') };
 const readResp = () => Object.fromEntries(Object.entries(F).map(([k, el]) => [k, el.value.trim() === '' && k !== 'data' ? '' : (k === 'data' ? el.value : el.value.trim())]));
 const writeResp = (r) => { for (const k in F) F[k].value = r[k] ?? ''; syncRaw(); };
@@ -801,21 +902,33 @@ function selectPolicy(id, keepCtx) {
 }
 function inspectPolicy(id) {
   selectPolicy(id);
+  const p = S.policy, ev = p && evidenceFor(p);
+  if (ev) setResponse(ev, 'live', evidenceLabel(ev), { flight: p.flight, date: p.date });
+  else render();
   $('inspector').scrollIntoView();
-  if (!readResp().signature) render(); else render();
   $('fetchBtn').focus();
+}
+function loadRealProof() {
+  const x = REAL_PROOFS[0];
+  selectPolicy(String(S.policies.find((p) => p.flight === x.flight && p.date === x.date)?.id ?? ''));
+  setResponse(x.response, 'live', evidenceLabel(x.response), { flight: x.flight, date: x.date });
 }
 async function fetchEvidence() {
   const flight = $('cFlight').value.replace(/\s+/g, '').toUpperCase(), date = $('cDate').value.trim();
   if (!flight || !date) { $('cFlight').focus(); return; }
-  const b = $('fetchBtn'); b.disabled = true; b.textContent = 'Keeper is buying signed data…';
+  const b = $('fetchBtn'); b.disabled = true;
   try {
+    // Static page: the signed responses the keeper bought and published. With the keeper API: buy one now.
+    const known = evidenceFor({ arrivalRequestHash: requestHashFor(flight, date, 'arrival'), statusRequestHash: requestHashFor(flight, date, 'status') });
+    if (known) return setResponse(known, 'live', evidenceLabel(known), { flight, date });
+    if (!S.online) throw new Error(`The keeper has not published a signed response for ${flight} on ${date}. Pick a policy, or load the real Airnode proof.`);
+    b.textContent = 'Keeper is buying signed data…';
     const v = await j(`/verdict?flight=${encodeURIComponent(flight)}&date=${encodeURIComponent(date)}`);
     setResponse(v.evidence, 'live', `Live · ${v.kind} · AirnodeHub`, { flight, date });
   } catch (e) {
     $('verdict').className = 'verdict revert';
-    $('verdict').innerHTML = `<div class="big">Keeper could not fetch evidence</div><div class="why">${esc(e.message)}</div>`;
-  } finally { b.disabled = !S.online; b.textContent = 'Fetch real evidence'; }
+    $('verdict').innerHTML = `<div class="big">No signed evidence here yet</div><div class="why">${esc(e.message)}</div>`;
+  } finally { b.disabled = false; b.textContent = 'Keeper evidence'; }
 }
 
 for (const el of Object.values(F)) el.addEventListener('input', () => { syncRaw(); render(); });
@@ -838,8 +951,154 @@ $('file').addEventListener('change', async (e) => {
   e.target.value = '';
 });
 
-/* ------------------------------------------------------------------ keeper API */
+/* ------------------------------------------------------------------ Base Sepolia, read-only (no wallet, no key) */
+// Default: the deployed FlightDelayCover on Base Sepolia. With a keeper API, network + contract come from GET /health
+// (a rehearsal on anvil has its own contract). ?rpc= / ?contract= point the page at a local replay by hand.
+const QS = new URLSearchParams(location.search);
+const LIVE_CONTRACT = '0x257054204c4Cd43846C4553eBe6D709841980a80';
+const BASE_SEPOLIA_RPCS = ['https://sepolia.base.org', 'https://base-sepolia-rpc.publicnode.com'];
+let CONTRACT = QS.get('contract') || LIVE_CONTRACT;
+let RPCS = QS.get('rpc') ? [QS.get('rpc')] : BASE_SEPOLIA_RPCS;
+let NETWORK = QS.get('rpc') ? null : 'Base Sepolia';
+let IS_LIVE = CONTRACT.toLowerCase() === LIVE_CONTRACT.toLowerCase() && !QS.get('rpc');
+const KEEPER_JSON = QS.get('keeper') || 'https://raw.githubusercontent.com/womp-maindev/aeroguard/keeper-data/keeper.json';
+const ACTIONS_URL = 'https://github.com/womp-maindev/aeroguard/actions/workflows/keeper.yml';
+// purchase txs of the live policies (README "Live evidence")
+const LIVE_BOUGHT_TX = {
+  1: '0xbfd3ae73074ff63a3ef5f7e56b211d1ffb7223e2db944d0cc38ed069d1958b8d', 2: '0x7e71c55b970b96fb1588ddde1da029060d805c9b87691280ca2504098d4e69d2',
+  3: '0x2aeed6010ced165f66c26ea0f34e7068421a327cac0c6375d72ef7b794f41672', 4: '0x7e675d8f94946db1d02a40c1eff87ac5a0ca29b65730751cf0d902d767d2b0d1',
+};
+const STATUS = ['None', 'Active', 'PaidHalf', 'PaidFull', 'ClosedNoPayout', 'Expired'];
+const POLICIES_SLOT = 4n, RESERVED_SLOT = 2n; // forge inspect FlightDelayCover storageLayout
+
+let rpcAt = 0, rpcSeq = 0;
+/** JSON-RPC with fallback. A JSON-RPC error (e.g. a revert) is an answer, so it is thrown without trying the next node. */
+async function rpc(method, params) {
+  let last;
+  for (let k = 0; k < RPCS.length; k++) {
+    const i = (rpcAt + k) % RPCS.length;
+    let b;
+    try {
+      const r = await fetch(RPCS[i], { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ jsonrpc: '2.0', id: ++rpcSeq, method, params }) });
+      b = await r.json();
+    } catch (e) { last = e; continue; }
+    rpcAt = i;
+    if (b.error) throw Object.assign(new Error(b.error.message || 'RPC error'), { rpc: b.error });
+    return b.result;
+  }
+  throw last || new Error('no RPC reachable');
+}
+const rpcHost = () => { try { return new URL(RPCS[rpcAt]).host; } catch { return RPCS[rpcAt]; } };
+
+/* minimal ABI codec: exactly what the page calls */
+const strip = (h) => String(h ?? '').replace(/^0x/i, '');
+const pad = (h) => strip(h).padStart(64, '0');
+const hexN = (n) => BigInt(n).toString(16);
+const selector = (sig) => toHex(keccak(enc.encode(sig)).slice(0, 4));
+const encBytes = (u8) => { const h = toHex(u8).slice(2); return pad(hexN(u8.length)) + h.padEnd(Math.ceil(h.length / 64) * 64, '0'); };
+const wU = (w) => BigInt('0x' + (w || '0'));
+const wAddr = (w) => checksum('0x' + w.slice(24));
+const wStr = (h, off) => { const len = Number(wU(h.slice(off * 2, off * 2 + 64))); return new TextDecoder().decode(fromHex(h.slice(off * 2 + 64, off * 2 + 64 + len * 2))); };
+const call = (sig, args = '') => rpc('eth_call', [{ to: CONTRACT, data: selector(sig) + args }, 'latest']);
+
+async function chainPolicy(id) {
+  const h = strip(await call('policy(uint256)', pad(hexN(id))));
+  const t = Number(wU(h.slice(0, 64))); // the struct is dynamic: word 0 is its offset
+  const W = (i) => h.slice((t + 32 * i) * 2, (t + 32 * i + 32) * 2);
+  const status = Number(wU(W(3)));
+  return {
+    id: String(id), holder: wAddr(W(0)), scheduledArrival: String(wU(W(1))), maxAge: String(wU(W(2))), status, statusName: STATUS[status] ?? String(status),
+    premium: String(wU(W(4))), coverage: String(wU(W(5))), arrivalRequestHash: '0x' + W(6), statusRequestHash: '0x' + W(7), cardanoJobRef: '0x' + W(8),
+    flight: wStr(h, t + Number(wU(W(9)))), date: wStr(h, t + Number(wU(W(10)))),
+  };
+}
+async function chainState() {
+  const [n, free] = await Promise.all([call('nextId()'), call('freeCapital()')]);
+  const ids = [];
+  for (let i = 1n; i < BigInt(n); i++) ids.push(i);
+  return { policies: await Promise.all(ids.map(chainPolicy)), free: BigInt(free) };
+}
+
+const ERRORS = ['WrongRequest(bytes32)', 'Stale(uint256)', 'FromTheFuture(uint256)', 'ObservedTooEarly(uint256,uint256)', 'NotFinal(string)', 'NotActive(uint256)',
+  'Insolvent(uint256,uint256)', 'BadFlight()', 'BadDate()', 'BadCoverage()', 'WindowOpen(uint256)', 'ScheduleMismatch(uint256,uint256)', 'BadSchedule()', 'BadCommitment()',
+  'PrivatePolicy(uint256)', 'NotPrivate(uint256)', 'NotBuyable(string)', 'TooCloseToArrival(uint256,uint256)', 'NotSignedByAirnode(address)', 'InvalidTimestamp(string)',
+  'FieldNotFound(string)', 'UnexpectedValue(string)', 'ECDSAInvalidSignature()', 'ECDSAInvalidSignatureLength(uint256)', 'ECDSAInvalidSignatureS(bytes32)',
+  'ReentrancyGuardReentrantCall()', 'SafeERC20FailedOperation(address)', 'Error(string)', 'Panic(uint256)'];
+const ERR_BY_SEL = Object.fromEntries(ERRORS.map((s) => [selector(s), s]));
+/** Revert data → "Stale(1793378516)", the same form the keeper CLI prints. */
+function decodeRevert(data) {
+  const h = strip(data);
+  if (h.length < 8) return 'reverted without a reason';
+  const sig = ERR_BY_SEL['0x' + h.slice(0, 8).toLowerCase()];
+  if (!sig) return `unknown error 0x${h.slice(0, 8)}`;
+  const name = sig.slice(0, sig.indexOf('(')), types = sig.slice(name.length + 1, -1).split(',').filter(Boolean), body = h.slice(8);
+  const args = types.map((t, i) => { const w = body.slice(i * 64, i * 64 + 64); return t === 'address' ? wAddr(w) : t === 'bytes32' ? '0x' + w : t === 'string' ? wStr(body, Number(wU(w))) : String(wU(w)); });
+  return `${name}(${args.join(', ')})`;
+}
+const revertData = (e) => { const d = e?.rpc?.data; return typeof d === 'string' ? d : typeof d?.data === 'string' ? d.data : undefined; };
+
+/**
+ * settle() as an eth_call against the deployed bytecode. Nothing is written.
+ * reopen: a settled policy's status slot reads Active for this call (state override), so the oracle checks run again.
+ * at: block.timestamp for this call (block override), to replay genuine evidence at the time it was fresh.
+ */
+async function simulateSettle(p, r, { reopen = false, at } = {}) {
+  if (!/^\d+$/.test(String(r.timestamp).trim())) return { ok: false, reason: 'InvalidTimestamp (not a unix time)' };
+  let sig;
+  try { sig = fromHex(r.signature); fromHex(r.requestHash); } catch { return { ok: false, reason: 'not valid hex (requestHash or signature)' }; }
+  const dataEnc = encBytes(enc.encode(r.data));
+  const calldata = selector('settle(uint256,bytes32,uint256,bytes,bytes)') + pad(hexN(p.id)) + pad(r.requestHash) + pad(hexN(String(r.timestamp).trim()))
+    + pad(hexN(5 * 32)) + pad(hexN(5 * 32 + dataEnc.length / 2)) + dataEnc + encBytes(sig);
+  const params = [{ from: '0x000000000000000000000000000000000000dEaD', to: CONTRACT, data: calldata }, 'latest'];
+  const used = [];
+  if (reopen && Number(p.status) !== 1) {
+    const base = BigInt(toHex(keccak(concat(u256(p.id), u256(POLICIES_SLOT)))));
+    const statusSlot = '0x' + pad(hexN(base + 1n)), reservedSlot = '0x' + pad(hexN(RESERVED_SLOT));
+    const [cur, res] = await Promise.all([rpc('eth_getStorageAt', [CONTRACT, statusSlot, 'latest']), rpc('eth_getStorageAt', [CONTRACT, reservedSlot, 'latest'])]);
+    // status is the lowest byte of the slot it shares with premium; reserved must cover the coverage _close subtracts
+    params.push({ [CONTRACT]: { stateDiff: { [statusSlot]: '0x' + pad(cur).slice(0, 62) + '01', [reservedSlot]: '0x' + pad(hexN(wU(strip(res)) + BigInt(p.coverage))) } } });
+    used.push(`status ${p.statusName} → Active`);
+  }
+  if (at) { if (params.length < 3) params.push({}); params.push({ time: '0x' + hexN(at) }); used.push(`block time ${isoOut(at)}`); }
+  try {
+    await rpc('eth_call', params);
+    return { ok: true, used };
+  } catch (e) {
+    const d = revertData(e);
+    if (d || /revert/i.test(e.message)) return { ok: false, reason: decodeRevert(d), used };
+    return { ok: false, error: e.message, used };
+  }
+}
+
+/* ------------------------------------------------------------------ signed evidence the browser can use */
+// The real AirnodeHub-signed status that bought policy #1 (keeper/fixtures/IB1314-status-proof.json), paid in tx 0x544a7241…
+const REAL_PROOFS = [{
+  flight: 'IB1314', date: '2026-10-30',
+  response: {
+    airnode: '0x83FE2E8F24E66520B1902C3507De4F471248f2Ec',
+    requestHash: '0x782dcb07ea17581332987058650693af56cf1150a2734228ac3dc8347840c54c',
+    timestamp: '1793378516',
+    data: '{"scheduled":"2026-10-30 21:25Z","status":"Expected"}',
+    signature: '0x8036e78d05e55ce43b98b2de767462779d901d15f6eb254679e5a33ac19613663972110dd117cd39f98321a9e34dc47ad75a7cee875d8bbe5d2009c17e97038c1b',
+    paymentTx: '0x544a72416958438be7181af6dc96111ea7d0e6544d63e7ac869faac28671dad2',
+  },
+}];
+const allEvidence = () => [...S.evidence, ...REAL_PROOFS.map((x) => x.response)];
+const isFinal = (r) => { try { const s = JSON.parse(r.data).status; return s === 'Arrived' || s === 'Canceled'; } catch { return false; } };
+/** Best signed response for a policy: final beats not final, arrival beats status, newer beats older. */
+function evidenceFor(p) {
+  const a = String(p.arrivalRequestHash).toLowerCase(), st = String(p.statusRequestHash).toLowerCase();
+  const score = (r) => (isFinal(r) ? 4 : 0) + (r.requestHash.toLowerCase() === a ? 2 : 0);
+  return allEvidence().filter((r) => [a, st].includes(String(r.requestHash).toLowerCase()))
+    .sort((x, y) => score(y) - score(x) || Number(y.timestamp) - Number(x.timestamp))[0];
+}
+const evidenceLabel = (r) => `Airnode-signed · ${fmtTs(r.timestamp).slice(5)}`;
+
+/* ------------------------------------------------------------------ optional keeper API (npm run api) */
+// Only on localhost by default: a page on GitHub Pages has no keeper behind it.
+const API = QS.get('api') ?? (location.port === '8787' ? '' : /^(localhost|127\.0\.0\.1|)$/.test(location.hostname) ? 'http://localhost:8787' : null);
 const j = async (p, o) => {
+  if (API == null) throw new Error('no keeper API on this page');
   const r = await fetch(API + p, o);
   const b = await r.json().catch(() => ({ error: `HTTP ${r.status}` }));
   if (!r.ok) throw new Error(b.error || `HTTP ${r.status}`);
@@ -847,97 +1106,212 @@ const j = async (p, o) => {
 };
 const post = (p, body) => j(p, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
 
-function setOnline(on, contract) {
-  S.online = on;
-  $('apidot').className = 'dot ' + (on ? 'on' : 'off');
-  $('apitxt').textContent = on ? 'Keeper online' : 'Keeper API offline';
-  $('apistat').title = on ? `Keeper API at ${API || location.origin}` : `No keeper at ${API || location.origin}. The inspector still works.`;
-  document.querySelectorAll('.needs-api').forEach((b) => (b.disabled = !on));
-  if (contract) {
-    $('contractLink').href = scan('address', contract); $('contractLink').hidden = false;
-    $('footContract').innerHTML = `<a href="${scan('address', contract)}" target="_blank" rel="noopener">${contract}</a> · Base Sepolia`;
-  }
+function setStatus() {
+  const on = S.chain === true;
+  $('apidot').className = 'dot ' + (S.chain == null ? '' : on ? 'on' : 'off');
+  $('apitxt').textContent = S.chain == null ? 'connecting…' : on ? `Live · ${NETWORK || rpcHost()}` + (S.online ? ' + keeper' : '') : 'Chain unreachable';
+  document.querySelector('.tag.testnet').textContent = `Testnet · ${NETWORK || rpcHost()}`;
+  $('apistat').title = on ? `Reading ${CONTRACT} via ${rpcHost()} (eth_call, no key)${S.online ? `; keeper API at ${API || location.origin}` : ''}`
+    : `Could not reach ${RPCS.join(' or ')}. The inspector still works offline.`;
+  document.querySelectorAll('.needs-api').forEach((b) => (b.disabled = !S.online));
+  if (!S.online && !$('buyOut').textContent) $('buyOut').innerHTML = 'Buying cover needs the keeper\'s wallet: run <code>cd keeper && npm run api</code> and open <code>localhost:8787</code>. Everything else on this page reads the chain directly.';
 }
-const offlineMsg = () => `<div class="empty">Keeper API not reachable at <code>${esc(API || location.origin)}</code>. Start it with <code>cd keeper && npm run api</code>. The security inspector above works without it.</div>`;
 
-async function refresh() {
-  let health;
-  try { health = await j('/health'); setOnline(true, health.contract); }
-  catch { setOnline(false); $('pol').innerHTML = `<tr><td colspan="10">${offlineMsg()}</td></tr>`; $('logBody').innerHTML = offlineMsg(); $('tPolicy').innerHTML = '<option value="">Keeper API offline</option>'; return; }
+/* ------------------------------------------------------------------ policies + stats */
+const settleTx = () => {
+  const m = {};
+  for (const run of S.keeper?.runs ?? []) for (const l of run.log ?? []) { const x = /^policy #(\d+) settled/.exec(l.msg); if (x && l.link) m[x[1]] = l.link; }
+  for (const l of S.apiLog) { const x = /^policy #(\d+) settled/.exec(l.msg); if (x && l.link) m[x[1]] = l.link; }
+  return m;
+};
+function renderPolicies(ps, free) {
+  S.policies = ps;
+  if (S.policy) S.policy = ps.find((p) => String(p.id) === String(S.policy.id)) || null;
+  const paid = ps.reduce((a, p) => a + (p.statusName === 'PaidFull' ? Number(p.coverage) : p.statusName === 'PaidHalf' ? Number(p.coverage) / 2 : 0), 0) / 1e6;
+  $('sPol').textContent = ps.length;
+  $('sAct').textContent = ps.filter((p) => p.statusName === 'Active').length;
+  $('sPaid').textContent = paid.toLocaleString('en', { maximumFractionDigits: 2 });
+  $('sFree').textContent = free == null ? '–' : (Number(free) / 1e6).toLocaleString('en', { maximumFractionDigits: 2 });
+  const st = settleTx();
+  const bought = IS_LIVE ? LIVE_BOUGHT_TX : {};
+  const txs = (p) => [bought[p.id] && `<a href="${scan('tx', bought[p.id])}" target="_blank" rel="noopener">bought ↗</a>`,
+    st[p.id] && /^https:/.test(st[p.id]) && `<a href="${esc(st[p.id])}" target="_blank" rel="noopener">settled ↗</a>`].filter(Boolean).join(' ') || '–';
+  $('pol').innerHTML = ps.length ? ps.slice().reverse().map((p) => `<tr>
+    <td class="m">${p.id}</td><td class="m"><b>${esc(p.flight || 'private')}</b></td><td class="m">${esc(p.date)}</td>
+    <td class="m">${Number(p.scheduledArrival) ? isoOut(Number(p.scheduledArrival)) : '–'}</td>
+    <td class="m">${Number(p.coverage) / 1e6} aUSD</td><td class="m">${Number(p.premium) / 1e6}</td>
+    <td><span class="pill ${esc(p.statusName)}">${esc(p.statusName)}</span></td>
+    <td class="m">${scanLink('address', p.holder, short(p.holder))}</td>
+    <td class="m"><span class="txl">${txs(p)}</span></td>
+    <td><button class="btn-ghost btn-sm" onclick="inspectPolicy('${p.id}')">Inspect</button></td></tr>`).join('')
+    : `<tr><td colspan="10"><div class="empty">No policies yet.</div></td></tr>`;
+  const opts = ps.map((p) => `<option value="${p.id}">#${p.id} · ${esc(p.flight)} ${esc(p.date)} · ${esc(p.statusName)}</option>`).join('');
+  const cp = $('cPolicy').value, tp = $('tPolicy').value;
+  $('cPolicy').innerHTML = '<option value="">None: use flight + date</option>' + opts; $('cPolicy').value = cp;
+  $('tPolicy').innerHTML = ps.length ? opts : '<option value="">No policies yet</option>';
+  if (tp && ps.some((p) => p.id === tp)) $('tPolicy').value = tp;
+  else { const act = ps.filter((p) => p.statusName === 'Active').pop() || ps[0]; if (act) $('tPolicy').value = act.id; }
+  labNote();
+}
+
+async function refreshChain() {
   try {
-    const ps = await j('/policies');
-    S.policies = ps;
-    if (S.policy) S.policy = ps.find((p) => String(p.id) === String(S.policy.id)) || null;
-    const paid = ps.reduce((a, p) => a + (p.statusName === 'PaidFull' ? Number(p.coverage) : p.statusName === 'PaidHalf' ? Number(p.coverage) / 2 : 0), 0) / 1e6;
-    $('sPol').textContent = ps.length;
-    $('sAct').textContent = ps.filter((p) => p.statusName === 'Active').length;
-    $('sPaid').textContent = paid.toLocaleString('en', { maximumFractionDigits: 2 });
-    $('pol').innerHTML = ps.length ? ps.slice().reverse().map((p) => `<tr>
-      <td class="m">${p.id}</td><td class="m"><b>${esc(p.flight)}</b></td><td class="m">${esc(p.date)}</td>
-      <td class="m">${Number(p.scheduledArrival) ? isoOut(Number(p.scheduledArrival)) : '–'}</td>
-      <td class="m">${Number(p.coverage) / 1e6} aUSD</td><td class="m">${Number(p.premium) / 1e6}</td>
-      <td><span class="pill ${esc(p.statusName)}">${esc(p.statusName)}</span></td>
-      <td class="m"><a href="${scan('address', p.holder)}" target="_blank" rel="noopener">${short(p.holder)}</a></td>
-      <td class="m">${/^0x0+$/.test(p.cardanoJobRef) ? '–' : short(p.cardanoJobRef)}</td>
-      <td><button class="btn-ghost btn-sm" onclick="inspectPolicy('${p.id}')">Inspect</button></td></tr>`).join('')
-      : `<tr><td colspan="10"><div class="empty">No policies yet. Cover a flight above.</div></td></tr>`;
-    const opts = ps.map((p) => `<option value="${p.id}">#${p.id} · ${esc(p.flight)} ${esc(p.date)} · ${esc(p.statusName)}</option>`).join('');
-    const cp = $('cPolicy').value, tp = $('tPolicy').value;
-    $('cPolicy').innerHTML = '<option value="">None: use flight + date</option>' + opts; $('cPolicy').value = cp;
-    $('tPolicy').innerHTML = ps.length ? opts : '<option value="">No policies yet</option>';
-    if (tp) $('tPolicy').value = tp;
-    else { const act = ps.filter((p) => p.statusName === 'Active').pop(); if (act) $('tPolicy').value = act.id; }
-  } catch (e) { $('pol').innerHTML = `<tr><td colspan="10"><div class="empty">Could not read policies: ${esc(e.message)}</div></td></tr>`; }
-  try {
-    const { log, spend } = await j('/log');
-    $('sSpend').textContent = spend.filter((s) => s.ok).length;
-    $('logCount').textContent = `${log.length} events`;
-    $('logBody').innerHTML = log.length ? log.slice().reverse().map((l) => `<div class="ln"><span class="ts">${esc(l.at.slice(11, 19))}</span><span class="lv ${esc(l.level)}">${esc(l.level)}</span><span>${esc(l.msg)} ${l.link ? `<a target="_blank" rel="noopener" href="${esc(l.link)}">basescan ↗</a>` : ''}</span></div>`).join('')
-      : '<div class="empty" style="display:block">Keeper is running. Nothing to report yet.</div>';
-  } catch (e) { $('logBody').innerHTML = `<div class="empty" style="display:block">Could not read the log: ${esc(e.message)}</div>`; }
+    const { policies, free } = await chainState();
+    S.chain = true; S.free = free;
+    renderPolicies(policies, free);
+  } catch (e) {
+    S.chain = false;
+    if (S.online) { try { renderPolicies(await j('/policies'), null); } catch {} }
+    else if (!S.policies.length) {
+      const msg = `<div class="empty">Could not reach Base Sepolia (${esc(e.message)}). The inspector above works offline.</div>`;
+      $('pol').innerHTML = `<tr><td colspan="10">${msg}</td></tr>`;
+      $('tPolicy').innerHTML = '<option value="">Chain unreachable</option>';
+    }
+  }
+  setStatus();
   render();
 }
 
-/* ------------------------------------------------------------------ tamper lab */
+/** GET /health → { contract, network: "Base Sepolia" | "Local anvil", explorer }. Without a keeper: Base Sepolia. */
+async function probeApi() {
+  if (API == null) return;
+  let h;
+  try { h = await j('/health'); S.online = true; } catch { S.online = false; return; }
+  if (QS.get('contract') || QS.get('rpc') || !h.contract) return;
+  CONTRACT = h.contract;
+  NETWORK = h.network || NETWORK;
+  EXPLORER = h.explorer === undefined ? EXPLORER : h.explorer;
+  if (/anvil|local/i.test(String(h.network))) RPCS = ['http://127.0.0.1:8545'];
+  IS_LIVE = CONTRACT.toLowerCase() === LIVE_CONTRACT.toLowerCase() && RPCS === BASE_SEPOLIA_RPCS;
+  const a = $('contractLink'), f = $('footContract');
+  if (EXPLORER) { a.href = scan('address', CONTRACT); a.hidden = false; } else a.hidden = true;
+  f.innerHTML = `${scanLink('address', CONTRACT, CONTRACT)} · ${esc(NETWORK)}`;
+}
+
+/* ------------------------------------------------------------------ keeper log: the keeper API, or what GitHub Actions published */
+async function refreshKeeper() {
+  if (API != null) {
+    try { await j('/health'); S.online = true; } catch { S.online = false; }
+    if (S.online) { try { const { log } = await j('/log'); S.apiLog = log; } catch {} }
+  }
+  try {
+    const r = await fetch(KEEPER_JSON, { cache: 'no-cache' });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    S.keeper = await r.json();
+    S.evidence = (S.keeper.evidence ?? []).filter((x) => x && x.requestHash && x.signature && typeof x.data === 'string');
+  } catch (e) { S.keeperErr = e.message; }
+  setStatus();
+  renderLog();
+  if (S.policies.length) renderPolicies(S.policies, S.free);
+  $('fetchBtn').disabled = !S.online && !S.evidence.length;
+}
+const logLine = (l) => `<div class="ln"><span class="ts">${esc(String(l.at).slice(11, 19))}</span><span class="lv ${esc(l.level)}">${esc(l.level)}</span><span>${esc(l.msg)} ${l.link && /^https:/.test(l.link) ? `<a target="_blank" rel="noopener" href="${esc(l.link)}">basescan ↗</a>` : ''}</span></div>`;
+function renderLog() {
+  const runs = S.keeper?.runs ?? [];
+  if (S.online && S.apiLog.length) {
+    $('logCount').textContent = `${S.apiLog.length} events · local`;
+    $('logSrc').textContent = `Keeper API at ${API || location.origin}.`;
+    $('logBody').innerHTML = S.apiLog.slice().reverse().map(logLine).join('');
+    return;
+  }
+  if (!runs.length) {
+    $('logCount').textContent = '–';
+    $('logSrc').textContent = 'No published run log yet.';
+    $('logBody').innerHTML = `<div class="empty" style="display:block">The keeper runs in GitHub Actions every ~15 min. Each run's full output is on the <a href="${ACTIONS_URL}" target="_blank" rel="noopener">Actions page ↗</a>.</div>`;
+    return;
+  }
+  const last = runs[runs.length - 1];
+  $('logCount').textContent = `${runs.length} runs`;
+  $('logSrc').innerHTML = `Last run ${esc(String(last.finishedAt || last.startedAt || '').slice(0, 16).replace('T', ' '))} UTC · published by the workflow`;
+  $('logBody').innerHTML = runs.slice().reverse().slice(0, 30).map((run) => `<div class="run">${esc(String(run.startedAt || '').slice(5, 16).replace('T', ' '))} UTC <span>${esc(run.event === 'schedule' ? 'scheduled' : run.event === 'workflow_dispatch' ? 'manual' : run.event || '')}</span>${run.url ? `<a href="${esc(run.url)}" target="_blank" rel="noopener">run ↗</a>` : ''}</div>`
+    + ((run.log ?? []).length ? run.log.map(logLine).join('') : '<div class="ln"><span></span><span></span><span class="ts">nothing logged</span></div>')).join('');
+}
+
+/* ------------------------------------------------------------------ tamper lab (eth_call, no key) */
 const MODES = [
   { m: 'edit', t: 'Edited data', p: 'Rewrites the arrival time and status to claim a bigger payout. Keeps the original signature.' },
-  { m: 'wrongreq', t: 'Wrong request', p: "Points a response at another flight's request hash (LH9999) to settle this policy with it." },
-  { m: 'wrongsigner', t: 'Wrong signer', p: 'Correct request and data, signed by a fresh attacker key instead of the Airnode.' },
-  { m: 'stale', t: 'Stale evidence', p: 'A genuine response older than maxAge. Needs an old response as base, otherwise skipped.' },
-  { m: 'valid', t: 'Genuine', p: 'The unmodified Airnode response. Settles the policy for real if every check passes.' },
+  { m: 'wrongreq', t: 'Wrong request', p: "Points the response at another flight's request hash (LH9999) to settle this policy with it." },
+  { m: 'wrongsigner', t: 'Wrong signer', p: 'Correct request and data, signed in your browser by a fresh attacker key instead of the Airnode.' },
+  { m: 'stale', t: 'Stale evidence', p: "A genuine Airnode response older than the policy's maxAge, at today's block time." },
+  { m: 'valid', t: 'Genuine', p: 'The unmodified Airnode response. Simulated only: shows what settle() would do with it.' },
 ];
 $('modes').innerHTML = MODES.map((x) => `<div class="mode"><span class="mn">${x.m}</span><h4>${x.t}</h4><p>${x.p}</p>
-  <button class="btn-${x.m === 'valid' ? 'primary' : 'ghost'} btn-sm needs-api" onclick="runMode('${x.m}')">${x.m === 'valid' ? 'Submit genuine' : 'Run'}</button>
+  <button class="btn-${x.m === 'valid' ? 'primary' : 'ghost'} btn-sm" onclick="runMode('${x.m}')">${x.m === 'valid' ? 'Simulate genuine' : 'Run'}</button>
   <div class="res" id="res-${x.m}"><span class="e">Not run yet.</span></div></div>`).join('');
 
+const labPolicy = () => S.policies.find((p) => p.id === $('tPolicy').value);
+/** The response every attack starts from, and whether it is a genuine Airnode signature. */
+function labBase(p) {
+  if ($('tUseInsp').checked) { const r = readResp(); if (r.signature) return { r, genuine: false, label: "the inspector's response" }; }
+  const ev = evidenceFor(p);
+  if (ev) {
+    let d = {}; try { d = JSON.parse(ev.data); } catch {}
+    return { r: ev, genuine: true, label: `a real Airnode response: ${p.flight} ${ev.requestHash.toLowerCase() === p.arrivalRequestHash.toLowerCase() ? 'arrival' : 'status'} "${d.status}", signed ${fmtTs(ev.timestamp)}` };
+  }
+  // No genuine response for this policy in the browser: a correctly shaped one signed by the public demo key.
+  const sched = Number(p.scheduledArrival);
+  const r = { airnode: AIRNODE, requestHash: p.arrivalRequestHash, timestamp: String(Math.floor(Date.now() / 1000) - 600), data: JSON.stringify({ actual: isoOut(sched + 3 * 3600), scheduled: isoOut(sched), status: 'Arrived' }) };
+  return { r: { ...r, signature: signLikeAirnode(r, DEMO_PK) }, genuine: false, label: 'a look-alike signed by the public demo key (no genuine response for this policy is published yet)' };
+}
+function labNote() {
+  const p = labPolicy();
+  if (!p) { $('labNote').innerHTML = ''; return; }
+  const b = labBase(p);
+  const closed = Number(p.status) !== 1;
+  $('labNote').innerHTML = `<span>Base: <b>${esc(b.label)}</b>.</span>`
+    + (closed ? `<span class="${$('tReopen').checked ? '' : 'warn'}">Policy #${p.id} is <b>${esc(p.statusName)}</b> on-chain, so the contract stops every call at <code>NotActive</code> before any oracle check. ${$('tReopen').checked ? 'For these simulations its status slot is overridden to Active (eth_call state override; nothing is written).' : 'Tick "Reopen" to run the oracle checks anyway.'}</span>` : '');
+}
+['tPolicy', 'tUseInsp', 'tReopen', 'tRewind'].forEach((id) => $(id).addEventListener('change', labNote));
+
+function mutate(m, base, p) {
+  const r = { ...base.r };
+  if (m === 'edit') {
+    r.data = r.data.replace(/"actual":"[^"]+"/, '"actual":"2099-01-01 00:00Z"').replace(/"status":"[^"]+"/, '"status":"Canceled"');
+    if (r.data === base.r.data) r.data = r.data.replace('"', ' "');
+  } else if (m === 'wrongreq') r.requestHash = requestHashFor('LH9999', p.date, 'arrival');
+  else if (m === 'wrongsigner') r.signature = signLikeAirnode(r, AGC.secp256k1.utils.randomPrivateKey());
+  return r;
+}
 async function runMode(m) {
-  const id = $('tPolicy').value, el = $(`res-${m}`);
-  if (!id) { el.className = 'res sk'; el.innerHTML = '<span class="h">NO POLICY</span><span class="e">Pick a target policy first.</span>'; return; }
-  if (m === 'valid' && !confirm(`Submit the genuine response to policy #${id}? If it passes, the policy settles on-chain for real.`)) return;
-  const body = { policyId: id, mode: m };
-  if ($('tUseInsp').checked) { const r = readResp(); if (r.signature) body.response = r; }
-  el.className = 'res'; el.innerHTML = '<span class="e">Simulating settle() on Base Sepolia…</span>';
+  const p = labPolicy(), el = $(`res-${m}`);
+  if (!p) { el.className = 'res sk'; el.innerHTML = '<span class="h">NO POLICY</span><span class="e">Pick a target policy first.</span>'; return; }
+  const base = labBase(p);
+  if ((m === 'stale' || m === 'valid') && !base.genuine && !$('tUseInsp').checked) {
+    el.className = 'res sk'; el.innerHTML = `<span class="h">SKIPPED</span><span class="e">Needs a genuine Airnode response for ${esc(p.flight)}; none is published for this policy yet. Try policy #1, or tick "Use the inspector's response".</span>`; return;
+  }
+  if (m === 'stale') {
+    const age = Math.floor(Date.now() / 1000) - Number(base.r.timestamp);
+    if (age <= Number(p.maxAge)) { el.className = 'res sk'; el.innerHTML = `<span class="h">SKIPPED</span><span class="e">The base is only ${dur(age)} old; it goes stale after ${dur(Number(p.maxAge))}.</span>`; return; }
+  }
+  const r = mutate(m, base, p);
+  el.className = 'res'; el.innerHTML = '<span class="e">eth_call settle() on Base Sepolia…</span>';
+  const at = m === 'valid' && $('tRewind').checked ? Number(r.timestamp) + 120 : undefined;
   try {
-    const r = await post('/tamper', body);
-    if (r.accepted) {
+    const out = await simulateSettle(p, r, { reopen: $('tReopen').checked, at });
+    const via = out.used?.length ? `<span class="e">simulated with ${esc(out.used.join(', '))}</span>` : '';
+    if (out.ok) {
+      const v = evaluate({ resp: r, flight: p.flight, date: p.date, maxAge: Number(p.maxAge), now: at ?? Math.floor(Date.now() / 1000), policy: null });
       el.className = 'res ok';
-      el.innerHTML = `<span class="h">ACCEPTED · ${esc(r.status)}</span>Payout ${Number(r.payout || 0) / 1e6} aUSD${r.delayMinutes != null ? `, ${esc(r.delayMinutes)} min late` : ''}. <a href="${esc(r.link)}" target="_blank" rel="noopener">tx ↗</a>`;
-    } else if (r.skipped) {
+      el.innerHTML = `<span class="h">ACCEPTED · eth_call</span>settle() would ${v.tier ? `pay ${v.tier}% (${(Number(p.coverage) / 1e6) * v.tier / 100} aUSD) to the holder` : 'close the policy with no payout'}.${via}`;
+    } else if (out.error) {
       el.className = 'res sk';
-      el.innerHTML = `<span class="h">SKIPPED</span><span class="e">${esc(r.skipped)}</span>`;
+      el.innerHTML = `<span class="h">RPC ERROR</span><span class="e">${esc(out.error)}${out.used?.length ? ' (this node may not support eth_call overrides; untick them and retry)' : ''}</span>`;
     } else {
-      const e = explain(r.reason);
+      const e = explain(out.reason);
       el.className = 'res no';
-      el.innerHTML = `<span class="h">REVERTED</span><code>${esc(r.reason)}</code>${e ? `<span class="e">${esc(e)}</span>` : ''}`;
+      el.innerHTML = `<span class="h">REVERTED</span><code>${esc(out.reason)}</code>${e ? `<span class="e">${esc(e)}</span>` : ''}${via}`;
     }
   } catch (e) {
     el.className = 'res no';
     el.innerHTML = `<span class="h">ERROR</span><span class="e">${esc(e.message)}</span>`;
   }
 }
-async function runAttacks() { for (const m of ['edit', 'wrongreq', 'wrongsigner', 'stale']) await runMode(m); refresh(); }
+async function runAttacks() {
+  const b = $('runAll'); b.disabled = true;
+  try { for (const m of ['edit', 'wrongreq', 'wrongsigner', 'stale']) await runMode(m); } finally { b.disabled = false; }
+}
 
-/* ------------------------------------------------------------------ get covered */
+/* ------------------------------------------------------------------ get covered (keeper API only) */
 $('date').value = new Date().toISOString().slice(0, 10);
 const quote = () => ($('prem').value = `${((+$('cov').value || 0) * PREMIUM_BPS / 10000).toFixed(2)} aUSD`);
 $('cov').addEventListener('input', quote); quote();
@@ -946,8 +1320,8 @@ async function buy() {
   out.textContent = 'Keeper is buying the signed schedule via x402 and opening the policy…';
   try {
     const p = await post('/cover', { flight: $('flight').value, date: $('date').value, holder: $('holder').value.trim(), coverage: +$('cov').value });
-    out.innerHTML = `Policy <b>#${esc(p.policyId)}</b> is active for ${esc(p.flight)} · scheduled ${esc(p.scheduled)} · premium ${Number(p.premium) / 1e6} aUSD · <a target="_blank" rel="noopener" href="${scan('tx', p.txHash)}">basescan ↗</a>`;
-    refresh();
+    out.innerHTML = `Policy <b>#${esc(p.policyId)}</b> is active for ${esc(p.flight)} · scheduled ${esc(p.scheduled)} · premium ${Number(p.premium) / 1e6} aUSD · ${scanLink('tx', p.txHash, 'basescan ↗')}`;
+    refreshChain();
   } catch (e) { out.className = 'out err'; out.textContent = e.message; }
 }
 async function check() {
@@ -961,12 +1335,104 @@ async function check() {
   } catch (e) { out.className = 'out err'; out.textContent = e.message; }
 }
 
+/* ------------------------------------------------------------------ Cardano: GET /verdict → 402 → tADA → verdict + proof */
+// cardano/src/server.ts: x402 "exact" scheme on cardano:preprod, 2 tADA per verdict. web/data/cardano-run.json holds a
+// recorded paid run ({ challenge, response }); without one the page shows the server's offer and the evidence it sells.
+const CARDANO = { network: 'cardano:preprod', scheme: 'exact', amount: '2000000', asset: 'lovelace', maxTimeoutSeconds: 600, flight: 'IB1314', date: '2026-10-30' };
+const CARDANO_SERVER = QS.get('cardano'); // e.g. http://localhost:4021 (needs CORS on that server)
+const ada = (lovelace) => `${(Number(lovelace) / 1e6).toLocaleString('en', { maximumFractionDigits: 6 })} tADA`;
+const b64json = (s) => { try { return JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(s), (c) => c.charCodeAt(0)))); } catch { return null; } };
+
+function cardanoAnswer() {
+  const run = S.cardano.pasted ? { response: S.cardano.pasted, source: 'pasted' } : S.cardano.run ? { ...S.cardano.run, source: 'recorded' } : null;
+  const res = run?.response;
+  const ev = res?.evidence?.signature ? res.evidence : REAL_PROOFS[0].response;
+  return { run, res, ev, flight: res?.flight || CARDANO.flight, date: res?.date || CARDANO.date };
+}
+function renderCardano() {
+  const { run, res, ev, flight, date } = cardanoAnswer();
+  const ch = S.cardano.live || run?.challenge;
+  const acc = (Array.isArray(ch?.accepts) ? ch.accepts : ch?.accepts ? [ch.accepts] : []).find((a) => String(a.network).startsWith('cardano')) || null;
+  const offer = acc ? { scheme: acc.scheme, network: acc.network, amount: acc.amount ?? acc.maxAmountRequired, asset: acc.asset, payTo: acc.payTo, maxTimeoutSeconds: acc.maxTimeoutSeconds } : CARDANO;
+  const url = `GET /verdict?flight=${esc(flight)}&date=${esc(date)}`;
+  $('cdSrc').innerHTML = run ? (run.source === 'pasted' ? 'Source: pasted answer' : `Source: recorded run${run.recordedAt ? ' · ' + esc(String(run.recordedAt).slice(0, 16).replace('T', ' ')) + ' UTC' : ''}`)
+    : 'Source: <a href="https://github.com/womp-maindev/aeroguard/tree/main/cardano" target="_blank" rel="noopener">cardano/</a> server config';
+
+  $('cd1').innerHTML = `<div class="sn"><b>01 · ASK</b><span class="badge ${acc ? 'live' : 'none'}">${S.cardano.live ? 'live' : acc ? 'recorded' : 'server config'}</span></div>
+    <h4>402 Payment Required</h4>
+    <div class="http">${url}<br><span class="st c402">HTTP/1.1 402 Payment Required</span><br>PAYMENT-REQUIRED: x402 offer ↓</div>
+    <dl class="kv"><dt>price</dt><dd class="big">${ada(offer.amount)}</dd>
+      <dt>network</dt><dd>${esc(offer.network)}</dd><dt>scheme</dt><dd>${esc(offer.scheme)} · ${esc(offer.asset)}</dd>
+      <dt>payTo</dt><dd>${offer.payTo ? esc(short(offer.payTo, 14)) : 'seller wallet of the running server'}</dd>
+      <dt>valid</dt><dd>${esc(offer.maxTimeoutSeconds)} s</dd></dl>
+    <p class="grow">No account, no API key. Flights without signed evidence get a free 404: nobody pays for an answer that can't be proven.</p>
+    ${CARDANO_SERVER ? `<div class="actions"><button class="btn-ghost btn-sm" onclick="askCardano()">Ask ${esc(new URL(CARDANO_SERVER).host)} (unpaid)</button></div>` : ''}`;
+
+  const tx = res?.paidWith?.txHash;
+  $('cd2').innerHTML = `<div class="sn"><b>02 · PAY</b><span class="badge ${tx ? 'live' : 'none'}">${tx ? 'paid' : 'not recorded yet'}</span></div>
+    <h4>Agent pays in tADA</h4>
+    <p>The agent's wallet signs a Cardano transaction (spend cap: tADA only, ≤ 5 tADA) and retries with <code>PAYMENT-SIGNATURE</code>. It never broadcasts: the facilitator checks amount, recipient and validity window, then submits it.</p>
+    ${tx ? `<dl class="kv"><dt>tx</dt><dd><a href="${esc(res.paidWith.explorer || 'https://preprod.cardanoscan.io/transaction/' + tx)}" target="_blank" rel="noopener">${esc(short(tx, 12))} ↗</a></dd><dt>network</dt><dd>${esc(res.paidWith.network || CARDANO.network)}</dd></dl>`
+      : `<div class="cmd">cd cardano && npm run server
+npm run buy -- --flight ${esc(flight)} --date ${esc(date)}</div><p class="grow">No paid preprod request is recorded on this page yet. Paste the answer <code>npm run buy</code> prints below to replay it here.</p>`}`;
+
+  let d = {}; try { d = JSON.parse(ev.data); } catch {}
+  const v = res?.verdict || {};
+  const rec = recoverSigner(ev), okSig = rec.signer && rec.signer.toLowerCase() === AIRNODE.toLowerCase();
+  const delay = v.delayMinutes ?? (d.actual && d.scheduled ? Math.max(0, Math.round((isoParse(d.actual) - isoParse(d.scheduled)) / 60)) : undefined);
+  const final = v.final ?? (d.status === 'Arrived' || d.status === 'Canceled');
+  $('cd3').innerHTML = `<div class="sn"><b>03 · VERDICT</b><span class="badge ${res ? 'live' : 'none'}">${res ? 'HTTP 200' : 'evidence it sells'}</span></div>
+    <h4>Verdict + Airnode signature</h4>
+    <div class="http"><span class="st c200">HTTP/1.1 200 OK</span>${tx ? '<br>PAYMENT-RESPONSE: settled' : ''}</div>
+    <dl class="kv"><dt>flight</dt><dd>${esc(flight)} · ${esc(date)}</dd>
+      <dt>status</dt><dd>${esc(v.status ?? d.status ?? '–')}${final ? ' · final' : ' · not final yet'}</dd>
+      <dt>scheduled</dt><dd>${esc(v.scheduled ?? d.scheduled ?? '–')}</dd>
+      ${delay !== undefined ? `<dt>delay</dt><dd>${esc(delay)} min</dd>` : ''}
+      <dt>signer</dt><dd>${okSig ? '✅ AeroDataBox Airnode' : `❌ ${esc(rec.signer || rec.error)}`}</dd></dl>
+    <p class="grow">The five evidence fields go unchanged into <code>FlightDelayCover</code> on Base Sepolia. One edited byte and the signer check fails.</p>
+    <div class="actions"><button class="btn-primary btn-sm" onclick="cardanoToInspector()">Open in Inspector →</button></div>`;
+}
+function cardanoToInspector() {
+  const { ev, flight, date, run } = cardanoAnswer();
+  selectPolicy(String(S.policies.find((p) => p.flight === flight && p.date === date)?.id ?? ''));
+  setResponse(ev, 'live', run ? `Cardano x402 · ${run.source}` : 'Cardano x402 · evidence', { flight, date });
+  $('inspector').scrollIntoView();
+}
+async function askCardano() {
+  const { flight, date } = cardanoAnswer();
+  try {
+    const r = await fetch(`${CARDANO_SERVER}/verdict?flight=${encodeURIComponent(flight)}&date=${encodeURIComponent(date)}`);
+    const body = await r.json().catch(() => null);
+    const h = r.headers.get('PAYMENT-REQUIRED');
+    if (r.status !== 402) throw new Error(`expected 402, got HTTP ${r.status}${body?.error ? ': ' + body.error : ''}`);
+    S.cardano.live = (h && b64json(h)) || body;
+  } catch (e) { alert(`Could not ask ${CARDANO_SERVER}: ${e.message}. The server needs CORS (Access-Control-Allow-Origin, Access-Control-Expose-Headers: PAYMENT-REQUIRED).`); }
+  renderCardano();
+}
+$('cdPaste').addEventListener('input', () => {
+  const t = $('cdPaste').value.trim();
+  if (!t) { S.cardano.pasted = null; $('cdPasteMsg').textContent = ''; renderCardano(); return; }
+  try {
+    const x = JSON.parse(t.slice(t.indexOf('{'), t.lastIndexOf('}') + 1));
+    if (!x.evidence?.signature) throw new Error('no "evidence" with a signature in it');
+    S.cardano.pasted = x; $('cdPasteMsg').textContent = 'Loaded. Steps 02 and 03 now show your answer.';
+  } catch (e) { $('cdPasteMsg').textContent = `Not a paid /verdict answer yet: ${e.message}`; }
+  renderCardano();
+});
+async function loadCardano() {
+  try { const r = await fetch('data/cardano-run.json', { cache: 'no-cache' }); if (r.ok) { const x = await r.json(); if (x?.response?.evidence) S.cardano.run = x; } } catch {}
+  renderCardano();
+}
+
 /* ------------------------------------------------------------------ boot */
 window.addEventListener('DOMContentLoaded', () => {
-  setOnline(false); $('apitxt').textContent = 'checking keeper…'; $('apidot').className = 'dot';
+  setStatus();
   render();
-  refresh();
-  setInterval(refresh, 10000);
+  renderCardano();
+  probeApi().finally(() => { refreshChain(); refreshKeeper(); });
+  loadCardano();
+  setInterval(refreshChain, 20000);
+  setInterval(refreshKeeper, 60000);
   setInterval(() => { if (readResp().signature) render(); }, 5000); // ages tick
 });
 </script>
