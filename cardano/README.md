@@ -11,7 +11,7 @@ cd cardano && npm i && npm test     # 53 tests: real signed Cardano txs, x402 ro
 cd onchain && aiken check           # 44 tests, incl. real AeroDataBox Airnode signatures verified with Plutus builtins
 ```
 
-Paid preprod transactions: [EVIDENCE.md](EVIDENCE.md). Live run: `npm run qualify` (needs a Blockfrost preprod key and a
+**Paid on preprod:** 2 tADA over x402 for the final IB1314 verdict, tx [`e2ef922b…`](https://preprod.cardanoscan.io/transaction/e2ef922be71ba61da9431f1a5f56f4c56f5d61348c4945194cf390dd0acd7864); all paid requests in [EVIDENCE.md](EVIDENCE.md). Live run: `npm run qualify` (needs a Blockfrost preprod key and a
 faucet-funded wallet, see below).
 
 `GET /verdict?flight=IB1314&date=2026-10-30` answers **402** with a price on `cardano:preprod`: **1 tADA** while the

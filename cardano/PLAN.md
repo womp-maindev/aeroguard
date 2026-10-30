@@ -18,8 +18,8 @@
 |---|---|---|---|
 | 0.1 | Платный `GET /verdict` на `@x402/express` + `@x402/cardano` (exact, tADA) | `npm test` зелёный | ✅ |
 | 0.2 | Покупатель с spend cap, `wallets`, `balance` | адреса выводятся офлайн | ✅ |
-| 0.3 | **Первый реальный платёж:** `npm run balance` → `server` → `buy` (локально у тебя) | tx hash в `EVIDENCE.md`, открывается на preprod.cardanoscan.io | 🔜 |
-| 0.4 | Коммит `EVIDENCE.md` + ссылка в README и Devfolio | ссылка кликабельна | 🔜 |
+| 0.3 | **Первый реальный платёж:** `npm run qualify` | tx `e2ef922b…` в `EVIDENCE.md` | ✅ |
+| 0.4 | Коммит `EVIDENCE.md` + ссылка в README и Devfolio | ссылка кликабельна | ✅ |
 | 0.5 | Второй платёж другим рейсом/методом (повтор = не случайность) | ≥2 строки в `EVIDENCE.md` | ⬜ |
 
 **Если 0.3 падает**, проверить по порядку:

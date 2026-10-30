@@ -63,7 +63,7 @@ builtins, settle the Aiken cover the same way, and paying the holder with them i
 policies (imported from the keeper's published `keeper-data`, each signature re-checked); a live answer costs 1 tADA,
 a final one 2 tADA.
 
-Evidence: tx hash(es) in [`cardano/EVIDENCE.md`](../cardano/EVIDENCE.md), code in [`cardano/`](../cardano/).
+**Paid on Cardano preprod:** an agent paid 2 tADA over x402 for the final IB1314 verdict, tx [`e2ef922b…`](https://preprod.cardanoscan.io/transaction/e2ef922be71ba61da9431f1a5f56f4c56f5d61348c4945194cf390dd0acd7864) (all paid requests: [`cardano/EVIDENCE.md`](../cardano/EVIDENCE.md)). Code in [`cardano/`](../cardano/).
 
 ## Business case
 - Pay per answer, no account: a claims agent pays ~0.2–1 ADA per verdict on mainnet, only for flights it needs.
