@@ -127,7 +127,7 @@ export interface Verdict {
   final: boolean;
 }
 
-/** Same rule as the contract, off-chain, so the agent only spends gas on evidence that will pay. */
+/** Same rule as the contract, off-chain, so the keeper only spends gas on evidence that will pay. */
 export const readVerdict = (r: SignedResponse): Verdict => {
   const d = JSON.parse(r.data) as { status: string; scheduled: string; actual?: string };
   const toMs = (s: string) => Date.parse(s.replace(' ', 'T'));

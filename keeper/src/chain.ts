@@ -69,7 +69,7 @@ export const rpc = () => process.env.BASE_SEPOLIA_RPC ?? 'https://sepolia.base.o
 export const coverAddress = () => env('FLIGHT_COVER_ADDRESS') as Hex;
 export const publicClient = () => createPublicClient({ chain: baseSepolia, transport: http(rpc()) });
 export const walletClient = () =>
-  createWalletClient({ chain: baseSepolia, transport: http(rpc()), account: privateKeyToAccount(env('AGENT_PK') as Hex) });
+  createWalletClient({ chain: baseSepolia, transport: http(rpc()), account: privateKeyToAccount((process.env.KEEPER_PK || env('AGENT_PK')) as Hex) });
 
 export const explorerTx = (h: string) => `https://sepolia.basescan.org/tx/${h}`;
 
@@ -80,7 +80,7 @@ export const revertReason = (e: unknown): string => {
   return e instanceof BaseError ? e.shortMessage : String(e);
 };
 
-export const jobRef = (cardanoJobId: string): Hex => (cardanoJobId ? keccak256(toHex(cardanoJobId)) : `0x${'0'.repeat(64)}`);
+export const orderRef = (orderId: string): Hex => (orderId ? keccak256(toHex(orderId)) : `0x${'0'.repeat(64)}`);
 
 export const ensureAllowance = async (amount: bigint) => {
   const w = walletClient();
@@ -98,7 +98,7 @@ export const buyPolicy = async (a: {
   date: string;
   coverage: bigint;
   holder: Hex;
-  cardanoJobId?: string;
+  orderId?: string;
   proof: SignedResponse;
 }) => {
   const p = publicClient();
@@ -108,7 +108,7 @@ export const buyPolicy = async (a: {
     address: coverAddress(),
     abi: coverAbi,
     functionName: 'buyPolicy',
-    args: [a.flight, a.date, a.coverage, a.holder, jobRef(a.cardanoJobId ?? ''), BigInt(a.proof.timestamp), toHex(a.proof.data), a.proof.signature],
+    args: [a.flight, a.date, a.coverage, a.holder, orderRef(a.orderId ?? ''), BigInt(a.proof.timestamp), toHex(a.proof.data), a.proof.signature],
   });
   const rc = await p.waitForTransactionReceipt({ hash });
   const [ev] = parseEventLogs({ abi: coverAbi, logs: rc.logs, eventName: 'PolicyBought' });

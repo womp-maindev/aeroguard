@@ -1,16 +1,13 @@
-# AeroGuard ✈️ — your flight is late, you're already paid
+# AeroGuard — your flight is late, you're already paid
 
-**An autonomous agent that sells flight‑delay cover and pays it out with no claim form.**
-It is hired and paid on **Cardano** (Masumi / Sokosumi), buys **AeroDataBox data signed by its AirnodeHub Airnode** over **x402**, and a contract on **Base Sepolia** releases money only when that signed evidence passes its checks.
-
-> TUM Blockchain & AI Hackathon 2026 · Tracks: **API3 (AirnodeHub)** · **Cardano (Agentic Commerce)**
+Parametric flight-delay cover that settles itself. A smart contract pays out **only** on flight data signed by the **AeroDataBox Airnode on API3 AirnodeHub**, and an autonomous keeper buys that data over **x402** and settles policies on-chain without anyone filing a claim.
 
 | | |
 |---|---|
-| Contract (Base Sepolia) | [`0x257054204c4Cd43846C4553eBe6D709841980a80`](https://sepolia.basescan.org/address/0x257054204c4Cd43846C4553eBe6D709841980a80) (source verified on Sourcify) |
-| AeroDataBox Airnode signer | `0x83FE2E8F24E66520B1902C3507De4F471248f2Ec` |
+| Contract (Base Sepolia) | [`0x257054204c4Cd43846C4553eBe6D709841980a80`](https://sepolia.basescan.org/address/0x257054204c4Cd43846C4553eBe6D709841980a80) · source verified on Sourcify |
+| Trusted signer | AeroDataBox Airnode `0x83FE2E8F24E66520B1902C3507De4F471248f2Ec` |
+| Data operation | `flightStatusOnDate` (0.05 aUSD per call, x402) |
 | Payment token | aUSD `0xbeA34973e5f67F18F656A2C6070C64326C791808` |
-| Masumi agent / Sokosumi Coworker | see [`docs/cardano-evidence.md`](docs/cardano-evidence.md) |
 
 ## Live evidence (Base Sepolia, real AeroDataBox data)
 | Step | Tx |
@@ -25,26 +22,22 @@ Tamper test against the deployed contract with a REAL signed Airnode response (p
 The keeper runs on its own as a GitHub Actions cron (`.github/workflows/keeper.yml`, every 15 min) and settles these policies after landing.
 
 ## The problem
-Flight delays are common, and in the EU passengers are often owed compensation, but claiming it takes forms, weeks and often a claims agency fee. Many people never claim. Parametric cover fixes that: if the data says the flight landed ≥2 h late, you are paid. The hard part is **trusting the data**, and **who presses the button**.
+Flight delays are common and compensation claims are slow: forms, evidence, weeks of waiting, often a claims-agency fee. Parametric cover removes the claim: if trustworthy data says the flight landed late, money moves. The hard parts are **trusting the data** and **who presses the button**. AeroGuard answers both: AirnodeHub signatures checked by the contract, and a keeper that anyone can replace because it has no special power.
 
 ## How it works
 ```
- Traveller / travel-booking agent
-   │ hires AeroGuard on Sokosumi, pays per job on Cardano preprod (Masumi escrow)      ← Cardano
-   ▼
- AeroGuard agent (agent/)
-   │ 1  buys the flight's schedule from AirnodeHub via x402 (0.05 aUSD)
-   │ 2  opens a policy: FlightDelayCover.buyPolicy(flight, date, …)
-   │ 3  keeper loop: after scheduled arrival, buys SIGNED arrival data (x402)        ← API3 +10
-   │ 4  submits it: FlightDelayCover.settle(id, requestHash, timestamp, data, sig)
-   ▼
- FlightDelayCover.sol (Base Sepolia)                                                  ← API3
-   ✓ request  = one of the two hashes DERIVED ON-CHAIN from this policy's flight + date
-   ✓ signer   = the AeroDataBox Airnode (AirnodeV2Attestation.verify)
-   ✓ fresh    = signed ≤ maxAge ago, not from the future
-   ✓ observed = signed after the landing it reports; status must be final (Arrived / Canceled)
-   ✓ once     = signature never used before, policy still Active
-   → ≥180 min late or cancelled: 100% · ≥120 min: 50% · else closed, premium stays in the pool
+Traveller / travel app
+  │ 1  buy: attach a fresh signed AeroDataBox STATUS response (pre-departure)        → buyPolicy
+  ▼
+FlightDelayCover.sol (Base Sepolia)
+  ✓ purchase: signer · request (derived on-chain from flight+date) · ≤15 min old · status pre-departure
+              · scheduled arrival read FROM the signature · ≥ minLeadTime away
+  ✓ settle:   signer · request · fresh (≤ maxAge) · not from the future · status final
+              · observed after the landing it reports · same signed schedule as at purchase · policy still Active
+  → ≥180 min late or cancelled: 100% · ≥120 min: 50% · otherwise closed, premium stays in the pool
+  ▲
+  │ 2  keeper (keeper/): after scheduled arrival buys a SIGNED arrival response via x402 and calls settle
+  │    anyone can call settle — money always goes to the stored holder
 ```
 
 ### Why the signed data matters (API3)
@@ -65,19 +58,13 @@ Buying cover also needs AirnodeHub-signed evidence. `buyPolicy` takes a fresh (�
 ### Private policies (commit–reveal)
 `buyPrivatePolicy(commitment, …)` stores only `keccak256(abi.encode(flight, date, salt))`. Observers can't tell which flight is insured until `settlePrivate` reveals it, then the same verification runs. Residual risk (documented): without a purchase proof a private buyer is bounded only by lead time and a ±1 h schedule window; production fix = ZK proof of purchase-time status.
 
-### Autonomous agent (API3 bonus)
-`pnpm --dir agent keeper` runs unattended. Every minute it scans active policies on‑chain, decides **when** data is worth buying (≥30 min after scheduled arrival; one early look 3 h before for cancellations; at most 6 paid lookups per policy, because the shared AeroDataBox quota is ~2,000 lookups for all teams), pays via x402, simulates `settle`, and only then sends the transaction. It survives restarts (state = chain + cache).
-
-### Cardano (Masumi)
-`masumi/` is the official TUM quickstart Coworker, rewired so a Task runs the AeroGuard engine:
-- `"Cover LH1234 on 2026-10-31 for 2 aUSD, pay 0x…"` → policy opened, reply with tx link; follow‑up reply when the keeper settles
-- `"Was KL1395 delayed on 2026-10-30?"` → **verdict** mode: a contract‑verifiable signed flight outcome any other agent can reuse (agent‑to‑agent oracle).
-Payment per job on Cardano preprod via Masumi escrow: the buyer is refunded if the verdict is not delivered. Evidence (Task IDs, tx hashes, seller receipt): [`docs/cardano-evidence.md`](docs/cardano-evidence.md).
+### Autonomous keeper (API3 bonus)
+`npm run keeper` (or the GitHub Actions cron in `.github/workflows/keeper.yml`, every 15 min) runs unattended. It reads active policies from chain, decides **when** data is worth buying (≥30 min after scheduled arrival, one early look 3 h before for cancellations, at most 6 paid lookups per policy because the AeroDataBox quota is shared), pays through x402, simulates `settle`, and only then sends the transaction. One signed outcome settles every policy on the same flight. State = chain + cache, so it survives restarts.
 
 ## Tamper test for judges
 ```bash
-cp .env.example .env            # set AGENT_PK (Base Sepolia ETH) and FLIGHT_COVER_ADDRESS
-cd agent && npm i
+cp .env.example .env            # set KEEPER_PK (Base Sepolia ETH) and FLIGHT_COVER_ADDRESS
+cd keeper && npm i
 npm run tamper -- --policy 1                          # edit · stale · wrongreq · wrongsigner · valid
 npm run tamper -- --policy 1 --response my.json       # YOUR OWN signed response
 npm run tamper -- --policy 1 --mode edit --response my.json
@@ -95,34 +82,33 @@ Each forgery is simulated against the deployed contract and prints the revert re
 Also rejected: buying after departure (`NotBuyable`), buying too close to arrival (`TooCloseToArrival`), schedule switched after purchase (`ScheduleMismatch`), settling twice (`NotActive`), future timestamps (`FromTheFuture`), "Arrived" signed before the landing it reports (`ObservedTooEarly`), non‑final status (`NotFinal`), selling cover the pool can't back (`Insolvent`).
 
 ## Run it
-Requires Node ≥ 22.18, [Foundry](https://getfoundry.sh).
+Node ≥ 22.18 and [Foundry](https://getfoundry.sh).
 ```bash
 git clone --recurse-submodules https://github.com/womp-maindev/aeroguard && cd aeroguard
-cp .env.example .env
-# contracts
-cd contracts && forge test                       # 49 tests: tamper suite, purchase proof, private policies, fuzzed tiers
+cp .env.example .env                    # set KEEPER_PK (Base Sepolia ETH + aUSD)
+
+cd contracts && forge test              # 49 tests + real-capture fixture
 forge script script/Deploy.s.sol --rpc-url $BASE_SEPOLIA_RPC --broadcast --private-key $DEPLOYER_PK
-# agent + dashboard (http://localhost:8787)
-cd ../agent && npm i && npm run api              # API + keeper + dashboard
-npm run cli -- buy --flight LH1234 --date 2026-10-31 --holder 0x… --coverage 2
+
+cd ../keeper && npm i
+npm run api                             # dashboard + API + keeper on http://localhost:8787
+npm run cli -- buy --flight LH1816 --date 2026-10-30 --holder 0x… --coverage 0.5
 npm run cli -- policies
-# Cardano coworker
-cd ../masumi && npm ci && npm start              # model agent;  in 2nd terminal: npm run worker
+npm run cli -- tick                     # one keeper pass
 ```
 
-## Local end-to-end rehearsal (no testnet funds needed)
+### Rehearsal without testnet funds
 ```bash
-anvil --chain-id 84532 &          # then:
-cd agent && npm run e2e:local      # deploys, buys 5 policies with signed proofs, runs 4 tamper attacks + valid, keeper settles all
+anvil --chain-id 84532 &
+cd keeper && npm run rehearse   # deploy locally, buy 5 policies with signed proofs, 4 attacks + valid, keeper settles all
 ```
-Fixture mode signs with a local test key and is labelled everywhere; on the real deployment such responses are rejected with `NotSignedByAirnode`.
+Rehearsal responses are signed with a local test key and labelled; the real deployment rejects them with `NotSignedByAirnode`.
 
 ## Repo
 ```
-contracts/  FlightDelayCover.sol + AirnodeHub libraries (from api3dao/airnodehub-hackathon-starter), Foundry tests
-agent/      x402 AirnodeHub client, AeroDataBox requests, policy/settle, autonomous keeper, tamper CLI, HTTP API
-masumi/     Sokosumi Coworker (Masumi TUM quickstart) running AeroGuard jobs, paid on Cardano preprod
-web/        dashboard: flow, policies, live keeper log, tamper lab
+contracts/  FlightDelayCover.sol + AirnodeHub libraries (api3dao/airnodehub-hackathon-starter), Foundry tests, threat model
+keeper/     x402 AirnodeHub client, AeroDataBox requests, buy/settle, autonomous keeper, tamper CLI, HTTP API
+web/        dashboard: in-browser Security Inspector, tamper lab, policies, keeper log (single file, works offline)
 ```
 
 ## Security notes
@@ -131,4 +117,4 @@ web/        dashboard: flow, policies, live keeper log, tamper lab
 - Hackathon simplifications: owner key sets premium/limits; premium is a flat 8 % (real pricing would use route/airline delay statistics, which AeroDataBox's priced tier offers).
 
 ## What's next
-LP vault with yield from premiums · priced risk per route · 2‑source agreement (AeroDataBox + OpenSky) · weather / rail delay products on the same contract shape · listing AeroGuard verdicts as a paid x402 endpoint on Cardano for any agent.
+LP vault earning premiums · risk-priced premiums per route · 2-source agreement (AeroDataBox + OpenSky) · ZK purchase proofs for private policies · the same contract shape for weather and rail delays.

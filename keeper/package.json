@@ -1,5 +1,5 @@
 {
-  "name": "@aeroguard/agent",
+  "name": "@aeroguard/keeper",
   "private": true,
   "type": "module",
   "engines": { "node": ">=22.18" },
@@ -8,7 +8,7 @@
     "cli": "node --env-file-if-exists=../.env src/cli.ts",
     "keeper": "node --env-file-if-exists=../.env src/cli.ts keeper",
     "tamper": "node --env-file-if-exists=../.env src/cli.ts tamper",
-    "e2e:local": "node src/e2e-local.ts",
+    "rehearse": "node src/rehearse.ts",
     "api": "node --env-file-if-exists=../.env src/api.ts"
   },
   "dependencies": {

@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { type Hex, keccak256, toHex } from 'viem';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import type { SignedResponse } from './airnode-v2.ts';
-import { cover, describe, keeperTick, resolveFlight, runKeeper, verdict } from './agent.ts';
+import { cover, describe, keeperTick, resolveFlight, runKeeper, verdict } from './keeper.ts';
 import { allPolicies, explorerTx, getPolicy, revertReason, settle, STATUS } from './chain.ts';
 import { requestHashFor } from './flight.ts';
 
@@ -47,7 +47,7 @@ export const tamper = async (id: bigint, mode: string, base?: SignedResponse) =>
       }
       const age = Math.floor(Date.now() / 1000) - Number(r.timestamp);
       if (age <= Number(p.maxAge))
-        return { accepted: false, skipped: `response is only ${age}s old; pass --response with one older than ${p.maxAge}s (e.g. agent/fixtures/*.json)` };
+        return { accepted: false, skipped: `response is only ${age}s old; pass --response with one older than ${p.maxAge}s (e.g. keeper/fixtures/*.json)` };
       break;
     }
     case 'wrongreq': // genuine-looking response for another flight, signed by a random key cannot pass either
@@ -71,7 +71,7 @@ const main = async () => {
   switch (cmd) {
     case 'wallet': {
       const pk = generatePrivateKey();
-      console.log(`AGENT_PK=${pk}\n# address: ${privateKeyToAccount(pk).address}`);
+      console.log(`KEEPER_PK=${pk}\n# address: ${privateKeyToAccount(pk).address}`);
       return;
     }
     case 'hash':
@@ -93,7 +93,7 @@ const main = async () => {
           date: need('date'),
           holder: need('holder') as Hex,
           coverage: BigInt(Math.round(Number(flag('coverage') ?? '2') * 1e6)),
-          cardanoJobId: flag('job'),
+          orderId: flag('order'),
         }),
       );
       return;

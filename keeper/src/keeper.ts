@@ -1,7 +1,7 @@
-// AeroGuard agent core: resolve → quote → buy → (keeper) fetch signed evidence → settle.
+// AeroGuard core: resolve → quote → buy → watch → fetch signed evidence → settle.
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import type { Hex } from 'viem';
-import { allPolicies, buyPolicy, explorerTx, revertReason, settle } from './chain.ts';
+import { allPolicies, buyPolicy, coverAddress, explorerTx, revertReason, settle } from './chain.ts';
 import { fetchSignedFlight, normalizeFlight, readVerdict, type Verdict } from './flight.ts';
 import { createPayingFetch } from './x402.ts';
 
@@ -20,8 +20,8 @@ export const say = (level: LogLine['level'], msg: string, link?: string) => {
 };
 
 const payer = () => {
-  const k = process.env.X402_PAYER_PK || process.env.AGENT_PK;
-  if (!k) throw new Error('Set X402_PAYER_PK (or AGENT_PK) in .env — it needs aUSD on Base Sepolia');
+  const k = process.env.X402_PAYER_PK || process.env.KEEPER_PK || process.env.AGENT_PK;
+  if (!k) throw new Error('Set KEEPER_PK in .env — it needs aUSD on Base Sepolia');
   return createPayingFetch(k as Hex);
 };
 
@@ -49,7 +49,7 @@ export const verdict = async (flight: string, date: string, maxCacheAgeSec = 10 
   return { kind: 'status' as const, evidence: st, verdict: readVerdict(st) };
 };
 
-export const cover = async (a: { flight: string; date: string; holder: Hex; coverage?: bigint; cardanoJobId?: string }) => {
+export const cover = async (a: { flight: string; date: string; holder: Hex; coverage?: bigint; orderId?: string }) => {
   const r = await resolveFlight(a.flight, a.date);
   if (!['Expected', 'Unknown', 'CheckIn', 'Boarding'].includes(r.status))
     throw new Error(`${r.flight} is ${r.status}; cover can only be bought before departure (the contract checks the signed status)`);
@@ -77,7 +77,7 @@ export const keeperTick = async () => {
   const now = Math.floor(Date.now() / 1000);
   for (const p of await allPolicies()) {
     if (p.status !== 1) continue; // Active only
-    const key = p.id.toString();
+    const key = `${coverAddress()}:${p.id}`;
     const s = (state[key] ??= { tries: 0, next: Number(p.scheduledArrival) + FIRST_CHECK });
     // cancellations can be known early: one cheap look 3h before arrival
     if (s.tries === 0 && now < s.next && now > Number(p.scheduledArrival) - 3 * 3600) s.next = now;
@@ -85,17 +85,17 @@ export const keeperTick = async () => {
     s.tries++;
     s.next = now + RETRY;
     try {
-      say('info', `policy #${key}: checking ${p.flight} ${p.date} (try ${s.tries}/${MAX_TRIES})`);
+      say('info', `policy #${p.id}: checking ${p.flight} ${p.date} (try ${s.tries}/${MAX_TRIES})`);
       const v = await verdict(p.flight, p.date, 600); // one paid lookup serves every policy on that flight
       s.last = describe(v.verdict);
       if (!v.verdict.final) {
-        say('info', `policy #${key}: ${s.last} — not final, next look in ${RETRY / 60} min`);
+        say('info', `policy #${p.id}: ${s.last} — not final, next look in ${RETRY / 60} min`);
         continue;
       }
       const res = await settle(p.id, v.evidence);
-      say('chain', `policy #${key} settled ${res.status}: ${s.last}, payout ${Number(res.payout) / 1e6} aUSD`, explorerTx(res.txHash));
+      say('chain', `policy #${p.id} settled ${res.status}: ${s.last}, payout ${Number(res.payout) / 1e6} aUSD`, explorerTx(res.txHash));
     } catch (e) {
-      say('warn', `policy #${key}: ${revertReason(e)}`);
+      say('warn', `policy #${p.id}: ${revertReason(e)}`);
     } finally {
       saveState(state);
     }

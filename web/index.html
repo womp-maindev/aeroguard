@@ -240,12 +240,12 @@
       AeroGuard
     </a>
     <div class="navlinks">
-      <a href="#inspector">Inspector</a><a href="#lab">Tamper lab</a><a href="#cover">Get covered</a><a href="#policies">Policies</a><a href="#log">Agent log</a>
+      <a href="#inspector">Inspector</a><a href="#lab">Tamper lab</a><a href="#cover">Get covered</a><a href="#policies">Policies</a><a href="#log">Keeper log</a>
     </div>
     <div class="navright">
       <span class="tag api3">API3 · AirnodeHub</span>
       <span class="tag testnet" title="Base Sepolia testnet. No real money.">Testnet · Base Sepolia</span>
-      <span class="apistat" id="apistat"><i class="dot" id="apidot"></i><span id="apitxt">checking agent…</span></span>
+      <span class="apistat" id="apistat"><i class="dot" id="apidot"></i><span id="apitxt">checking keeper…</span></span>
     </div>
   </div>
 </nav>
@@ -256,7 +256,7 @@
       <div>
         <p class="eyebrow">Parametric flight-delay cover · no claim form</p>
         <h1>Your flight is late.<br /><em>You're already paid.</em></h1>
-        <p class="lede">An autonomous agent sells the cover and settles it. The contract pays <b>only</b> on AeroDataBox data signed by its API3 Airnode: right flight, right date, fresh, final, never reused. Don't trust us. <b>Verify a signed response yourself, right here in your browser.</b></p>
+        <p class="lede">An autonomous keeper sells the cover and settles it. The contract pays <b>only</b> on AeroDataBox data signed by its API3 Airnode: right flight, right date, fresh, final, never reused. Don't trust us. <b>Verify a signed response yourself, right here in your browser.</b></p>
         <div class="ctas">
           <a class="btn btn-primary" href="#inspector" onclick="setTimeout(loadFixture, 350)">Open the security inspector →</a>
           <a class="btn btn-ghost" href="#cover">Get covered</a>
@@ -274,8 +274,8 @@
     </div>
 
     <div class="card flow" aria-label="How it works">
-      <div><b>01 · HIRE</b><strong>Hire the agent</strong><span>Traveller or travel agent hires AeroGuard on Sokosumi and pays on Cardano preprod (Masumi).</span></div>
-      <div><b>02 · RESOLVE</b><strong>Buy the schedule</strong><span>Agent pays AirnodeHub over x402 (0.05 aUSD) for the signed flight schedule.</span></div>
+      <div><b>01 · PROVE</b><strong>Prove it hasn't left</strong><span>A fresh signed status shows the flight is still pre-departure. The contract reads the schedule from the signature.</span></div>
+      <div><b>02 · RESOLVE</b><strong>Pay per call</strong><span>The keeper pays AirnodeHub over x402 (0.05 aUSD) for signed flight data. No API keys.</span></div>
       <div><b>03 · COVER</b><strong>Open the policy</strong><span>Policy opens on Base Sepolia. The contract derives the request hashes from flight + date itself.</span></div>
       <div><b>04 · WATCH</b><strong>Keeper wakes up</strong><span>After landing, the keeper buys signed arrival data. No human in the loop.</span></div>
       <div><b>05 · PAY</b><strong>Contract decides</strong><span>Signer, request, freshness, finality and replay checks pass → 50% or 100% paid out.</span></div>
@@ -293,7 +293,7 @@
         <div>
           <span class="num">01 · SECURITY INSPECTOR</span>
           <h2>Would the contract pay on this evidence?</h2>
-          <p>Paste a signed AirnodeHub response, load one from the agent, or start with the demo. Every check the contract runs is re-run here in your browser: keccak256 and secp256k1 signer recovery, no server involved. Then edit one byte of <code>data</code> and watch it fail.</p>
+          <p>Paste a signed AirnodeHub response, load one from the keeper, or start with the demo. Every check the contract runs is re-run here in your browser: keccak256 and secp256k1 signer recovery, no server involved. Then edit one byte of <code>data</code> and watch it fail.</p>
         </div>
       </div>
       <div class="insp">
@@ -305,7 +305,7 @@
           </div>
           <div class="srcrow">
             <button class="btn-primary btn-sm" onclick="loadFixture()">Load demo (FIXTURE)</button>
-            <button class="btn-ghost btn-sm needs-api" id="fetchBtn" onclick="fetchEvidence()" title="The agent buys a signed response via x402 (0.05 aUSD on Base Sepolia, cached 10 min)">Fetch real evidence from agent</button>
+            <button class="btn-ghost btn-sm needs-api" id="fetchBtn" onclick="fetchEvidence()" title="The keeper buys a signed response via x402 (0.05 aUSD on Base Sepolia, cached 10 min)">Fetch real evidence</button>
             <button class="btn-ghost btn-sm" onclick="document.getElementById('file').click()">Open .json</button>
             <input type="file" id="file" accept=".json,application/json" hidden />
           </div>
@@ -389,18 +389,18 @@
       </div>
       <div class="card">
         <div class="lab-top">
-          <label class="f">Target policy<select id="tPolicy" class="needs-api"><option value="">Agent API offline</option></select></label>
+          <label class="f">Target policy<select id="tPolicy" class="needs-api"><option value="">Keeper API offline</option></select></label>
           <label class="chk"><input type="checkbox" id="tUseInsp" /> Use the inspector's response as the base</label>
           <button class="btn-primary needs-api" onclick="runAttacks()">Run the 4 attacks</button>
         </div>
         <div class="modes" id="modes"></div>
-        <div class="cli">Bring your own response: <code>cd agent && npm run tamper -- --policy N --response your.json</code>. The <b>Genuine</b> mode really settles the policy if every check passes.</div>
+        <div class="cli">Bring your own response: <code>cd keeper && npm run tamper -- --policy N --response your.json</code>. The <b>Genuine</b> mode really settles the policy if every check passes.</div>
       </div>
     </section>
 
     <!-- ============================================================ COVER + LOG -->
     <section class="block" id="cover">
-      <div class="sh"><div><span class="num">03 · GET COVERED</span><h2>Cover a flight</h2><p>The agent buys the signed schedule, quotes the premium (8% of cover) and opens the policy on-chain. Cover must be bought before the outcome is known.</p></div></div>
+      <div class="sh"><div><span class="num">03 · GET COVERED</span><h2>Cover a flight</h2><p>The keeper buys the signed schedule, quotes the premium (8% of cover) and opens the policy on-chain. Cover must be bought before the outcome is known.</p></div></div>
       <div class="two-col">
         <div class="card pad">
           <div class="form">
@@ -417,8 +417,8 @@
           <div class="out" id="buyOut"></div>
         </div>
         <div class="card" id="log">
-          <div class="panel-h"><h3>Agent log · autonomous keeper</h3><span class="tag" id="logCount">–</span></div>
-          <div class="log" id="logBody"><div class="empty" style="display:block">Waiting for the agent…</div></div>
+          <div class="panel-h"><h3>Keeper log</h3><span class="tag" id="logCount">–</span></div>
+          <div class="log" id="logBody"><div class="empty" style="display:block">Waiting for the keeper…</div></div>
         </div>
       </div>
     </section>
@@ -426,8 +426,8 @@
     <section class="block" id="policies">
       <div class="sh"><div><span class="num">04 · POLICIES</span><h2>Live from Base Sepolia</h2><p>Read straight from the contract. Click <b>Inspect</b> to check a policy's evidence against its on-chain request hashes.</p></div><a class="btn btn-ghost btn-sm" id="contractLink" target="_blank" rel="noopener" hidden>Contract on Basescan ↗</a></div>
       <div class="card scroll">
-        <table class="tbl"><thead><tr><th>#</th><th>Flight</th><th>Date</th><th>Sched. arrival</th><th>Cover</th><th>Premium</th><th>Status</th><th>Holder</th><th>Cardano job</th><th></th></tr></thead>
-        <tbody id="pol"><tr><td colspan="10"><div class="empty">Waiting for the agent…</div></td></tr></tbody></table>
+        <table class="tbl"><thead><tr><th>#</th><th>Flight</th><th>Date</th><th>Sched. arrival</th><th>Cover</th><th>Premium</th><th>Status</th><th>Holder</th><th>Ref</th><th></th></tr></thead>
+        <tbody id="pol"><tr><td colspan="10"><div class="empty">Waiting for the keeper…</div></td></tr></tbody></table>
       </div>
     </section>
   </div>
@@ -441,7 +441,7 @@
     </div>
     <div>
       <p><strong>Trusted signer</strong><br /><code>0x83FE2E8F24E66520B1902C3507De4F471248f2Ec</code> (AeroDataBox Airnode)</p>
-      <p><strong>Contract</strong><br /><code id="footContract">shown when the agent API is online</code></p>
+      <p><strong>Contract</strong><br /><code id="footContract">shown when the keeper API is online</code></p>
     </div>
   </div>
 </footer>
@@ -808,14 +808,14 @@ function inspectPolicy(id) {
 async function fetchEvidence() {
   const flight = $('cFlight').value.replace(/\s+/g, '').toUpperCase(), date = $('cDate').value.trim();
   if (!flight || !date) { $('cFlight').focus(); return; }
-  const b = $('fetchBtn'); b.disabled = true; b.textContent = 'Agent is buying signed data…';
+  const b = $('fetchBtn'); b.disabled = true; b.textContent = 'Keeper is buying signed data…';
   try {
     const v = await j(`/verdict?flight=${encodeURIComponent(flight)}&date=${encodeURIComponent(date)}`);
     setResponse(v.evidence, 'live', `Live · ${v.kind} · AirnodeHub`, { flight, date });
   } catch (e) {
     $('verdict').className = 'verdict revert';
-    $('verdict').innerHTML = `<div class="big">Agent could not fetch evidence</div><div class="why">${esc(e.message)}</div>`;
-  } finally { b.disabled = !S.online; b.textContent = 'Fetch real evidence from agent'; }
+    $('verdict').innerHTML = `<div class="big">Keeper could not fetch evidence</div><div class="why">${esc(e.message)}</div>`;
+  } finally { b.disabled = !S.online; b.textContent = 'Fetch real evidence'; }
 }
 
 for (const el of Object.values(F)) el.addEventListener('input', () => { syncRaw(); render(); });
@@ -838,7 +838,7 @@ $('file').addEventListener('change', async (e) => {
   e.target.value = '';
 });
 
-/* ------------------------------------------------------------------ agent API */
+/* ------------------------------------------------------------------ keeper API */
 const j = async (p, o) => {
   const r = await fetch(API + p, o);
   const b = await r.json().catch(() => ({ error: `HTTP ${r.status}` }));
@@ -850,20 +850,20 @@ const post = (p, body) => j(p, { method: 'POST', headers: { 'content-type': 'app
 function setOnline(on, contract) {
   S.online = on;
   $('apidot').className = 'dot ' + (on ? 'on' : 'off');
-  $('apitxt').textContent = on ? 'Agent online' : 'Agent API offline';
-  $('apistat').title = on ? `Agent API at ${API || location.origin}` : `No agent at ${API || location.origin}. The inspector still works.`;
+  $('apitxt').textContent = on ? 'Keeper online' : 'Keeper API offline';
+  $('apistat').title = on ? `Keeper API at ${API || location.origin}` : `No keeper at ${API || location.origin}. The inspector still works.`;
   document.querySelectorAll('.needs-api').forEach((b) => (b.disabled = !on));
   if (contract) {
     $('contractLink').href = scan('address', contract); $('contractLink').hidden = false;
     $('footContract').innerHTML = `<a href="${scan('address', contract)}" target="_blank" rel="noopener">${contract}</a> · Base Sepolia`;
   }
 }
-const offlineMsg = () => `<div class="empty">Agent API not reachable at <code>${esc(API || location.origin)}</code>. Start it with <code>cd agent && npm run api</code>. The security inspector above works without it.</div>`;
+const offlineMsg = () => `<div class="empty">Keeper API not reachable at <code>${esc(API || location.origin)}</code>. Start it with <code>cd keeper && npm run api</code>. The security inspector above works without it.</div>`;
 
 async function refresh() {
   let health;
   try { health = await j('/health'); setOnline(true, health.contract); }
-  catch { setOnline(false); $('pol').innerHTML = `<tr><td colspan="10">${offlineMsg()}</td></tr>`; $('logBody').innerHTML = offlineMsg(); $('tPolicy').innerHTML = '<option value="">Agent API offline</option>'; return; }
+  catch { setOnline(false); $('pol').innerHTML = `<tr><td colspan="10">${offlineMsg()}</td></tr>`; $('logBody').innerHTML = offlineMsg(); $('tPolicy').innerHTML = '<option value="">Keeper API offline</option>'; return; }
   try {
     const ps = await j('/policies');
     S.policies = ps;
@@ -943,7 +943,7 @@ const quote = () => ($('prem').value = `${((+$('cov').value || 0) * PREMIUM_BPS 
 $('cov').addEventListener('input', quote); quote();
 async function buy() {
   const out = $('buyOut'); out.className = 'out';
-  out.textContent = 'Agent is buying the signed schedule via x402 and opening the policy…';
+  out.textContent = 'Keeper is buying the signed schedule via x402 and opening the policy…';
   try {
     const p = await post('/cover', { flight: $('flight').value, date: $('date').value, holder: $('holder').value.trim(), coverage: +$('cov').value });
     out.innerHTML = `Policy <b>#${esc(p.policyId)}</b> is active for ${esc(p.flight)} · scheduled ${esc(p.scheduled)} · premium ${Number(p.premium) / 1e6} aUSD · <a target="_blank" rel="noopener" href="${scan('tx', p.txHash)}">basescan ↗</a>`;
@@ -952,7 +952,7 @@ async function buy() {
 }
 async function check() {
   const out = $('buyOut'); out.className = 'out';
-  out.textContent = 'Agent is buying a signed status…';
+  out.textContent = 'Keeper is buying a signed status…';
   try {
     const f = $('flight').value.replace(/\s+/g, '').toUpperCase(), d = $('date').value;
     const v = await j(`/verdict?flight=${encodeURIComponent(f)}&date=${encodeURIComponent(d)}`);
@@ -963,7 +963,7 @@ async function check() {
 
 /* ------------------------------------------------------------------ boot */
 window.addEventListener('DOMContentLoaded', () => {
-  setOnline(false); $('apitxt').textContent = 'checking agent…'; $('apidot').className = 'dot';
+  setOnline(false); $('apitxt').textContent = 'checking keeper…'; $('apidot').className = 'dot';
   render();
   refresh();
   setInterval(refresh, 10000);

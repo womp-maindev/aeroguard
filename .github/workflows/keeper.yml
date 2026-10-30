@@ -14,12 +14,12 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 22 }
       - uses: actions/cache@v4
-        with: { path: agent/.cache, key: keeper-${{ github.run_id }}, restore-keys: keeper- }
+        with: { path: keeper/.cache, key: keeper-${{ github.run_id }}, restore-keys: keeper- }
       - run: npm ci || npm i
-        working-directory: agent
+        working-directory: keeper
       - run: node src/cli.ts tick
-        working-directory: agent
+        working-directory: keeper
         env:
-          AGENT_PK: ${{ secrets.AGENT_PK }}
+          KEEPER_PK: ${{ secrets.KEEPER_PK || secrets.AGENT_PK }}
           FLIGHT_COVER_ADDRESS: ${{ vars.FLIGHT_COVER_ADDRESS }}
           BASE_SEPOLIA_RPC: https://sepolia.base.org

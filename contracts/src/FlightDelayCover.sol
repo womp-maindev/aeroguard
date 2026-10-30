@@ -11,11 +11,11 @@ import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
 /// @title AeroGuard FlightDelayCover
 /// @notice Parametric flight-delay cover that pays out only on AeroDataBox data signed by its AirnodeHub Airnode.
-/// Nobody files a claim and nobody approves one: anyone (normally the AeroGuard keeper agent) submits a signed
+/// Nobody files a claim and nobody approves one: anyone (normally the AeroGuard keeper) submits a signed
 /// AeroDataBox response, and this contract decides.
 /// @dev Trust model. The signature proves the AeroDataBox Airnode produced exactly this data for exactly this request
 /// at this time. It does not prove that AeroDataBox itself is right about the real world. Every request hash is
-/// DERIVED ON-CHAIN from the policy's flight number and date, so nobody (not even the agent that sold the policy) can
+/// DERIVED ON-CHAIN from the policy's flight number and date, so nobody (not even the keeper that sold the policy) can
 /// settle a policy with a response about another flight, another date or another projection.
 contract FlightDelayCover is Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
@@ -38,7 +38,7 @@ contract FlightDelayCover is Ownable, ReentrancyGuard {
     /// @notice Max age of the signed status response a public buyer attaches as purchase proof.
     uint256 public constant PURCHASE_MAX_AGE = 15 minutes;
     /// @notice Private policies: the signed scheduled arrival at settlement must be within this distance of the
-    /// buyer-supplied one (the agent rounds it to the hour). Public policies store the signed value: tolerance 0.
+    /// buyer-supplied one (the keeper rounds it to the hour). Public policies store the signed value: tolerance 0.
     uint256 public constant SCHEDULE_TOLERANCE = 1 hours;
     /// @notice A private policy cannot anchor its expiry further than this from now (bounds capital lock-up).
     uint256 public constant MAX_HORIZON = 400 days;

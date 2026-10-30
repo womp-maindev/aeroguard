@@ -1,8 +1,8 @@
-// Tiny HTTP API used by the Masumi worker and the dashboard.  PORT=8787 by default.
+// HTTP API for the dashboard and integrations. PORT=8787 by default.
 import { readFileSync } from 'node:fs';
 import { createServer } from 'node:http';
 import type { Hex } from 'viem';
-import { cover, describe, log, runKeeper, verdict } from './agent.ts';
+import { cover, describe, log, runKeeper, verdict } from './keeper.ts';
 import { allPolicies, coverAddress, STATUS } from './chain.ts';
 import { spendLog } from './flight.ts';
 import { tamper } from './cli.ts';
@@ -34,7 +34,7 @@ createServer(async (req, res) => {
     }
     if (url.pathname === '/cover' && req.method === 'POST') {
       const b = await body(req);
-      return json(res, 200, await cover({ flight: b.flight, date: b.date, holder: b.holder as Hex, coverage: b.coverage ? BigInt(Math.round(b.coverage * 1e6)) : undefined, cardanoJobId: b.cardanoJobId }));
+      return json(res, 200, await cover({ flight: b.flight, date: b.date, holder: b.holder as Hex, coverage: b.coverage ? BigInt(Math.round(b.coverage * 1e6)) : undefined, orderId: b.orderId }));
     }
     if (url.pathname === '/tamper' && req.method === 'POST') {
       const b = await body(req);

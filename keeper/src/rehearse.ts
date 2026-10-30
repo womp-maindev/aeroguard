@@ -1,6 +1,6 @@
-// Local end-to-end rehearsal on anvil (chain id 84532 so the agent's Base Sepolia client works unchanged).
+// Local end-to-end rehearsal on anvil (chain id 84532 so the Base Sepolia client works unchanged).
 //   anvil --chain-id 84532 &   then:   node src/e2e-local.ts
-// Deploys MockUSD + FlightDelayCover (airnode = local FIXTURE signer), buys 3 policies through the agent,
+// Deploys MockUSD + FlightDelayCover (airnode = local FIXTURE signer), buys 5 policies with signed purchase proofs,
 // runs the keeper once (fixture mode), then runs the 4 tamper attacks + valid against the deployed bytecode.
 import { readFileSync } from 'node:fs';
 import { createWalletClient, createPublicClient, http, type Hex, parseAbi } from 'viem';
@@ -29,13 +29,13 @@ for (const [fn, args] of [['mint', [w.account.address, 1000_000_000n]], ['approv
 await p.waitForTransactionReceipt({ hash: await w.writeContract({ address: cover, abi: parseAbi(['function fundPool(uint256)']), functionName: 'fundPool', args: [100_000_000n] }) });
 
 process.env.BASE_SEPOLIA_RPC = RPC;
-process.env.AGENT_PK = DEPLOYER;
+process.env.KEEPER_PK = DEPLOYER;
 process.env.FLIGHT_COVER_ADDRESS = cover;
 process.env.FIXTURE_MODE = 'true';
 process.env.FIXTURE_SIGNER_PK = FIXTURE_SIGNER;
 console.log('deployed MockUSD', usd, 'cover', cover);
 
-const { cover: buyCover, keeperTick } = await import('./agent.ts');
+const { cover: buyCover, keeperTick } = await import('./keeper.ts');
 const { tamper } = await import('./cli.ts');
 const holder = '0x000000000000000000000000000000000000bEEF' as Hex;
 const at = async (iso: string) => {
