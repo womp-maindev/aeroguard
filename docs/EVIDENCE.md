@@ -8,7 +8,7 @@ Every signed response below can be re-verified offline without trusting us. Reco
 
 | # | Flight | Scheduled arrival (signed) | Purchase | Signed pre-departure proof | Settlement | Outcome · payout |
 |---|---|---|---|---|---|---|
-| 1 | IB1314 MUC→MAD | 21:25Z | [0xbfd3ae73…](https://sepolia.basescan.org/tx/0xbfd3ae73074ff63a3ef5f7e56b211d1ffb7223e2db944d0cc38ed069d1958b8d) | `Expected`, signed 16:41:56Z ([file](../contracts/test/fixtures/IB1314-purchase-proof.json), x402 [0x544a7241…](https://sepolia.basescan.org/tx/0x544a72416958438be7181af6dc96111ea7d0e6544d63e7ac869faac28671dad2)) | pending | pending |
+| 1 | IB1314 MUC→MAD | 21:25Z | [0xbfd3ae73…](https://sepolia.basescan.org/tx/0xbfd3ae73074ff63a3ef5f7e56b211d1ffb7223e2db944d0cc38ed069d1958b8d) | `Expected`, signed 16:41:56Z ([file](../contracts/test/fixtures/IB1314-purchase-proof.json), x402 [0x544a7241…](https://sepolia.basescan.org/tx/0x544a72416958438be7181af6dc96111ea7d0e6544d63e7ac869faac28671dad2)) | [0xf0aa5db2…](https://sepolia.basescan.org/tx/0xf0aa5db2e08a9b9aa7298c92853642b39d7ff330fe3e42cd8b441aa136246b44) 21:58Z | `ClosedNoPayout` · 0 (landed 21:00Z, 25 min early) |
 | 2 | LH1816 MUC→BCN | 21:55Z | [0x7e71c55b…](https://sepolia.basescan.org/tx/0x7e71c55b970b96fb1588ddde1da029060d805c9b87691280ca2504098d4e69d2) | `Expected` ([file](../contracts/test/fixtures/LH1816-purchase-proof.json), read back from the calldata) | pending | pending |
 | 3 | EI357 MUC→DUB | 21:55Z | [0x2aeed601…](https://sepolia.basescan.org/tx/0x2aeed6010ced165f66c26ea0f34e7068421a327cac0c6375d72ef7b794f41672) | `Expected` ([file](../contracts/test/fixtures/EI357-purchase-proof.json), read back from the calldata) | pending | pending |
 | 4 | BA955 MUC→LHR | 21:50Z | [0x7e675d8f…](https://sepolia.basescan.org/tx/0x7e675d8f94946db1d02a40c1eff87ac5a0ca29b65730751cf0d902d767d2b0d1) | `Expected` ([file](../contracts/test/fixtures/BA955-purchase-proof.json), read back from the calldata) | pending | pending |
@@ -23,8 +23,10 @@ Every purchase proof sits in its `buyPolicy` calldata (`timestamp`, `data`, `sig
 | 30 Oct 19:10 | #2 LH1816 | early look | arrival: `CheckIn`, revised 21:45Z | [0xf3568783…](https://sepolia.basescan.org/tx/0xf3568783791c945e20e5c7a5ecccb21c1d3a061fe613593021f83b4412d88e0d) |
 | 30 Oct 19:10 | #3 EI357 | early look | arrival: `Boarding`, revised 21:55Z | [0x6d3aa808…](https://sepolia.basescan.org/tx/0x6d3aa8080ae7ee561108ea9795ed06c5051732368858b5460b01848bffe78efc) |
 | 30 Oct 19:10 | #4 BA955 | early look | arrival: `CheckIn`, revised 21:50Z | [0xac70e982…](https://sepolia.basescan.org/tx/0xac70e982516617addda1270febe45a7a46a03cede9aac8ca3b36c72aef8add8f) |
+| 30 Oct 20:59 | #1 IB1314 | forced single-policy look (it was revised to land early) | arrival: `Approaching` (not final) | [0x3780278f…](https://sepolia.basescan.org/tx/0x3780278f40ba654556b4dd5a3452dc996d746ff38e291682a78c771125685473) |
+| 30 Oct 21:58 | #1 IB1314 | first check after arrival | arrival: **`Arrived` 21:00Z** → settled ([file](../contracts/test/fixtures/IB1314-settlement.json)) | [0xaaa74d0e…](https://sepolia.basescan.org/tx/0xaaa74d0e408f5558f14e71f43b7a37b6e37764d454d0425291f7dfb7b36e2104) |
 
-None of these is final, so the keeper did not try to settle. Settlement lookups start 30 min after each scheduled arrival ([`schedule.ts`](../keeper/src/schedule.ts)).
+The keeper only sends `settle` on a final status, after simulating it. Settlement lookups start 30 min after each scheduled arrival ([`schedule.ts`](../keeper/src/schedule.ts)).
 
 ## Attacks against the deployed contract (policy #1, real Airnode response)
 

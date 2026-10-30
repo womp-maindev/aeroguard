@@ -25,12 +25,12 @@
 <link rel="preload" href="fonts/KellySlab-normal.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="preload" href="fonts/Jost-normal.woff2" as="font" type="font/woff2" crossorigin />
 <style>
-  /* womp.solutions type: Kelly Slab (display), Jost (text, caps labels), Caveat (hand notes). Self-hosted, OFL. */
+  /* fonts from womp.solutions, self-hosted (OFL): kelly slab for titles, jost for text, caveat for the handwritten bits */
   @font-face { font-family: 'Caveat'; font-style: normal; font-weight: 500 700; font-display: swap; src: url(fonts/Caveat-normal.woff2) format('woff2'); }
   @font-face { font-family: 'Jost'; font-style: normal; font-weight: 300 800; font-display: swap; src: url(fonts/Jost-normal.woff2) format('woff2'); }
   @font-face { font-family: 'Kelly Slab'; font-style: normal; font-weight: 400; font-display: swap; src: url(fonts/KellySlab-normal.woff2) format('woff2'); }
   :root {
-    /* sky chart: white-grey sky, graphite ink, safety orange; hand-drawn planes cross the background */
+    /* light grey sky, dark ink, one orange. planes fly in the back */
     --bg: #eef0f3; --bg2: #ffffff; --card: #ffffff; --card2: #f3f5f8; --line: #e1e5eb; --line2: #cbd1da;
     --text: #151b26; --mute: #556071; --dim: #8a93a2;
     --accent: #e8521c; --accent-ink: #ffffff; --accent-soft: rgba(232, 82, 28, .09);
@@ -49,7 +49,7 @@
   body { margin: 0; font: 16px/1.55 var(--sans); background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased; position: relative; }
   body::before { content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0;
     background: radial-gradient(1100px 520px at 70% -8%, #fff 0, rgba(255,255,255,0) 70%), radial-gradient(circle, #cdd2da 1px, transparent 1.3px) 0 0 / 26px 26px; }
-  /* the sky: hand-drawn planes with dashed contrails drift across, behind everything */
+  /* planes in the background. pure css, they just fly left↔right forever */
   .sky { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
   .sky img { position: absolute; left: 0; top: var(--y); width: var(--w); opacity: calc(var(--o, .6) * .7); will-change: transform;
     animation: fly var(--d) linear var(--dl) infinite; }
@@ -231,7 +231,7 @@
   .cli { padding: 13px 18px; border-top: 1px solid var(--line); font-size: 12.5px; color: var(--mute); }
   .cli code { color: var(--text); }
 
-  /* cover form + tables */
+  /* cover form, tables, log */
   .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
   .form { display: grid; grid-template-columns: 1.2fr 1fr; gap: 12px; }
   .form .full { grid-column: 1 / -1; }
@@ -272,7 +272,7 @@
   footer.site code { color: var(--text); word-break: break-all; }
   .disclaimer { color: var(--accent); font-weight: 600; }
 
-  /* network + evidence chips */
+  /* small stuff: chips, notes, log runs */
   .src { font: 600 10.5px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--dim); }
   .src a { color: var(--mute); text-decoration: underline; text-underline-offset: 2px; }
   .txl { display: inline-flex; gap: 8px; }
@@ -328,7 +328,7 @@
     aside.pass { transform: none; }
     .mh-long { display: none; }
     .sig { font-size: 28px; }
-    /* hero buttons: stacked, same width */
+    /* hero buttons under each other, full width */
     .ctas { flex-direction: column; align-items: stretch; }
     .ctas .btn { width: 100%; justify-content: center; padding: 14px 15px; }
     .lab-top { align-items: stretch; flex-direction: column; } .lab-top label.f { min-width: 0; }
@@ -417,7 +417,7 @@
       <div class="stat"><b id="sFree">–</b><span>aUSD free in the pool</span></div>
     </div>
 
-    <!-- ============================================================ INSPECTOR -->
+    <!-- inspector -->
     <section class="block" id="inspector">
       <div class="sh">
         <div>
@@ -427,7 +427,7 @@
         </div>
       </div>
       <div class="insp">
-        <!-- left: evidence -->
+        <!-- left side: the response -->
         <div class="card">
           <div class="panel-h">
             <h3>Evidence</h3>
@@ -482,7 +482,7 @@
           </details>
         </div>
 
-        <!-- right: verdict -->
+        <!-- right side: what the contract would say -->
         <div class="card" aria-live="polite">
           <div class="panel-h"><h3>Contract verdict · computed locally</h3><span class="tag" id="kindTag">-</span></div>
           <div class="verdict idle" id="verdict">
@@ -509,7 +509,7 @@
       </div>
     </section>
 
-    <!-- ============================================================ TAMPER LAB -->
+    <!-- tamper lab -->
     <section class="block" id="lab">
       <div class="sh">
         <div>
@@ -532,7 +532,7 @@
       </div>
     </section>
 
-    <!-- ============================================================ COVER + LOG -->
+    <!-- cover + log -->
     <section class="block" id="cover">
       <div class="sh"><div><span class="num">03 · GET COVERED</span><h2>Cover a flight</h2><p>The keeper buys the signed schedule, quotes the premium (8% of cover) and opens the policy on-chain. Cover must be bought before the outcome is known.</p></div></div>
       <div class="two-col">
@@ -578,7 +578,7 @@ npm run cli -- buy --flight LH1816 --date 2026-10-31 --holder 0x… --coverage 0
       </div>
     </section>
 
-    <!-- ============================================================ CARDANO -->
+    <!-- cardano -->
     <section class="block" id="cardano">
       <div class="sh">
         <div>
@@ -622,18 +622,15 @@ npm run cli -- buy --flight LH1816 --date 2026-10-31 --holder 0x… --coverage 0
   </div>
 </footer>
 
-<!-- Vendored: @noble/curves 1.9.7 (secp256k1) + @noble/hashes 1.x (keccak_256), MIT, bundled with esbuild as window.AGC. -->
+<!-- noble curves 1.9.7 + noble hashes (MIT), bundled with esbuild into window.AGC so the page works offline -->
 <script>var AGC=(()=>{var Xt=Object.defineProperty;var hn=Object.getOwnPropertyDescriptor;var bn=Object.getOwnPropertyNames;var xn=Object.prototype.hasOwnProperty;var pn=(t,e)=>{for(var r in e)Xt(t,r,{get:e[r],enumerable:!0})},gn=(t,e,r,n)=>{if(e&&typeof e=="object"||typeof e=="function")for(let o of bn(e))!xn.call(t,o)&&o!==r&&Xt(t,o,{get:()=>e[o],enumerable:!(n=hn(e,o))||n.enumerable});return t};var mn=t=>gn(Xt({},"__esModule",{value:!0}),t);var tr={};pn(tr,{keccak_256:()=>dn,secp256k1:()=>on});var at=typeof globalThis=="object"&&"crypto"in globalThis?globalThis.crypto:void 0;function ut(t){return t instanceof Uint8Array||ArrayBuffer.isView(t)&&t.constructor.name==="Uint8Array"}function et(t){if(!Number.isSafeInteger(t)||t<0)throw new Error("positive integer expected, got "+t)}function K(t,...e){if(!ut(t))throw new Error("Uint8Array expected");if(e.length>0&&!e.includes(t.length))throw new Error("Uint8Array expected of length "+e+", got length="+t.length)}function Lt(t){if(typeof t!="function"||typeof t.create!="function")throw new Error("Hash should be wrapped by utils.createHasher");et(t.outputLen),et(t.blockLen)}function W(t,e=!0){if(t.destroyed)throw new Error("Hash instance has been destroyed");if(e&&t.finished)throw new Error("Hash#digest() has already been called")}function Ut(t,e){K(t);let r=e.outputLen;if(t.length<r)throw new Error("digestInto() expects output buffer of length at least "+r)}function ge(t){return new Uint32Array(t.buffer,t.byteOffset,Math.floor(t.byteLength/4))}function z(...t){for(let e=0;e<t.length;e++)t[e].fill(0)}function Tt(t){return new DataView(t.buffer,t.byteOffset,t.byteLength)}function X(t,e){return t<<32-e|t>>>e}var yn=new Uint8Array(new Uint32Array([287454020]).buffer)[0]===68;function wn(t){return t<<24&4278190080|t<<8&16711680|t>>>8&65280|t>>>24&255}function Bn(t){for(let e=0;e<t.length;e++)t[e]=wn(t[e]);return t}var Yt=yn?t=>t:Bn,me=typeof Uint8Array.from([]).toHex=="function"&&typeof Uint8Array.fromHex=="function",En=Array.from({length:256},(t,e)=>e.toString(16).padStart(2,"0"));function $(t){if(K(t),me)return t.toHex();let e="";for(let r=0;r<t.length;r++)e+=En[t[r]];return e}var P={_0:48,_9:57,A:65,F:70,a:97,f:102};function pe(t){if(t>=P._0&&t<=P._9)return t-P._0;if(t>=P.A&&t<=P.F)return t-(P.A-10);if(t>=P.a&&t<=P.f)return t-(P.a-10)}function lt(t){if(typeof t!="string")throw new Error("hex string expected, got "+typeof t);if(me)return Uint8Array.fromHex(t);let e=t.length,r=e/2;if(e%2)throw new Error("hex string expected, got unpadded hex of length "+e);let n=new Uint8Array(r);for(let o=0,i=0;o<r;o++,i+=2){let s=pe(t.charCodeAt(i)),c=pe(t.charCodeAt(i+1));if(s===void 0||c===void 0){let f=t[i]+t[i+1];throw new Error('hex string expected, got non-hex character "'+f+'" at index '+i)}n[o]=s*16+c}return n}function ye(t){if(typeof t!="string")throw new Error("string expected");return new Uint8Array(new TextEncoder().encode(t))}function dt(t){return typeof t=="string"&&(t=ye(t)),K(t),t}function Y(...t){let e=0;for(let n=0;n<t.length;n++){let o=t[n];K(o),e+=o.length}let r=new Uint8Array(e);for(let n=0,o=0;n<t.length;n++){let i=t[n];r.set(i,o),o+=i.length}return r}var nt=class{};function Rt(t){let e=n=>t().update(dt(n)).digest(),r=t();return e.outputLen=r.outputLen,e.blockLen=r.blockLen,e.create=()=>t(),e}function kt(t=32){if(at&&typeof at.getRandomValues=="function")return at.getRandomValues(new Uint8Array(t));if(at&&typeof at.randomBytes=="function")return Uint8Array.from(at.randomBytes(t));throw new Error("crypto.getRandomValues must be defined")}function vn(t,e,r,n){if(typeof t.setBigUint64=="function")return t.setBigUint64(e,r,n);let o=BigInt(32),i=BigInt(4294967295),s=Number(r>>o&i),c=Number(r&i),f=n?4:0,b=n?0:4;t.setUint32(e+f,s,n),t.setUint32(e+b,c,n)}function we(t,e,r){return t&e^~t&r}function Be(t,e,r){return t&e^t&r^e&r}var qt=class extends nt{constructor(e,r,n,o){super(),this.finished=!1,this.length=0,this.pos=0,this.destroyed=!1,this.blockLen=e,this.outputLen=r,this.padOffset=n,this.isLE=o,this.buffer=new Uint8Array(e),this.view=Tt(this.buffer)}update(e){W(this),e=dt(e),K(e);let{view:r,buffer:n,blockLen:o}=this,i=e.length;for(let s=0;s<i;){let c=Math.min(o-this.pos,i-s);if(c===o){let f=Tt(e);for(;o<=i-s;s+=o)this.process(f,s);continue}n.set(e.subarray(s,s+c),this.pos),this.pos+=c,s+=c,this.pos===o&&(this.process(r,0),this.pos=0)}return this.length+=e.length,this.roundClean(),this}digestInto(e){W(this),Ut(e,this),this.finished=!0;let{buffer:r,view:n,blockLen:o,isLE:i}=this,{pos:s}=this;r[s++]=128,z(this.buffer.subarray(s)),this.padOffset>o-s&&(this.process(n,0),s=0);for(let g=s;g<o;g++)r[g]=0;vn(n,o-8,BigInt(this.length*8),i),this.process(n,0);let c=Tt(e),f=this.outputLen;if(f%4)throw new Error("_sha2: outputLen should be aligned to 32bit");let b=f/4,x=this.get();if(b>x.length)throw new Error("_sha2: outputLen bigger than state");for(let g=0;g<b;g++)c.setUint32(4*g,x[g],i)}digest(){let{buffer:e,outputLen:r}=this;this.digestInto(e);let n=e.slice(0,r);return this.destroy(),n}_cloneInto(e){e||(e=new this.constructor),e.set(...this.get());let{blockLen:r,buffer:n,length:o,finished:i,destroyed:s,pos:c}=this;return e.destroyed=s,e.finished=i,e.length=o,e.pos=c,o%r&&e.buffer.set(n),e}clone(){return this._cloneInto()}},Q=Uint32Array.from([1779033703,3144134277,1013904242,2773480762,1359893119,2600822924,528734635,1541459225]);var Nt=BigInt(4294967295),Ee=BigInt(32);function Sn(t,e=!1){return e?{h:Number(t&Nt),l:Number(t>>Ee&Nt)}:{h:Number(t>>Ee&Nt)|0,l:Number(t&Nt)|0}}function ve(t,e=!1){let r=t.length,n=new Uint32Array(r),o=new Uint32Array(r);for(let i=0;i<r;i++){let{h:s,l:c}=Sn(t[i],e);[n[i],o[i]]=[s,c]}return[n,o]}var Se=(t,e,r)=>t<<r|e>>>32-r,Ae=(t,e,r)=>e<<r|t>>>32-r,_e=(t,e,r)=>e<<r-32|t>>>64-r,Ie=(t,e,r)=>t<<r-32|e>>>64-r;var An=Uint32Array.from([1116352408,1899447441,3049323471,3921009573,961987163,1508970993,2453635748,2870763221,3624381080,310598401,607225278,1426881987,1925078388,2162078206,2614888103,3248222580,3835390401,4022224774,264347078,604807628,770255983,1249150122,1555081692,1996064986,2554220882,2821834349,2952996808,3210313671,3336571891,3584528711,113926993,338241895,666307205,773529912,1294757372,1396182291,1695183700,1986661051,2177026350,2456956037,2730485921,2820302411,3259730800,3345764771,3516065817,3600352804,4094571909,275423344,430227734,506948616,659060556,883997877,958139571,1322822218,1537002063,1747873779,1955562222,2024104815,2227730452,2361852424,2428436474,2756734187,3204031479,3329325298]),rt=new Uint32Array(64),zt=class extends qt{constructor(e=32){super(64,e,8,!1),this.A=Q[0]|0,this.B=Q[1]|0,this.C=Q[2]|0,this.D=Q[3]|0,this.E=Q[4]|0,this.F=Q[5]|0,this.G=Q[6]|0,this.H=Q[7]|0}get(){let{A:e,B:r,C:n,D:o,E:i,F:s,G:c,H:f}=this;return[e,r,n,o,i,s,c,f]}set(e,r,n,o,i,s,c,f){this.A=e|0,this.B=r|0,this.C=n|0,this.D=o|0,this.E=i|0,this.F=s|0,this.G=c|0,this.H=f|0}process(e,r){for(let g=0;g<16;g++,r+=4)rt[g]=e.getUint32(r,!1);for(let g=16;g<64;g++){let a=rt[g-15],l=rt[g-2],y=X(a,7)^X(a,18)^a>>>3,E=X(l,17)^X(l,19)^l>>>10;rt[g]=E+rt[g-7]+y+rt[g-16]|0}let{A:n,B:o,C:i,D:s,E:c,F:f,G:b,H:x}=this;for(let g=0;g<64;g++){let a=X(c,6)^X(c,11)^X(c,25),l=x+a+we(c,f,b)+An[g]+rt[g]|0,E=(X(n,2)^X(n,13)^X(n,22))+Be(n,o,i)|0;x=b,b=f,f=c,c=s+l|0,s=i,i=o,o=n,n=l+E|0}n=n+this.A|0,o=o+this.B|0,i=i+this.C|0,s=s+this.D|0,c=c+this.E|0,f=f+this.F|0,b=b+this.G|0,x=x+this.H|0,this.set(n,o,i,s,c,f,b,x)}roundClean(){z(rt)}destroy(){this.set(0,0,0,0,0,0,0,0),z(this.buffer)}};var He=Rt(()=>new zt);var Ct=class extends nt{constructor(e,r){super(),this.finished=!1,this.destroyed=!1,Lt(e);let n=dt(r);if(this.iHash=e.create(),typeof this.iHash.update!="function")throw new Error("Expected instance of class which extends utils.Hash");this.blockLen=this.iHash.blockLen,this.outputLen=this.iHash.outputLen;let o=this.blockLen,i=new Uint8Array(o);i.set(n.length>o?e.create().update(n).digest():n);for(let s=0;s<i.length;s++)i[s]^=54;this.iHash.update(i),this.oHash=e.create();for(let s=0;s<i.length;s++)i[s]^=106;this.oHash.update(i),z(i)}update(e){return W(this),this.iHash.update(e),this}digestInto(e){W(this),K(e,this.outputLen),this.finished=!0,this.iHash.digestInto(e),this.oHash.update(e),this.oHash.digestInto(e),this.destroy()}digest(){let e=new Uint8Array(this.oHash.outputLen);return this.digestInto(e),e}_cloneInto(e){e||(e=Object.create(Object.getPrototypeOf(this),{}));let{oHash:r,iHash:n,finished:o,destroyed:i,blockLen:s,outputLen:c}=this;return e=e,e.finished=o,e.destroyed=i,e.blockLen=s,e.outputLen=c,e.oHash=r._cloneInto(e.oHash),e.iHash=n._cloneInto(e.iHash),e}clone(){return this._cloneInto()}destroy(){this.destroyed=!0,this.oHash.destroy(),this.iHash.destroy()}},Pt=(t,e,r)=>new Ct(t,e).update(r).digest();Pt.create=(t,e)=>new Ct(t,e);var Qt=BigInt(0),$t=BigInt(1);function Et(t,e=""){if(typeof t!="boolean"){let r=e&&`"${e}"`;throw new Error(r+"expected boolean, got type="+typeof t)}return t}function ot(t,e,r=""){let n=ut(t),o=t?.length,i=e!==void 0;if(!n||i&&o!==e){let s=r&&`"${r}" `,c=i?` of length ${e}`:"",f=n?`length=${o}`:`type=${typeof t}`;throw new Error(s+"expected Uint8Array"+c+", got "+f)}return t}function vt(t){let e=t.toString(16);return e.length&1?"0"+e:e}function Oe(t){if(typeof t!="string")throw new Error("hex string expected, got "+typeof t);return t===""?Qt:BigInt("0x"+t)}function gt(t){return Oe($(t))}function Jt(t){return K(t),Oe($(Uint8Array.from(t).reverse()))}function Vt(t,e){return lt(t.toString(16).padStart(e*2,"0"))}function Ft(t,e){return Vt(t,e).reverse()}function V(t,e,r){let n;if(typeof e=="string")try{n=lt(e)}catch(i){throw new Error(t+" must be hex string or Uint8Array, cause: "+i)}else if(ut(e))n=Uint8Array.from(e);else throw new Error(t+" must be hex string or Uint8Array");let o=n.length;if(typeof r=="number"&&o!==r)throw new Error(t+" of length "+r+" expected, got "+o);return n}var Wt=t=>typeof t=="bigint"&&Qt<=t;function Le(t,e,r){return Wt(t)&&Wt(e)&&Wt(r)&&e<=t&&t<r}function Ue(t,e,r,n){if(!Le(e,r,n))throw new Error("expected valid "+t+": "+r+" <= n < "+n+", got "+e)}function Zt(t){let e;for(e=0;t>Qt;t>>=$t,e+=1);return e}var st=t=>($t<<BigInt(t))-$t;function Te(t,e,r){if(typeof t!="number"||t<2)throw new Error("hashLen must be a number");if(typeof e!="number"||e<2)throw new Error("qByteLen must be a number");if(typeof r!="function")throw new Error("hmacFn must be a function");let n=l=>new Uint8Array(l),o=l=>Uint8Array.of(l),i=n(t),s=n(t),c=0,f=()=>{i.fill(1),s.fill(0),c=0},b=(...l)=>r(s,i,...l),x=(l=n(0))=>{s=b(o(0),l),i=b(),l.length!==0&&(s=b(o(1),l),i=b())},g=()=>{if(c++>=1e3)throw new Error("drbg: tried 1000 values");let l=0,y=[];for(;l<e;){i=b();let E=i.slice();y.push(E),l+=i.length}return Y(...y)};return(l,y)=>{f(),x(l);let E;for(;!(E=y(g()));)x();return f(),E}}function St(t,e,r={}){if(!t||typeof t!="object")throw new Error("expected valid options object");function n(o,i,s){let c=t[o];if(s&&c===void 0)return;let f=typeof c;if(f!==i||c===null)throw new Error(`param "${o}" is invalid: expected ${i}, got ${f}`)}Object.entries(e).forEach(([o,i])=>n(o,i,!1)),Object.entries(r).forEach(([o,i])=>n(o,i,!0))}function te(t){let e=new WeakMap;return(r,...n)=>{let o=e.get(r);if(o!==void 0)return o;let i=t(r,...n);return e.set(r,i),i}}var D=BigInt(0),Z=BigInt(1),ht=BigInt(2),qe=BigInt(3),Ne=BigInt(4),Ce=BigInt(5),_n=BigInt(7),Ve=BigInt(8),In=BigInt(9),Ze=BigInt(16);function G(t,e){let r=t%e;return r>=D?r:e+r}function j(t,e,r){let n=t;for(;e-- >D;)n*=n,n%=r;return n}function Re(t,e){if(t===D)throw new Error("invert: expected non-zero number");if(e<=D)throw new Error("invert: expected positive modulus, got "+e);let r=G(t,e),n=e,o=D,i=Z,s=Z,c=D;for(;r!==D;){let b=n/r,x=n%r,g=o-s*b,a=i-c*b;n=r,r=x,o=s,i=c,s=g,c=a}if(n!==Z)throw new Error("invert: does not exist");return G(o,e)}function ee(t,e,r){if(!t.eql(t.sqr(e),r))throw new Error("Cannot find square root")}function De(t,e){let r=(t.ORDER+Z)/Ne,n=t.pow(e,r);return ee(t,n,e),n}function Hn(t,e){let r=(t.ORDER-Ce)/Ve,n=t.mul(e,ht),o=t.pow(n,r),i=t.mul(e,o),s=t.mul(t.mul(i,ht),o),c=t.mul(i,t.sub(s,t.ONE));return ee(t,c,e),c}function On(t){let e=it(t),r=Me(t),n=r(e,e.neg(e.ONE)),o=r(e,n),i=r(e,e.neg(n)),s=(t+_n)/Ze;return(c,f)=>{let b=c.pow(f,s),x=c.mul(b,n),g=c.mul(b,o),a=c.mul(b,i),l=c.eql(c.sqr(x),f),y=c.eql(c.sqr(g),f);b=c.cmov(b,x,l),x=c.cmov(a,g,y);let E=c.eql(c.sqr(x),f),O=c.cmov(b,x,E);return ee(c,O,f),O}}function Me(t){if(t<qe)throw new Error("sqrt is not defined for small field");let e=t-Z,r=0;for(;e%ht===D;)e/=ht,r++;let n=ht,o=it(t);for(;ke(o,n)===1;)if(n++>1e3)throw new Error("Cannot find square root: probably non-prime P");if(r===1)return De;let i=o.pow(n,e),s=(e+Z)/ht;return function(f,b){if(f.is0(b))return b;if(ke(f,b)!==1)throw new Error("Cannot find square root");let x=r,g=f.mul(f.ONE,i),a=f.pow(b,e),l=f.pow(b,s);for(;!f.eql(a,f.ONE);){if(f.is0(a))return f.ZERO;let y=1,E=f.sqr(a);for(;!f.eql(E,f.ONE);)if(y++,E=f.sqr(E),y===x)throw new Error("Cannot find square root");let O=Z<<BigInt(x-y-1),R=f.pow(g,O);x=y,g=f.sqr(R),a=f.mul(a,g),l=f.mul(l,R)}return l}}function Ln(t){return t%Ne===qe?De:t%Ve===Ce?Hn:t%Ze===In?On(t):Me(t)}var Un=["create","isValid","is0","neg","inv","sqrt","sqr","eql","add","sub","mul","pow","div","addN","subN","mulN","sqrN"];function ne(t){let e={ORDER:"bigint",MASK:"bigint",BYTES:"number",BITS:"number"},r=Un.reduce((n,o)=>(n[o]="function",n),e);return St(t,r),t}function Tn(t,e,r){if(r<D)throw new Error("invalid exponent, negatives unsupported");if(r===D)return t.ONE;if(r===Z)return e;let n=t.ONE,o=e;for(;r>D;)r&Z&&(n=t.mul(n,o)),o=t.sqr(o),r>>=Z;return n}function Dt(t,e,r=!1){let n=new Array(e.length).fill(r?t.ZERO:void 0),o=e.reduce((s,c,f)=>t.is0(c)?s:(n[f]=s,t.mul(s,c)),t.ONE),i=t.inv(o);return e.reduceRight((s,c,f)=>t.is0(c)?s:(n[f]=t.mul(s,n[f]),t.mul(s,c)),i),n}function ke(t,e){let r=(t.ORDER-Z)/ht,n=t.pow(e,r),o=t.eql(n,t.ONE),i=t.eql(n,t.ZERO),s=t.eql(n,t.neg(t.ONE));if(!o&&!i&&!s)throw new Error("invalid Legendre symbol result");return o?1:i?0:-1}function Mt(t,e){e!==void 0&&et(e);let r=e!==void 0?e:t.toString(2).length,n=Math.ceil(r/8);return{nBitLength:r,nByteLength:n}}function it(t,e,r=!1,n={}){if(t<=D)throw new Error("invalid field: expected ORDER > 0, got "+t);let o,i,s=!1,c;if(typeof e=="object"&&e!=null){if(n.sqrt||r)throw new Error("cannot specify opts in two arguments");let a=e;a.BITS&&(o=a.BITS),a.sqrt&&(i=a.sqrt),typeof a.isLE=="boolean"&&(r=a.isLE),typeof a.modFromBytes=="boolean"&&(s=a.modFromBytes),c=a.allowedLengths}else typeof e=="number"&&(o=e),n.sqrt&&(i=n.sqrt);let{nBitLength:f,nByteLength:b}=Mt(t,o);if(b>2048)throw new Error("invalid field: expected ORDER of <= 2048 bytes");let x,g=Object.freeze({ORDER:t,isLE:r,BITS:f,BYTES:b,MASK:st(f),ZERO:D,ONE:Z,allowedLengths:c,create:a=>G(a,t),isValid:a=>{if(typeof a!="bigint")throw new Error("invalid field element: expected bigint, got "+typeof a);return D<=a&&a<t},is0:a=>a===D,isValidNot0:a=>!g.is0(a)&&g.isValid(a),isOdd:a=>(a&Z)===Z,neg:a=>G(-a,t),eql:(a,l)=>a===l,sqr:a=>G(a*a,t),add:(a,l)=>G(a+l,t),sub:(a,l)=>G(a-l,t),mul:(a,l)=>G(a*l,t),pow:(a,l)=>Tn(g,a,l),div:(a,l)=>G(a*Re(l,t),t),sqrN:a=>a*a,addN:(a,l)=>a+l,subN:(a,l)=>a-l,mulN:(a,l)=>a*l,inv:a=>Re(a,t),sqrt:i||(a=>(x||(x=Ln(t)),x(g,a))),toBytes:a=>r?Ft(a,b):Vt(a,b),fromBytes:(a,l=!0)=>{if(c){if(!c.includes(a.length)||a.length>b)throw new Error("Field.fromBytes: expected "+c+" bytes, got "+a.length);let E=new Uint8Array(b);E.set(a,r?0:E.length-a.length),a=E}if(a.length!==b)throw new Error("Field.fromBytes: expected "+b+" bytes, got "+a.length);let y=r?Jt(a):gt(a);if(s&&(y=G(y,t)),!l&&!g.isValid(y))throw new Error("invalid field element: outside of range 0..ORDER");return y},invertBatch:a=>Dt(g,a),cmov:(a,l,y)=>y?l:a});return Object.freeze(g)}function Ke(t){if(typeof t!="bigint")throw new Error("field order must be bigint");let e=t.toString(2).length;return Math.ceil(e/8)}function re(t){let e=Ke(t);return e+Math.ceil(e/2)}function oe(t,e,r=!1){let n=t.length,o=Ke(e),i=re(e);if(n<16||n<i||n>1024)throw new Error("expected "+i+"-1024 bytes of input, got "+n);let s=r?Jt(t):gt(t),c=G(s,e-Z)+Z;return r?Ft(c,o):Vt(c,o)}var mt=BigInt(0),bt=BigInt(1);function At(t,e){let r=e.negate();return t?r:e}function jt(t,e){let r=Dt(t.Fp,e.map(n=>n.Z));return e.map((n,o)=>t.fromAffine(n.toAffine(r[o])))}function Ye(t,e){if(!Number.isSafeInteger(t)||t<=0||t>e)throw new Error("invalid window size, expected [1.."+e+"], got W="+t)}function se(t,e){Ye(t,e);let r=Math.ceil(e/t)+1,n=2**(t-1),o=2**t,i=st(t),s=BigInt(t);return{windows:r,windowSize:n,mask:i,maxNumber:o,shiftBy:s}}function je(t,e,r){let{windowSize:n,mask:o,maxNumber:i,shiftBy:s}=r,c=Number(t&o),f=t>>s;c>n&&(c-=i,f+=bt);let b=e*n,x=b+Math.abs(c)-1,g=c===0,a=c<0,l=e%2!==0;return{nextN:f,offset:x,isZero:g,isNeg:a,isNegF:l,offsetF:b}}function Rn(t,e){if(!Array.isArray(t))throw new Error("array expected");t.forEach((r,n)=>{if(!(r instanceof e))throw new Error("invalid point at index "+n)})}function kn(t,e){if(!Array.isArray(t))throw new Error("array of scalars expected");t.forEach((r,n)=>{if(!e.isValid(r))throw new Error("invalid scalar at index "+n)})}var ie=new WeakMap,ze=new WeakMap;function ce(t){return ze.get(t)||1}function Ge(t){if(t!==mt)throw new Error("invalid wNAF")}var Kt=class{constructor(e,r){this.BASE=e.BASE,this.ZERO=e.ZERO,this.Fn=e.Fn,this.bits=r}_unsafeLadder(e,r,n=this.ZERO){let o=e;for(;r>mt;)r&bt&&(n=n.add(o)),o=o.double(),r>>=bt;return n}precomputeWindow(e,r){let{windows:n,windowSize:o}=se(r,this.bits),i=[],s=e,c=s;for(let f=0;f<n;f++){c=s,i.push(c);for(let b=1;b<o;b++)c=c.add(s),i.push(c);s=c.double()}return i}wNAF(e,r,n){if(!this.Fn.isValid(n))throw new Error("invalid scalar");let o=this.ZERO,i=this.BASE,s=se(e,this.bits);for(let c=0;c<s.windows;c++){let{nextN:f,offset:b,isZero:x,isNeg:g,isNegF:a,offsetF:l}=je(n,c,s);n=f,x?i=i.add(At(a,r[l])):o=o.add(At(g,r[b]))}return Ge(n),{p:o,f:i}}wNAFUnsafe(e,r,n,o=this.ZERO){let i=se(e,this.bits);for(let s=0;s<i.windows&&n!==mt;s++){let{nextN:c,offset:f,isZero:b,isNeg:x}=je(n,s,i);if(n=c,!b){let g=r[f];o=o.add(x?g.negate():g)}}return Ge(n),o}getPrecomputes(e,r,n){let o=ie.get(r);return o||(o=this.precomputeWindow(r,e),e!==1&&(typeof n=="function"&&(o=n(o)),ie.set(r,o))),o}cached(e,r,n){let o=ce(e);return this.wNAF(o,this.getPrecomputes(o,e,n),r)}unsafe(e,r,n,o){let i=ce(e);return i===1?this._unsafeLadder(e,r,o):this.wNAFUnsafe(i,this.getPrecomputes(i,e,n),r,o)}createCache(e,r){Ye(r,this.bits),ze.set(e,r),ie.delete(e)}hasCache(e){return ce(e)!==1}};function Pe(t,e,r,n){let o=e,i=t.ZERO,s=t.ZERO;for(;r>mt||n>mt;)r&bt&&(i=i.add(o)),n&bt&&(s=s.add(o)),o=o.double(),r>>=bt,n>>=bt;return{p1:i,p2:s}}function We(t,e,r,n){Rn(r,t),kn(n,e);let o=r.length,i=n.length;if(o!==i)throw new Error("arrays of points and scalars must have equal length");let s=t.ZERO,c=Zt(BigInt(o)),f=1;c>12?f=c-3:c>4?f=c-2:c>0&&(f=2);let b=st(f),x=new Array(Number(b)+1).fill(s),g=Math.floor((e.BITS-1)/f)*f,a=s;for(let l=g;l>=0;l-=f){x.fill(s);for(let E=0;E<i;E++){let O=n[E],R=Number(O>>BigInt(l)&b);x[R]=x[R].add(r[E])}let y=s;for(let E=x.length-1,O=s;E>0;E--)O=O.add(x[E]),y=y.add(O);if(a=a.add(y),l!==0)for(let E=0;E<f;E++)a=a.double()}return a}function Xe(t,e,r){if(e){if(e.ORDER!==t)throw new Error("Field.ORDER must match order: Fp == p, Fn == n");return ne(e),e}else return it(t,{isLE:r})}function $e(t,e,r={},n){if(n===void 0&&(n=t==="edwards"),!e||typeof e!="object")throw new Error(`expected valid ${t} CURVE object`);for(let f of["p","n","h"]){let b=e[f];if(!(typeof b=="bigint"&&b>mt))throw new Error(`CURVE.${f} must be positive bigint`)}let o=Xe(e.p,r.Fp,n),i=Xe(e.n,r.Fn,n),c=["Gx","Gy","a",t==="weierstrass"?"b":"d"];for(let f of c)if(!o.isValid(e[f]))throw new Error(`CURVE.${f} must be valid field element of CURVE.Fp`);return e=Object.freeze(Object.assign({},e)),{CURVE:e,Fp:o,Fn:i}}var Qe=(t,e)=>(t+(t>=0?e:-e)/Je)/e;function qn(t,e,r){let[[n,o],[i,s]]=e,c=Qe(s*t,r),f=Qe(-o*t,r),b=t-c*n-f*i,x=-c*o-f*s,g=b<F,a=x<F;g&&(b=-b),a&&(x=-x);let l=st(Math.ceil(Zt(r)/2))+wt;if(b<F||b>=l||x<F||x>=l)throw new Error("splitScalar (endomorphism): failed, k="+t);return{k1neg:g,k1:b,k2neg:a,k2:x}}function ae(t){if(!["compact","recovered","der"].includes(t))throw new Error('Signature format must be "compact", "recovered", or "der"');return t}function fe(t,e){let r={};for(let n of Object.keys(e))r[n]=t[n]===void 0?e[n]:t[n];return Et(r.lowS,"lowS"),Et(r.prehash,"prehash"),r.format!==void 0&&ae(r.format),r}var ue=class extends Error{constructor(e=""){super(e)}},J={Err:ue,_tlv:{encode:(t,e)=>{let{Err:r}=J;if(t<0||t>256)throw new r("tlv.encode: wrong tag");if(e.length&1)throw new r("tlv.encode: unpadded data");let n=e.length/2,o=vt(n);if(o.length/2&128)throw new r("tlv.encode: long form length too big");let i=n>127?vt(o.length/2|128):"";return vt(t)+i+o+e},decode(t,e){let{Err:r}=J,n=0;if(t<0||t>256)throw new r("tlv.encode: wrong tag");if(e.length<2||e[n++]!==t)throw new r("tlv.decode: wrong tlv");let o=e[n++],i=!!(o&128),s=0;if(!i)s=o;else{let f=o&127;if(!f)throw new r("tlv.decode(long): indefinite length not supported");if(f>4)throw new r("tlv.decode(long): byte length is too big");let b=e.subarray(n,n+f);if(b.length!==f)throw new r("tlv.decode: length bytes not complete");if(b[0]===0)throw new r("tlv.decode(long): zero leftmost byte");for(let x of b)s=s<<8|x;if(n+=f,s<128)throw new r("tlv.decode(long): not minimal encoding")}let c=e.subarray(n,n+s);if(c.length!==s)throw new r("tlv.decode: wrong value length");return{v:c,l:e.subarray(n+s)}}},_int:{encode(t){let{Err:e}=J;if(t<F)throw new e("integer: negative integers are not allowed");let r=vt(t);if(Number.parseInt(r[0],16)&8&&(r="00"+r),r.length&1)throw new e("unexpected DER parsing assertion: unpadded hex");return r},decode(t){let{Err:e}=J;if(t[0]&128)throw new e("invalid signature integer: negative");if(t[0]===0&&!(t[1]&128))throw new e("invalid signature integer: unnecessary leading zero");return gt(t)}},toSig(t){let{Err:e,_int:r,_tlv:n}=J,o=V("signature",t),{v:i,l:s}=n.decode(48,o);if(s.length)throw new e("invalid signature: left bytes after parsing");let{v:c,l:f}=n.decode(2,i),{v:b,l:x}=n.decode(2,f);if(x.length)throw new e("invalid signature: left bytes after parsing");return{r:r.decode(c),s:r.decode(b)}},hexFromSig(t){let{_tlv:e,_int:r}=J,n=e.encode(2,r.encode(t.r)),o=e.encode(2,r.encode(t.s)),i=n+o;return e.encode(48,i)}},F=BigInt(0),wt=BigInt(1),Je=BigInt(2),Gt=BigInt(3),Nn=BigInt(4);function yt(t,e){let{BYTES:r}=t,n;if(typeof e=="bigint")n=e;else{let o=V("private key",e);try{n=t.fromBytes(o)}catch{throw new Error(`invalid private key: expected ui8a of size ${r}, got ${typeof e}`)}}if(!t.isValidNot0(n))throw new Error("invalid private key: out of range [1..N-1]");return n}function Cn(t,e={}){let r=$e("weierstrass",t,e),{Fp:n,Fn:o}=r,i=r.CURVE,{h:s,n:c}=i;St(e,{},{allowInfinityPoint:"boolean",clearCofactor:"function",isTorsionFree:"function",fromBytes:"function",toBytes:"function",endo:"object",wrapPrivateKey:"boolean"});let{endo:f}=e;if(f&&(!n.is0(i.a)||typeof f.beta!="bigint"||!Array.isArray(f.basises)))throw new Error('invalid endo: expected "beta": bigint and "basises": array');let b=tn(n,o);function x(){if(!n.isOdd)throw new Error("compression is not supported: Field does not have .isOdd()")}function g(H,h,d){let{x:u,y:p}=h.toAffine(),m=n.toBytes(u);if(Et(d,"isCompressed"),d){x();let v=!n.isOdd(p);return Y(Fe(v),m)}else return Y(Uint8Array.of(4),m,n.toBytes(p))}function a(H){ot(H,void 0,"Point");let{publicKey:h,publicKeyUncompressed:d}=b,u=H.length,p=H[0],m=H.subarray(1);if(u===h&&(p===2||p===3)){let v=n.fromBytes(m);if(!n.isValid(v))throw new Error("bad point: is not on curve, wrong x");let B=E(v),w;try{w=n.sqrt(B)}catch(q){let L=q instanceof Error?": "+q.message:"";throw new Error("bad point: is not on curve, sqrt error"+L)}x();let S=n.isOdd(w);return(p&1)===1!==S&&(w=n.neg(w)),{x:v,y:w}}else if(u===d&&p===4){let v=n.BYTES,B=n.fromBytes(m.subarray(0,v)),w=n.fromBytes(m.subarray(v,v*2));if(!O(B,w))throw new Error("bad point: is not on curve");return{x:B,y:w}}else throw new Error(`bad point: got length ${u}, expected compressed=${h} or uncompressed=${d}`)}let l=e.toBytes||g,y=e.fromBytes||a;function E(H){let h=n.sqr(H),d=n.mul(h,H);return n.add(n.add(d,n.mul(H,i.a)),i.b)}function O(H,h){let d=n.sqr(h),u=E(H);return n.eql(d,u)}if(!O(i.Gx,i.Gy))throw new Error("bad curve params: generator point");let R=n.mul(n.pow(i.a,Gt),Nn),Bt=n.mul(n.sqr(i.b),BigInt(27));if(n.is0(n.add(R,Bt)))throw new Error("bad curve params: a or b");function k(H,h,d=!1){if(!n.isValid(h)||d&&n.is0(h))throw new Error(`bad point coordinate ${H}`);return h}function ct(H){if(!(H instanceof _))throw new Error("ProjectivePoint expected")}function tt(H){if(!f||!f.basises)throw new Error("no endo");return qn(H,f.basises,o.ORDER)}let xt=te((H,h)=>{let{X:d,Y:u,Z:p}=H;if(n.eql(p,n.ONE))return{x:d,y:u};let m=H.is0();h==null&&(h=m?n.ONE:n.inv(p));let v=n.mul(d,h),B=n.mul(u,h),w=n.mul(p,h);if(m)return{x:n.ZERO,y:n.ZERO};if(!n.eql(w,n.ONE))throw new Error("invZ was invalid");return{x:v,y:B}}),It=te(H=>{if(H.is0()){if(e.allowInfinityPoint&&!n.is0(H.Y))return;throw new Error("bad point: ZERO")}let{x:h,y:d}=H.toAffine();if(!n.isValid(h)||!n.isValid(d))throw new Error("bad point: x or y not field elements");if(!O(h,d))throw new Error("bad point: equation left != right");if(!H.isTorsionFree())throw new Error("bad point: not in prime-order subgroup");return!0});function pt(H,h,d,u,p){return d=new _(n.mul(d.X,H),d.Y,d.Z),h=At(u,h),d=At(p,d),h.add(d)}class _{constructor(h,d,u){this.X=k("x",h),this.Y=k("y",d,!0),this.Z=k("z",u),Object.freeze(this)}static CURVE(){return i}static fromAffine(h){let{x:d,y:u}=h||{};if(!h||!n.isValid(d)||!n.isValid(u))throw new Error("invalid affine point");if(h instanceof _)throw new Error("projective point not allowed");return n.is0(d)&&n.is0(u)?_.ZERO:new _(d,u,n.ONE)}static fromBytes(h){let d=_.fromAffine(y(ot(h,void 0,"point")));return d.assertValidity(),d}static fromHex(h){return _.fromBytes(V("pointHex",h))}get x(){return this.toAffine().x}get y(){return this.toAffine().y}precompute(h=8,d=!0){return ft.createCache(this,h),d||this.multiply(Gt),this}assertValidity(){It(this)}hasEvenY(){let{y:h}=this.toAffine();if(!n.isOdd)throw new Error("Field doesn't support isOdd");return!n.isOdd(h)}equals(h){ct(h);let{X:d,Y:u,Z:p}=this,{X:m,Y:v,Z:B}=h,w=n.eql(n.mul(d,B),n.mul(m,p)),S=n.eql(n.mul(u,B),n.mul(v,p));return w&&S}negate(){return new _(this.X,n.neg(this.Y),this.Z)}double(){let{a:h,b:d}=i,u=n.mul(d,Gt),{X:p,Y:m,Z:v}=this,B=n.ZERO,w=n.ZERO,S=n.ZERO,A=n.mul(p,p),q=n.mul(m,m),L=n.mul(v,v),I=n.mul(p,m);return I=n.add(I,I),S=n.mul(p,v),S=n.add(S,S),B=n.mul(h,S),w=n.mul(u,L),w=n.add(B,w),B=n.sub(q,w),w=n.add(q,w),w=n.mul(B,w),B=n.mul(I,B),S=n.mul(u,S),L=n.mul(h,L),I=n.sub(A,L),I=n.mul(h,I),I=n.add(I,S),S=n.add(A,A),A=n.add(S,A),A=n.add(A,L),A=n.mul(A,I),w=n.add(w,A),L=n.mul(m,v),L=n.add(L,L),A=n.mul(L,I),B=n.sub(B,A),S=n.mul(L,q),S=n.add(S,S),S=n.add(S,S),new _(B,w,S)}add(h){ct(h);let{X:d,Y:u,Z:p}=this,{X:m,Y:v,Z:B}=h,w=n.ZERO,S=n.ZERO,A=n.ZERO,q=i.a,L=n.mul(i.b,Gt),I=n.mul(d,m),U=n.mul(u,v),N=n.mul(p,B),M=n.add(d,u),T=n.add(m,v);M=n.mul(M,T),T=n.add(I,U),M=n.sub(M,T),T=n.add(d,p);let C=n.add(m,B);return T=n.mul(T,C),C=n.add(I,N),T=n.sub(T,C),C=n.add(u,p),w=n.add(v,B),C=n.mul(C,w),w=n.add(U,N),C=n.sub(C,w),A=n.mul(q,T),w=n.mul(L,N),A=n.add(w,A),w=n.sub(U,A),A=n.add(U,A),S=n.mul(w,A),U=n.add(I,I),U=n.add(U,I),N=n.mul(q,N),T=n.mul(L,T),U=n.add(U,N),N=n.sub(I,N),N=n.mul(q,N),T=n.add(T,N),I=n.mul(U,T),S=n.add(S,I),I=n.mul(C,T),w=n.mul(M,w),w=n.sub(w,I),I=n.mul(M,U),A=n.mul(C,A),A=n.add(A,I),new _(w,S,A)}subtract(h){return this.add(h.negate())}is0(){return this.equals(_.ZERO)}multiply(h){let{endo:d}=e;if(!o.isValidNot0(h))throw new Error("invalid scalar: out of range");let u,p,m=v=>ft.cached(this,v,B=>jt(_,B));if(d){let{k1neg:v,k1:B,k2neg:w,k2:S}=tt(h),{p:A,f:q}=m(B),{p:L,f:I}=m(S);p=q.add(I),u=pt(d.beta,A,L,v,w)}else{let{p:v,f:B}=m(h);u=v,p=B}return jt(_,[u,p])[0]}multiplyUnsafe(h){let{endo:d}=e,u=this;if(!o.isValid(h))throw new Error("invalid scalar: out of range");if(h===F||u.is0())return _.ZERO;if(h===wt)return u;if(ft.hasCache(this))return this.multiply(h);if(d){let{k1neg:p,k1:m,k2neg:v,k2:B}=tt(h),{p1:w,p2:S}=Pe(_,u,m,B);return pt(d.beta,w,S,p,v)}else return ft.unsafe(u,h)}multiplyAndAddUnsafe(h,d,u){let p=this.multiplyUnsafe(d).add(h.multiplyUnsafe(u));return p.is0()?void 0:p}toAffine(h){return xt(this,h)}isTorsionFree(){let{isTorsionFree:h}=e;return s===wt?!0:h?h(_,this):ft.unsafe(this,c).is0()}clearCofactor(){let{clearCofactor:h}=e;return s===wt?this:h?h(_,this):this.multiplyUnsafe(s)}isSmallOrder(){return this.multiplyUnsafe(s).is0()}toBytes(h=!0){return Et(h,"isCompressed"),this.assertValidity(),l(_,this,h)}toHex(h=!0){return $(this.toBytes(h))}toString(){return`<Point ${this.is0()?"ZERO":this.toHex()}>`}get px(){return this.X}get py(){return this.X}get pz(){return this.Z}toRawBytes(h=!0){return this.toBytes(h)}_setWindowSize(h){this.precompute(h)}static normalizeZ(h){return jt(_,h)}static msm(h,d){return We(_,o,h,d)}static fromPrivateKey(h){return _.BASE.multiply(yt(o,h))}}_.BASE=new _(i.Gx,i.Gy,n.ONE),_.ZERO=new _(n.ZERO,n.ONE,n.ZERO),_.Fp=n,_.Fn=o;let Ht=o.BITS,ft=new Kt(_,e.endo?Math.ceil(Ht/2):Ht);return _.BASE.precompute(8),_}function Fe(t){return Uint8Array.of(t?2:3)}function tn(t,e){return{secretKey:e.BYTES,publicKey:1+t.BYTES,publicKeyUncompressed:1+2*t.BYTES,publicKeyHasPrefix:!0,signature:2*e.BYTES}}function Vn(t,e={}){let{Fn:r}=t,n=e.randomBytes||kt,o=Object.assign(tn(t.Fp,r),{seed:re(r.ORDER)});function i(l){try{return!!yt(r,l)}catch{return!1}}function s(l,y){let{publicKey:E,publicKeyUncompressed:O}=o;try{let R=l.length;return y===!0&&R!==E||y===!1&&R!==O?!1:!!t.fromBytes(l)}catch{return!1}}function c(l=n(o.seed)){return oe(ot(l,o.seed,"seed"),r.ORDER)}function f(l,y=!0){return t.BASE.multiply(yt(r,l)).toBytes(y)}function b(l){let y=c(l);return{secretKey:y,publicKey:f(y)}}function x(l){if(typeof l=="bigint")return!1;if(l instanceof t)return!0;let{secretKey:y,publicKey:E,publicKeyUncompressed:O}=o;if(r.allowedLengths||y===E)return;let R=V("key",l).length;return R===E||R===O}function g(l,y,E=!0){if(x(l)===!0)throw new Error("first arg must be private key");if(x(y)===!1)throw new Error("second arg must be public key");let O=yt(r,l);return t.fromHex(y).multiply(O).toBytes(E)}return Object.freeze({getPublicKey:f,getSharedSecret:g,keygen:b,Point:t,utils:{isValidSecretKey:i,isValidPublicKey:s,randomSecretKey:c,isValidPrivateKey:i,randomPrivateKey:c,normPrivateKeyToScalar:l=>yt(r,l),precompute(l=8,y=t.BASE){return y.precompute(l,!1)}},lengths:o})}function Zn(t,e,r={}){Lt(e),St(r,{},{hmac:"function",lowS:"boolean",randomBytes:"function",bits2int:"function",bits2int_modN:"function"});let n=r.randomBytes||kt,o=r.hmac||((d,...u)=>Pt(e,d,Y(...u))),{Fp:i,Fn:s}=t,{ORDER:c,BITS:f}=s,{keygen:b,getPublicKey:x,getSharedSecret:g,utils:a,lengths:l}=Vn(t,r),y={prehash:!1,lowS:typeof r.lowS=="boolean"?r.lowS:!1,format:void 0,extraEntropy:!1},E="compact";function O(d){let u=c>>wt;return d>u}function R(d,u){if(!s.isValidNot0(u))throw new Error(`invalid signature ${d}: out of range 1..Point.Fn.ORDER`);return u}function Bt(d,u){ae(u);let p=l.signature,m=u==="compact"?p:u==="recovered"?p+1:void 0;return ot(d,m,`${u} signature`)}class k{constructor(u,p,m){this.r=R("r",u),this.s=R("s",p),m!=null&&(this.recovery=m),Object.freeze(this)}static fromBytes(u,p=E){Bt(u,p);let m;if(p==="der"){let{r:S,s:A}=J.toSig(ot(u));return new k(S,A)}p==="recovered"&&(m=u[0],p="compact",u=u.subarray(1));let v=s.BYTES,B=u.subarray(0,v),w=u.subarray(v,v*2);return new k(s.fromBytes(B),s.fromBytes(w),m)}static fromHex(u,p){return this.fromBytes(lt(u),p)}addRecoveryBit(u){return new k(this.r,this.s,u)}recoverPublicKey(u){let p=i.ORDER,{r:m,s:v,recovery:B}=this;if(B==null||![0,1,2,3].includes(B))throw new Error("recovery id invalid");if(c*Je<p&&B>1)throw new Error("recovery id is ambiguous for h>1 curve");let S=B===2||B===3?m+c:m;if(!i.isValid(S))throw new Error("recovery id 2 or 3 invalid");let A=i.toBytes(S),q=t.fromBytes(Y(Fe((B&1)===0),A)),L=s.inv(S),I=tt(V("msgHash",u)),U=s.create(-I*L),N=s.create(v*L),M=t.BASE.multiplyUnsafe(U).add(q.multiplyUnsafe(N));if(M.is0())throw new Error("point at infinify");return M.assertValidity(),M}hasHighS(){return O(this.s)}toBytes(u=E){if(ae(u),u==="der")return lt(J.hexFromSig(this));let p=s.toBytes(this.r),m=s.toBytes(this.s);if(u==="recovered"){if(this.recovery==null)throw new Error("recovery bit must be present");return Y(Uint8Array.of(this.recovery),p,m)}return Y(p,m)}toHex(u){return $(this.toBytes(u))}assertValidity(){}static fromCompact(u){return k.fromBytes(V("sig",u),"compact")}static fromDER(u){return k.fromBytes(V("sig",u),"der")}normalizeS(){return this.hasHighS()?new k(this.r,s.neg(this.s),this.recovery):this}toDERRawBytes(){return this.toBytes("der")}toDERHex(){return $(this.toBytes("der"))}toCompactRawBytes(){return this.toBytes("compact")}toCompactHex(){return $(this.toBytes("compact"))}}let ct=r.bits2int||function(u){if(u.length>8192)throw new Error("input is too large");let p=gt(u),m=u.length*8-f;return m>0?p>>BigInt(m):p},tt=r.bits2int_modN||function(u){return s.create(ct(u))},xt=st(f);function It(d){return Ue("num < 2^"+f,d,F,xt),s.toBytes(d)}function pt(d,u){return ot(d,void 0,"message"),u?ot(e(d),void 0,"prehashed message"):d}function _(d,u,p){if(["recovered","canonical"].some(U=>U in p))throw new Error("sign() legacy options not supported");let{lowS:m,prehash:v,extraEntropy:B}=fe(p,y);d=pt(d,v);let w=tt(d),S=yt(s,u),A=[It(S),It(w)];if(B!=null&&B!==!1){let U=B===!0?n(l.secretKey):B;A.push(V("extraEntropy",U))}let q=Y(...A),L=w;function I(U){let N=ct(U);if(!s.isValidNot0(N))return;let M=s.inv(N),T=t.BASE.multiply(N).toAffine(),C=s.create(T.x);if(C===F)return;let Ot=s.create(M*s.create(L+C*S));if(Ot===F)return;let be=(T.x===C?0:2)|Number(T.y&wt),xe=Ot;return m&&O(Ot)&&(xe=s.neg(Ot),be^=1),new k(C,xe,be)}return{seed:q,k2sig:I}}function Ht(d,u,p={}){d=V("message",d);let{seed:m,k2sig:v}=_(d,u,p);return Te(e.outputLen,s.BYTES,o)(m,v)}function ft(d){let u,p=typeof d=="string"||ut(d),m=!p&&d!==null&&typeof d=="object"&&typeof d.r=="bigint"&&typeof d.s=="bigint";if(!p&&!m)throw new Error("invalid signature, expected Uint8Array, hex string or Signature instance");if(m)u=new k(d.r,d.s);else if(p){try{u=k.fromBytes(V("sig",d),"der")}catch(v){if(!(v instanceof J.Err))throw v}if(!u)try{u=k.fromBytes(V("sig",d),"compact")}catch{return!1}}return u||!1}function H(d,u,p,m={}){let{lowS:v,prehash:B,format:w}=fe(m,y);if(p=V("publicKey",p),u=pt(V("message",u),B),"strict"in m)throw new Error("options.strict was renamed to lowS");let S=w===void 0?ft(d):k.fromBytes(V("sig",d),w);if(S===!1)return!1;try{let A=t.fromBytes(p);if(v&&S.hasHighS())return!1;let{r:q,s:L}=S,I=tt(u),U=s.inv(L),N=s.create(I*U),M=s.create(q*U),T=t.BASE.multiplyUnsafe(N).add(A.multiplyUnsafe(M));return T.is0()?!1:s.create(T.x)===q}catch{return!1}}function h(d,u,p={}){let{prehash:m}=fe(p,y);return u=pt(u,m),k.fromBytes(d,"recovered").recoverPublicKey(u).toBytes()}return Object.freeze({keygen:b,getPublicKey:x,getSharedSecret:g,utils:a,lengths:l,Point:t,sign:Ht,verify:H,recoverPublicKey:h,Signature:k,hash:e})}function Dn(t){let e={a:t.a,b:t.b,p:t.Fp.ORDER,n:t.n,h:t.h,Gx:t.Gx,Gy:t.Gy},r=t.Fp,n=t.allowedPrivateKeyLengths?Array.from(new Set(t.allowedPrivateKeyLengths.map(s=>Math.ceil(s/2)))):void 0,o=it(e.n,{BITS:t.nBitLength,allowedLengths:n,modFromBytes:t.wrapPrivateKey}),i={Fp:r,Fn:o,allowInfinityPoint:t.allowInfinityPoint,endo:t.endo,isTorsionFree:t.isTorsionFree,clearCofactor:t.clearCofactor,fromBytes:t.fromBytes,toBytes:t.toBytes};return{CURVE:e,curveOpts:i}}function Mn(t){let{CURVE:e,curveOpts:r}=Dn(t),n={hmac:t.hmac,randomBytes:t.randomBytes,lowS:t.lowS,bits2int:t.bits2int,bits2int_modN:t.bits2int_modN};return{CURVE:e,curveOpts:r,hash:t.hash,ecdsaOpts:n}}function Kn(t,e){let r=e.Point;return Object.assign({},e,{ProjectivePoint:r,CURVE:Object.assign({},t,Mt(r.Fn.ORDER,r.Fn.BITS))})}function en(t){let{CURVE:e,curveOpts:r,hash:n,ecdsaOpts:o}=Mn(t),i=Cn(e,r),s=Zn(i,n,o);return Kn(t,s)}function nn(t,e){let r=n=>en({...t,hash:n});return{...r(e),create:r}}var de={p:BigInt("0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f"),n:BigInt("0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141"),h:BigInt(1),a:BigInt(0),b:BigInt(7),Gx:BigInt("0x79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"),Gy:BigInt("0x483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8")},jn={beta:BigInt("0x7ae96a2b657c07106e64479eac3434e99cf0497512f58995c1396c28719501ee"),basises:[[BigInt("0x3086d221a7d46bcde86c90e49284eb15"),-BigInt("0xe4437ed6010e88286f547fa90abfe4c3")],[BigInt("0x114ca50f7a8e2f3f657c1108d9d44cfd8"),BigInt("0x3086d221a7d46bcde86c90e49284eb15")]]};var rn=BigInt(2);function Gn(t){let e=de.p,r=BigInt(3),n=BigInt(6),o=BigInt(11),i=BigInt(22),s=BigInt(23),c=BigInt(44),f=BigInt(88),b=t*t*t%e,x=b*b*t%e,g=j(x,r,e)*x%e,a=j(g,r,e)*x%e,l=j(a,rn,e)*b%e,y=j(l,o,e)*l%e,E=j(y,i,e)*y%e,O=j(E,c,e)*E%e,R=j(O,f,e)*O%e,Bt=j(R,c,e)*E%e,k=j(Bt,r,e)*x%e,ct=j(k,s,e)*y%e,tt=j(ct,n,e)*b%e,xt=j(tt,rn,e);if(!le.eql(le.sqr(xt),t))throw new Error("Cannot find square root");return xt}var le=it(de.p,{sqrt:Gn}),on=nn({...de,Fp:le,lowS:!0,endo:jn},He);var Xn=BigInt(0),_t=BigInt(1),Yn=BigInt(2),zn=BigInt(7),Pn=BigInt(256),Wn=BigInt(113),fn=[],an=[],un=[];for(let t=0,e=_t,r=1,n=0;t<24;t++){[r,n]=[n,(2*r+3*n)%5],fn.push(2*(5*n+r)),an.push((t+1)*(t+2)/2%64);let o=Xn;for(let i=0;i<7;i++)e=(e<<_t^(e>>zn)*Wn)%Pn,e&Yn&&(o^=_t<<(_t<<BigInt(i))-_t);un.push(o)}var ln=ve(un,!0),$n=ln[0],Qn=ln[1],sn=(t,e,r)=>r>32?_e(t,e,r):Se(t,e,r),cn=(t,e,r)=>r>32?Ie(t,e,r):Ae(t,e,r);function Jn(t,e=24){let r=new Uint32Array(10);for(let n=24-e;n<24;n++){for(let s=0;s<10;s++)r[s]=t[s]^t[s+10]^t[s+20]^t[s+30]^t[s+40];for(let s=0;s<10;s+=2){let c=(s+8)%10,f=(s+2)%10,b=r[f],x=r[f+1],g=sn(b,x,1)^r[c],a=cn(b,x,1)^r[c+1];for(let l=0;l<50;l+=10)t[s+l]^=g,t[s+l+1]^=a}let o=t[2],i=t[3];for(let s=0;s<24;s++){let c=an[s],f=sn(o,i,c),b=cn(o,i,c),x=fn[s];o=t[x],i=t[x+1],t[x]=f,t[x+1]=b}for(let s=0;s<50;s+=10){for(let c=0;c<10;c++)r[c]=t[s+c];for(let c=0;c<10;c++)t[s+c]^=~r[(c+2)%10]&r[(c+4)%10]}t[0]^=$n[n],t[1]^=Qn[n]}z(r)}var he=class t extends nt{constructor(e,r,n,o=!1,i=24){if(super(),this.pos=0,this.posOut=0,this.finished=!1,this.destroyed=!1,this.enableXOF=!1,this.blockLen=e,this.suffix=r,this.outputLen=n,this.enableXOF=o,this.rounds=i,et(n),!(0<e&&e<200))throw new Error("only keccak-f1600 function is supported");this.state=new Uint8Array(200),this.state32=ge(this.state)}clone(){return this._cloneInto()}keccak(){Yt(this.state32),Jn(this.state32,this.rounds),Yt(this.state32),this.posOut=0,this.pos=0}update(e){W(this),e=dt(e),K(e);let{blockLen:r,state:n}=this,o=e.length;for(let i=0;i<o;){let s=Math.min(r-this.pos,o-i);for(let c=0;c<s;c++)n[this.pos++]^=e[i++];this.pos===r&&this.keccak()}return this}finish(){if(this.finished)return;this.finished=!0;let{state:e,suffix:r,pos:n,blockLen:o}=this;e[n]^=r,(r&128)!==0&&n===o-1&&this.keccak(),e[o-1]^=128,this.keccak()}writeInto(e){W(this,!1),K(e),this.finish();let r=this.state,{blockLen:n}=this;for(let o=0,i=e.length;o<i;){this.posOut>=n&&this.keccak();let s=Math.min(n-this.posOut,i-o);e.set(r.subarray(this.posOut,this.posOut+s),o),this.posOut+=s,o+=s}return e}xofInto(e){if(!this.enableXOF)throw new Error("XOF is not possible for this instance");return this.writeInto(e)}xof(e){return et(e),this.xofInto(new Uint8Array(e))}digestInto(e){if(Ut(e,this),this.finished)throw new Error("digest() was already called");return this.writeInto(e),this.destroy(),e}digest(){return this.digestInto(new Uint8Array(this.outputLen))}destroy(){this.destroyed=!0,z(this.state)}_cloneInto(e){let{blockLen:r,suffix:n,outputLen:o,rounds:i,enableXOF:s}=this;return e||(e=new t(r,n,o,s,i)),e.state32.set(this.state32),e.pos=this.pos,e.posOut=this.posOut,e.finished=this.finished,e.rounds=i,e.suffix=n,e.outputLen=o,e.enableXOF=s,e.destroyed=this.destroyed,e}},Fn=(t,e,r)=>Rt(()=>new he(e,t,r));var dn=Fn(1,136,256/8);return mn(tr);})();</script>
 <script>
 'use strict';
-/* =====================================================================================
-   AeroGuard dashboard. Vanilla JS. Crypto: @noble/curves + @noble/hashes (the libraries
-   viem uses), inlined at the bottom of this file as window.AGC so the inspector also
-   works offline and from file://.
-   ===================================================================================== */
+// aeroguard dashboard. plain js, no build step.
+// crypto = noble curves/hashes (same libs viem uses), inlined above as window.AGC
 const AIRNODE = '0x83FE2E8F24E66520B1902C3507De4F471248f2Ec';
-const DEFAULT_MAX_AGE = 3600;            // Deploy.s.sol: defaultMaxAge = 1 hours
-const PREMIUM_BPS = 800;                 // Deploy.s.sol: 8% premium
+const DEFAULT_MAX_AGE = 3600;            // same as Deploy.s.sol (1h)
+const PREMIUM_BPS = 800;                 // 8%
 const MAX_FUTURE_SKEW = 60, HALF = 7200, FULL = 10800;
 const PROJ = {
   arrival: [['actual', '/0/arrival/revisedTime/utc'], ['scheduled', '/0/arrival/scheduledTime/utc'], ['status', '/0/status']],
@@ -646,7 +643,7 @@ let EXPLORER = 'https://sepolia.basescan.org'; // from GET /health when a keeper
 const scan = (kind, v) => `${EXPLORER}/${kind}/${v}`;
 const scanLink = (kind, v, text) => (EXPLORER ? `<a href="${scan(kind, v)}" target="_blank" rel="noopener">${text}</a>` : text);
 
-/* ------------------------------------------------------------------ crypto */
+// --- crypto
 const enc = new TextEncoder();
 const toHex = (b) => '0x' + Array.from(b, (x) => x.toString(16).padStart(2, '0')).join('');
 const fromHex = (h) => {
@@ -667,19 +664,19 @@ const addrOfPub = (pub65) => checksum(toHex(keccak(pub65.slice(1)).slice(12)));
 const addrOfPk = (pk) => addrOfPub(AGC.secp256k1.getPublicKey(pk, false));
 const SECP_N_HALF = AGC.secp256k1.CURVE.n / 2n;
 
-/** keccak256(utf8(JSON.stringify([op, sortedParams, sortedProjection]))) — same as FlightDelayCover.requestHashFor */
+// same hash the contract builds in requestHashFor: keccak(json [op, sorted params, sorted projection])
 const requestHashFor = (flight, date, kind) =>
   toHex(keccak(enc.encode(JSON.stringify(['flightStatusOnDate', [['dateLocal', date], ['searchBy', 'number'], ['searchParam', flight]], PROJ[kind]]))));
-/** keccak256(abi.encodePacked(bytes32 requestHash, uint256 timestamp, bytes data)) */
+// keccak(requestHash ‖ timestamp ‖ data), packed
 const digestOf = (r) => {
   const rh = fromHex(r.requestHash);
   if (rh.length !== 32) throw new Error('requestHash must be 32 bytes');
   return keccak(concat(rh, u256(r.timestamp), enc.encode(r.data)));
 };
-/** EIP-191: keccak256("\x19Ethereum Signed Message:\n32" ‖ digest) — MessageHashUtils.toEthSignedMessageHash */
+// eip-191 prefix, like toEthSignedMessageHash in OZ
 const ethSigned = (d) => keccak(concat(enc.encode('\x19Ethereum Signed Message:\n32'), d));
 
-/** Mirrors OpenZeppelin ECDSA.recover. Returns { signer } or { error: 'ECDSA…' }. */
+// does what OZ ECDSA.recover does, incl. the same error names
 const recoverSigner = (r) => {
   let sig;
   try { sig = fromHex(r.signature); } catch { return { error: 'ECDSAInvalidSignature()' }; }
@@ -693,13 +690,13 @@ const recoverSigner = (r) => {
     return { signer: addrOfPub(rs.recoverPublicKey(ethSigned(digestOf(r))).toRawBytes(false)) };
   } catch { return { error: 'ECDSAInvalidSignature()' }; }
 };
-/** Signs exactly like an Airnode v2 would — used for the demo fixture and the "attacker key" attack. */
+// sign like an airnode would. used for the demo + the attacker-key attack
 const signLikeAirnode = (r, pk) => {
-  const sig = AGC.secp256k1.sign(ethSigned(digestOf(r)), pk); // low-s by default
+  const sig = AGC.secp256k1.sign(ethSigned(digestOf(r)), pk); // noble gives low-s already
   return toHex(concat(sig.toCompactRawBytes(), new Uint8Array([27 + sig.recovery])));
 };
 
-/** Same forms IsoTimestamp.sol accepts: "2026-10-23 10:55Z", "…T10:55:00+02:00", "2024-11-05". */
+// parses the same formats as IsoTimestamp.sol ("2026-10-23 10:55Z", "...T10:55:00+02:00", "2024-11-05")
 const isoParse = (t) => {
   const m = /^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2})(?::(\d{2})(?:\.\d+)?)?(Z|([+-])(\d{2})(?::?(\d{2}))?))?$/.exec(String(t));
   if (!m) return NaN;
@@ -711,17 +708,17 @@ const isoOut = (ts) => new Date(ts * 1000).toISOString().slice(0, 16).replace('T
 const fmtTs = (ts) => { const n = Number(ts); return Number.isFinite(n) && n > 0 ? isoOut(n) : String(ts); };
 const dur = (s) => { const a = Math.abs(Math.round(s)), h = Math.floor(a / 3600), m = Math.floor((a % 3600) / 60), x = a % 60; return (s < 0 ? '-' : '') + (h ? `${h}h ${String(m).padStart(2, '0')}m` : m ? `${m}m ${String(x).padStart(2, '0')}s` : `${x}s`); };
 
-/* ------------------------------------------------------------------ demo fixture */
-// A PUBLIC demo key. It is not the Airnode key, which is the whole point: the contract rejects its signatures.
+// --- demo fixture
+// public demo key, NOT the airnode. thats the point: the contract rejects it
 const DEMO_PK = keccak(enc.encode('AeroGuard public demo key. Not the AeroDataBox Airnode. Never fund it.'));
 const DEMO_SIGNER = addrOfPk(DEMO_PK);
 const buildFixture = () => {
   const now = Math.floor(Date.now() / 1000);
-  const sched = Math.floor((now - 4 * 3600) / 300) * 300;     // scheduled 4 h ago
-  const actual = sched + 156 * 60;                               // landed 2 h 36 min late → 50% tier
+  const sched = Math.floor((now - 4 * 3600) / 300) * 300;     // sched 4h ago
+  const actual = sched + 156 * 60;                               // 2h36 late → 50%
   const date = new Date((sched - 2 * 3600) * 1000).toISOString().slice(0, 10);
   const r = {
-    airnode: AIRNODE, // the claim costs nothing; the contract ignores it and recovers the real signer
+    airnode: AIRNODE, // anyone can write this field, contract ignores it
     requestHash: requestHashFor('LH1234', date, 'arrival'),
     timestamp: String(now - 6 * 60),
     data: JSON.stringify({ actual: isoOut(actual), scheduled: isoOut(sched), status: 'Arrived' }),
@@ -729,7 +726,7 @@ const buildFixture = () => {
   return { flight: 'LH1234', date, response: { ...r, signature: signLikeAirnode(r, DEMO_PK) } };
 };
 
-/* ------------------------------------------------------------------ the contract, re-run locally */
+// --- same checks as the contract, but in js
 const EXPLAIN = {
   WrongRequest: (a) => `This signature answers a different question (another flight, date or projection). The contract derived this policy's two request hashes from its flight and date when it was bought; ${short(a[0], 10)} is neither of them.`,
   NotSignedByAirnode: (a) => `The signature recovers to ${a[0]}, not the AeroDataBox Airnode ${short(AIRNODE)}. An edited byte or a forged key both end up here.`,
@@ -763,13 +760,13 @@ function evaluate({ resp, flight, date, maxAge, now, policy }) {
   };
   const out = { rows, kind: null };
 
-  // 0. policy still open
+  // policy still open?
   if (policy) {
     if (Number(policy.status) !== 1) add('fail', 'Policy is open', `Policy #${policy.id} is ${policy.statusName}. Settled and expired policies cannot pay again.`, '', `NotActive(${policy.id})`);
     else add('pass', 'Policy is open', `Policy #${policy.id} is Active and waiting for evidence.`);
   }
 
-  // 1. right request: hash derived from flight + date, as the contract does
+  // right request? hash from flight + date, like on chain
   const okF = /^[A-Z0-9]{3,8}$/.test(flight), okD = /^\d{4}-\d{2}-\d{2}$/.test(date);
   const exp = okF && okD ? { arrival: requestHashFor(flight, date, 'arrival'), status: requestHashFor(flight, date, 'status') } : null;
   out.expected = exp;
@@ -787,7 +784,7 @@ function evaluate({ resp, flight, date, maxAge, now, policy }) {
     else add('fail', 'Answers the right question', `The response was signed for some other request, not ${flight} on ${date}.`, detail, `WrongRequest(${resp.requestHash})`);
   }
 
-  // 2. signer (binds requestHash + timestamp + data)
+  // signer (covers requestHash + timestamp + data)
   let rec;
   try { rec = recoverSigner(resp); } catch (e) { rec = { error: 'ECDSAInvalidSignature()' }; }
   out.signer = rec.signer;
@@ -799,7 +796,7 @@ function evaluate({ resp, flight, date, maxAge, now, policy }) {
     rec.signer === DEMO_SIGNER ? 'Recovered the public demo key. Perfectly formatted, but not signed by the Airnode, so it is worthless.' : 'Recovers to some other key. Either the data, timestamp or requestHash was edited after signing, or an attacker signed it.',
     `recovered <b>${rec.signer}</b><br>required &nbsp;<b>${AIRNODE}</b>${claim}`, `NotSignedByAirnode(${rec.signer})`);
 
-  // 3 + 4. time
+  // time checks
   const ts = /^\d+$/.test(String(resp.timestamp).trim()) ? Number(resp.timestamp) : NaN;
   if (!Number.isFinite(ts)) { add('fail', 'Not from the future', 'timestamp must be a unix time in seconds.', '', 'InvalidTimestamp'); add('skip', 'Fresh', 'Needs a valid timestamp.'); }
   else {
@@ -810,13 +807,13 @@ function evaluate({ resp, flight, date, maxAge, now, policy }) {
     else add('pass', `Fresh (≤ ${dur(maxAge)} old)`, `Signed ${dur(Math.max(0, age))} ago. ${dur(maxAge - age)} left before it goes stale.`, `age <b>${dur(Math.max(0, age))}</b> ≤ maxAge <b>${maxAge}s</b>`);
   }
 
-  // 5. replay (needs chain state)
+  // replay, only the chain knows
   let rid = '';
   try { rid = toHex(keccak(fromHex(resp.signature))); } catch {}
   out.responseId = rid;
   add('info', 'Settles each policy once', 'Checked on-chain: a policy leaves Active before any transfer, so it can never pay twice (NotActive). One signed flight outcome may settle every policy on that same flight — same truth, no extra paid lookups.', rid ? `responseId <b>${rid}</b>` : '');
 
-  // 6 + 7. decode, finality, observation time
+  // decode data, final?, observed after landing?
   let d = null;
   try { d = JSON.parse(resp.data); if (!d || typeof d !== 'object') throw 0; } catch { d = null; }
   out.decoded = d;
@@ -845,7 +842,7 @@ function evaluate({ resp, flight, date, maxAge, now, policy }) {
   return out;
 }
 
-/* ------------------------------------------------------------------ inspector state + render */
+// --- inspector state + render
 const S = { policies: [], policy: null, original: null, source: null, online: false, chain: null, clock: 0, free: null, keeper: null, evidence: [], apiLog: [], cardano: { run: null, pasted: null, live: null } };
 const F = { airnode: $('fAirnode'), requestHash: $('fRequestHash'), timestamp: $('fTimestamp'), data: $('fData'), signature: $('fSignature') };
 const readResp = () => Object.fromEntries(Object.entries(F).map(([k, el]) => [k, el.value.trim() === '' && k !== 'data' ? '' : (k === 'data' ? el.value : el.value.trim())]));
@@ -935,7 +932,7 @@ function render() {
   ].map(([k, val]) => `<dt>${k}</dt><dd>${val}</dd>`).join('');
 }
 
-/* ------------------------------------------------------------------ inspector actions */
+// --- inspector actions
 function loadFixture() {
   const fx = buildFixture();
   selectPolicy('');
@@ -994,7 +991,7 @@ async function fetchEvidence() {
   if (!flight || !date) { $('cFlight').focus(); return; }
   const b = $('fetchBtn'); b.disabled = true;
   try {
-    // Static page: the signed responses the keeper bought and published. With the keeper API: buy one now.
+    // first look in what the keeper already published, only buy a new one if the api is running
     const known = evidenceFor({ arrivalRequestHash: requestHashFor(flight, date, 'arrival'), statusRequestHash: requestHashFor(flight, date, 'status') });
     if (known) return setResponse(known, 'live', evidenceLabel(known), { flight, date });
     if (!S.online) throw new Error(`The keeper has not published a signed response for ${flight} on ${date}. Pick a policy, or load the real Airnode proof.`);
@@ -1027,9 +1024,9 @@ $('file').addEventListener('change', async (e) => {
   e.target.value = '';
 });
 
-/* ------------------------------------------------------------------ Base Sepolia, read-only (no wallet, no key) */
-// Default: the deployed FlightDelayCover on Base Sepolia. With a keeper API, network + contract come from GET /health
-// (a rehearsal on anvil has its own contract). ?rpc= / ?contract= point the page at a local replay by hand.
+// --- chain reads, no wallet needed
+// default = live contract on base sepolia. if a keeper api runs, take network/contract from /health
+// (anvil rehearsal deploys its own). ?rpc= and ?contract= are for testing against anvil
 const QS = new URLSearchParams(location.search);
 const LIVE_CONTRACT = '0x257054204c4Cd43846C4553eBe6D709841980a80';
 const BASE_SEPOLIA_RPCS = ['https://sepolia.base.org', 'https://base-sepolia-rpc.publicnode.com'];
@@ -1039,16 +1036,16 @@ let NETWORK = QS.get('rpc') ? null : 'Base Sepolia';
 let IS_LIVE = CONTRACT.toLowerCase() === LIVE_CONTRACT.toLowerCase() && !QS.get('rpc');
 const KEEPER_JSON = QS.get('keeper') || 'https://raw.githubusercontent.com/womp-maindev/aeroguard/keeper-data/keeper.json';
 const ACTIONS_URL = 'https://github.com/womp-maindev/aeroguard/actions/workflows/keeper.yml';
-// purchase txs of the live policies (README "Live evidence")
+// buy txs of the 4 live policies (from the readme)
 const LIVE_BOUGHT_TX = {
   1: '0xbfd3ae73074ff63a3ef5f7e56b211d1ffb7223e2db944d0cc38ed069d1958b8d', 2: '0x7e71c55b970b96fb1588ddde1da029060d805c9b87691280ca2504098d4e69d2',
   3: '0x2aeed6010ced165f66c26ea0f34e7068421a327cac0c6375d72ef7b794f41672', 4: '0x7e675d8f94946db1d02a40c1eff87ac5a0ca29b65730751cf0d902d767d2b0d1',
 };
 const STATUS = ['None', 'Active', 'PaidHalf', 'PaidFull', 'ClosedNoPayout', 'Expired'];
-const POLICIES_SLOT = 4n, RESERVED_SLOT = 2n; // forge inspect FlightDelayCover storageLayout
+const POLICIES_SLOT = 4n, RESERVED_SLOT = 2n; // from forge inspect ... storageLayout
 
 let rpcAt = 0, rpcSeq = 0;
-/** JSON-RPC with fallback. A JSON-RPC error (e.g. a revert) is an answer, so it is thrown without trying the next node. */
+// json-rpc with a backup node. a revert is a real answer, so no retry on that
 async function rpc(method, params) {
   let last;
   for (let k = 0; k < RPCS.length; k++) {
@@ -1066,7 +1063,7 @@ async function rpc(method, params) {
 }
 const rpcHost = () => { try { return new URL(RPCS[rpcAt]).host; } catch { return RPCS[rpcAt]; } };
 
-/* minimal ABI codec: exactly what the page calls */
+// tiny abi encode/decode, only what we need
 const strip = (h) => String(h ?? '').replace(/^0x/i, '');
 const pad = (h) => strip(h).padStart(64, '0');
 const hexN = (n) => BigInt(n).toString(16);
@@ -1079,7 +1076,7 @@ const call = (sig, args = '') => rpc('eth_call', [{ to: CONTRACT, data: selector
 
 async function chainPolicy(id) {
   const h = strip(await call('policy(uint256)', pad(hexN(id))));
-  const t = Number(wU(h.slice(0, 64))); // the struct is dynamic: word 0 is its offset
+  const t = Number(wU(h.slice(0, 64))); // struct has strings → first word is an offset
   const W = (i) => h.slice((t + 32 * i) * 2, (t + 32 * i + 32) * 2);
   const status = Number(wU(W(3)));
   return {
@@ -1101,7 +1098,7 @@ const ERRORS = ['WrongRequest(bytes32)', 'Stale(uint256)', 'FromTheFuture(uint25
   'FieldNotFound(string)', 'UnexpectedValue(string)', 'ECDSAInvalidSignature()', 'ECDSAInvalidSignatureLength(uint256)', 'ECDSAInvalidSignatureS(bytes32)',
   'ReentrancyGuardReentrantCall()', 'SafeERC20FailedOperation(address)', 'Error(string)', 'Panic(uint256)'];
 const ERR_BY_SEL = Object.fromEntries(ERRORS.map((s) => [selector(s), s]));
-/** Revert data → "Stale(1793378516)", the same form the keeper CLI prints. */
+// revert data → "Stale(1793378516)", same format as the cli
 function decodeRevert(data) {
   const h = strip(data);
   if (h.length < 8) return 'reverted without a reason';
@@ -1113,11 +1110,9 @@ function decodeRevert(data) {
 }
 const revertData = (e) => { const d = e?.rpc?.data; return typeof d === 'string' ? d : typeof d?.data === 'string' ? d.data : undefined; };
 
-/**
- * settle() as an eth_call against the deployed bytecode. Nothing is written.
- * reopen: a settled policy's status slot reads Active for this call (state override), so the oracle checks run again.
- * at: block.timestamp for this call (block override), to replay genuine evidence at the time it was fresh.
- */
+// settle() but as eth_call, so nothing gets written.
+// reopen: pretend a settled policy is still Active (state override) so the oracle checks run
+// at: fake block.timestamp (block override) to replay real evidence when it was still fresh
 async function simulateSettle(p, r, { reopen = false, at } = {}) {
   if (!/^\d+$/.test(String(r.timestamp).trim())) return { ok: false, reason: 'InvalidTimestamp (not a unix time)' };
   let sig;
@@ -1131,13 +1126,13 @@ async function simulateSettle(p, r, { reopen = false, at } = {}) {
     const base = BigInt(toHex(keccak(concat(u256(p.id), u256(POLICIES_SLOT)))));
     const statusSlot = '0x' + pad(hexN(base + 1n)), reservedSlot = '0x' + pad(hexN(RESERVED_SLOT));
     const [cur, res] = await Promise.all([rpc('eth_getStorageAt', [CONTRACT, statusSlot, 'latest']), rpc('eth_getStorageAt', [CONTRACT, reservedSlot, 'latest'])]);
-    // status is the lowest byte of the slot it shares with premium; reserved must cover the coverage _close subtracts
+    // status = lowest byte (shares the slot w/ premium). bump reserved too or _close underflows
     params.push({ [CONTRACT]: { stateDiff: { [statusSlot]: '0x' + pad(cur).slice(0, 62) + '01', [reservedSlot]: '0x' + pad(hexN(wU(strip(res)) + BigInt(p.coverage))) } } });
     used.push(`status ${p.statusName} → Active`);
   }
   if (at) { if (params.length < 3) params.push({}); params.push({ time: '0x' + hexN(at) }); used.push(`block time ${isoOut(at)}`); }
-  // A node that rejects eth_call overrides answers with an RPC error, not a revert: try the other nodes, then
-  // fall back to a plain call (which then shows what the live state says, e.g. NotActive) and say so.
+  // some nodes dont support overrides → rpc error (not a revert). try the other node,
+  // if that fails too just do a normal call and say so
   let lastErr;
   for (let k = 0; k < RPCS.length; k++) {
     try {
@@ -1158,8 +1153,8 @@ async function simulateSettle(p, r, { reopen = false, at } = {}) {
   return { ok: false, error: lastErr?.message || 'RPC error', used };
 }
 
-/* ------------------------------------------------------------------ signed evidence the browser can use */
-// The real AirnodeHub-signed status that bought policy #1 (keeper/fixtures/IB1314-status-proof.json), paid in tx 0x544a7241…
+// --- signed evidence
+// the real signed status that bought policy #1 (keeper/fixtures/IB1314-status-proof.json)
 const REAL_PROOFS = [{
   flight: 'IB1314', date: '2026-10-30',
   response: {
@@ -1173,7 +1168,7 @@ const REAL_PROOFS = [{
 }];
 const allEvidence = () => [...S.evidence, ...REAL_PROOFS.map((x) => x.response)];
 const isFinal = (r) => { try { const s = JSON.parse(r.data).status; return s === 'Arrived' || s === 'Canceled'; } catch { return false; } };
-/** Best signed response for a policy: final beats not final, arrival beats status, newer beats older. */
+// pick the best response for a policy: final > not final, arrival > status, newer > older
 function evidenceFor(p) {
   const a = String(p.arrivalRequestHash).toLowerCase(), st = String(p.statusRequestHash).toLowerCase();
   const score = (r) => (isFinal(r) ? 4 : 0) + (r.requestHash.toLowerCase() === a ? 2 : 0);
@@ -1182,8 +1177,8 @@ function evidenceFor(p) {
 }
 const evidenceLabel = (r) => `Airnode-signed · ${fmtTs(r.timestamp).slice(5)}`;
 
-/* ------------------------------------------------------------------ optional keeper API (npm run api) */
-// Only on localhost by default: a page on GitHub Pages has no keeper behind it.
+// --- keeper api (optional, npm run api)
+// only try localhost by default, on pages there is no keeper
 const API = QS.get('api') ?? (location.port === '8787' ? '' : /^(localhost|127\.0\.0\.1|)$/.test(location.hostname) ? 'http://localhost:8787' : null);
 const j = async (p, o) => {
   if (API == null) throw new Error('no keeper API on this page');
@@ -1210,7 +1205,7 @@ function setStatus() {
   }).join(' · ') : '';
 }
 
-/* ------------------------------------------------------------------ policies + stats */
+// --- policies + stats
 const settleTx = () => {
   const m = {};
   for (const run of S.keeper?.runs ?? []) for (const l of run.log ?? []) { const x = /^policy #(\d+) settled/.exec(l.msg); if (x && l.link) m[x[1]] = l.link; }
@@ -1265,7 +1260,7 @@ async function refreshChain() {
   render();
 }
 
-/** GET /health → { contract, network: "Base Sepolia" | "Local anvil", explorer }. Without a keeper: Base Sepolia. */
+// /health gives { contract, network, explorer }. no keeper → stay on base sepolia
 async function probeApi() {
   if (API == null) return;
   let h;
@@ -1281,7 +1276,7 @@ async function probeApi() {
   f.innerHTML = `${scanLink('address', CONTRACT, CONTRACT)} <span style="white-space:nowrap">· ${esc(NETWORK)}</span>`;
 }
 
-/* ------------------------------------------------------------------ keeper log: the keeper API, or what GitHub Actions published */
+// --- keeper log (local api or the json from actions)
 async function refreshKeeper() {
   if (API != null) {
     try { await j('/health'); S.online = true; } catch { S.online = false; }
@@ -1320,7 +1315,7 @@ function renderLog() {
     + ((run.log ?? []).length ? run.log.map(logLine).join('') : '<div class="ln"><span></span><span></span><span class="ts">nothing logged</span></div>')).join('');
 }
 
-/* ------------------------------------------------------------------ tamper lab (eth_call, no key) */
+// --- tamper lab
 const MODES = [
   { m: 'edit', t: 'Edited data', p: 'Rewrites the arrival time and status to claim a bigger payout. Keeps the original signature.' },
   { m: 'wrongreq', t: 'Wrong request', p: "Points the response at another flight's request hash (LH9999) to settle this policy with it." },
@@ -1333,7 +1328,7 @@ $('modes').innerHTML = MODES.map((x) => `<div class="mode"><span class="mn">${x.
   <div class="res" id="res-${x.m}"><span class="e">Not run yet.</span></div></div>`).join('');
 
 const labPolicy = () => S.policies.find((p) => p.id === $('tPolicy').value);
-/** The response every attack starts from, and whether it is a genuine Airnode signature. */
+// what the attacks start from + is it really signed by the airnode
 function labBase(p) {
   if ($('tUseInsp').checked) { const r = readResp(); if (r.signature) return { r, genuine: false, label: "the inspector's response" }; }
   const ev = evidenceFor(p);
@@ -1341,7 +1336,7 @@ function labBase(p) {
     let d = {}; try { d = JSON.parse(ev.data); } catch {}
     return { r: ev, genuine: true, label: `a real Airnode response: ${p.flight} ${ev.requestHash.toLowerCase() === p.arrivalRequestHash.toLowerCase() ? 'arrival' : 'status'} "${d.status}", signed ${fmtTs(ev.timestamp)}` };
   }
-  // No genuine response for this policy in the browser: a correctly shaped one signed by the public demo key.
+  // nothing real for this policy yet → fake one with the demo key, same shape
   const sched = Number(p.scheduledArrival);
   const r = { airnode: AIRNODE, requestHash: p.arrivalRequestHash, timestamp: String(Math.floor(Date.now() / 1000) - 600), data: JSON.stringify({ actual: isoOut(sched + 3 * 3600), scheduled: isoOut(sched), status: 'Arrived' }) };
   return { r: { ...r, signature: signLikeAirnode(r, DEMO_PK) }, genuine: false, label: 'a look-alike signed by the public demo key (no genuine response for this policy is published yet)' };
@@ -1404,7 +1399,7 @@ async function runAttacks() {
   try { for (const m of ['edit', 'wrongreq', 'wrongsigner', 'stale']) await runMode(m); } finally { b.disabled = false; }
 }
 
-/* ------------------------------------------------------------------ get covered (keeper API only) */
+// --- get covered (needs the api)
 $('date').value = new Date().toISOString().slice(0, 10);
 const quote = () => ($('prem').value = `${((+$('cov').value || 0) * PREMIUM_BPS / 10000).toFixed(2)} aUSD`);
 $('cov').addEventListener('input', quote); quote();
@@ -1428,11 +1423,11 @@ async function check() {
   } catch (e) { out.className = 'out err'; out.textContent = e.message; }
 }
 
-/* ------------------------------------------------------------------ Cardano: GET /verdict → 402 → tADA → verdict + proof */
-// cardano/src/server.ts: x402 "exact" scheme on cardano:preprod, 2 tADA per verdict. web/data/cardano-run.json holds a
-// recorded paid run ({ challenge, response }); without one the page shows the server's offer and the evidence it sells.
+// --- cardano: 402 → pay → verdict
+// mirrors cardano/src/server.ts: x402 "exact" on cardano:preprod, 2 tADA per verdict.
+// a real paid run can go into web/data/cardano-run.json ({ challenge, response }), else we show the offer + evidence
 const CARDANO = { network: 'cardano:preprod', scheme: 'exact', amount: '2000000', asset: 'lovelace', maxTimeoutSeconds: 600, flight: 'IB1314', date: '2026-10-30' };
-const CARDANO_SERVER = QS.get('cardano'); // e.g. http://localhost:4021 (needs CORS on that server)
+const CARDANO_SERVER = QS.get('cardano'); // like http://localhost:4021, server needs cors
 const ada = (lovelace) => `${(Number(lovelace) / 1e6).toLocaleString('en', { maximumFractionDigits: 6 })} tADA`;
 const b64json = (s) => { try { return JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(s), (c) => c.charCodeAt(0)))); } catch { return null; } };
 
@@ -1517,7 +1512,7 @@ async function loadCardano() {
   renderCardano();
 }
 
-/* ------------------------------------------------------------------ boot */
+// --- boot
 window.addEventListener('DOMContentLoaded', () => {
   setStatus();
   render();
@@ -1526,7 +1521,7 @@ window.addEventListener('DOMContentLoaded', () => {
   loadCardano();
   setInterval(refreshChain, 20000);
   setInterval(refreshKeeper, 60000);
-  setInterval(() => { if (readResp().signature) render(); }, 5000); // ages tick
+  setInterval(() => { if (readResp().signature) render(); }, 5000); // so the age keeps counting
 });
 </script>
 </body>

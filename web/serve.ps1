@@ -1,6 +1,6 @@
-# AeroGuard dashboard on Windows: a tiny static file server built into PowerShell, so nothing has to be installed.
-# start.bat runs it. Serves this folder on http://localhost:8080 (or the next free port) and opens the browser.
-# Written for Windows PowerShell 5.1 (preinstalled) and PowerShell 7. Close the window to stop.
+# mini static server for windows, so nobody has to install python
+# start.bat runs this. serves this folder on localhost:8080 (or next free port) + opens the browser
+# works on powershell 5.1 (comes with windows) and 7. close the window to stop
 $ErrorActionPreference = 'Stop'
 $root = [System.IO.Path]::GetFullPath($PSScriptRoot)
 $port = 8080

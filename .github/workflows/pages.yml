@@ -1,9 +1,7 @@
 name: Dashboard on GitHub Pages
-# Publishes web/ as a static site. The page reads policies straight from Base Sepolia (eth_call to
-# https://sepolia.base.org), the keeper log from the keeper-data branch, and needs no keeper API.
-# One-time setup: Settings → Pages → Build and deployment → Source: GitHub Actions.
-# Manual only while the repo is private (Pages needs a public repo on this plan); the team uses the Cloudflare
-# deployment behind Cloudflare Access meanwhile. Once public: run it from Actions, or add back
+# puts web/ on github pages. the page reads the chain itself + the keeper log from keeper-data, no api needed.
+# setup once: settings → pages → source: github actions
+# manual for now bc the repo is private. when public, run it from actions or add back:
 #   push: { branches: [main], paths: ["web/**", ".github/workflows/pages.yml"] }
 
 on:

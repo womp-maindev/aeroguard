@@ -1,7 +1,6 @@
 {
-  // GitHub Codespaces: Code → Codespaces → Create. The dashboard (web/) is served on port 8080 and opens in the
-  // browser by itself; it reads Base Sepolia from the browser, so no keys are needed. The keeper API (port 8787)
-  // is optional: put KEEPER_PK and FLIGHT_COVER_ADDRESS in Codespaces secrets, then run `cd keeper && npm run api`.
+  // codespaces: dashboard runs on 8080 and opens by itself, no keys needed (it reads base sepolia from the browser).
+  // keeper api on 8787 is optional: add KEEPER_PK + FLIGHT_COVER_ADDRESS as codespaces secrets, then `cd keeper && npm run api`
   "name": "AeroGuard",
   "image": "mcr.microsoft.com/devcontainers/javascript-node:1-22-bookworm",
   "postCreateCommand": "cd keeper && npm ci",

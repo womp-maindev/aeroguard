@@ -87,6 +87,7 @@ An honest traveller can also be hurt by forged data, for example a fake "on time
 
 ## Links
 - Evidence for every policy, signed response and x402 payment: https://github.com/womp-maindev/aeroguard/blob/main/docs/EVIDENCE.md
+- Policy #1 settled by the keeper on the Airnode-signed "Arrived" (landed early → no payout, premium stays in the pool): https://sepolia.basescan.org/tx/0xf0aa5db2e08a9b9aa7298c92853642b39d7ff330fe3e42cd8b441aa136246b44
 - Repo: https://github.com/womp-maindev/aeroguard
 - Contract: https://sepolia.basescan.org/address/0x257054204c4Cd43846C4553eBe6D709841980a80
 - x402 payment for signed data: https://sepolia.basescan.org/tx/0x76d334da55c86bbf61d37762f8ee843f4920bc874477a82d06852247b4e2054f
