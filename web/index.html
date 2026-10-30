@@ -234,6 +234,11 @@
   .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
   .form { display: grid; grid-template-columns: 1.2fr 1fr; gap: 12px; }
   .form .full { grid-column: 1 / -1; }
+  .cover-static h4 { margin: 0 0 10px; font: 400 21px/1.15 var(--display); }
+  .cover-static ol { margin: 0 0 14px; padding-left: 20px; color: var(--mute); font-size: 14px; display: grid; gap: 6px; }
+  .cover-static ol b { color: var(--text); font-weight: 600; }
+  .cover-static .buys { font-size: 13.5px; margin-bottom: 12px; color: var(--mute); }
+  .cover-static .muted { margin: 10px 0 0; font-size: 13px; color: var(--dim); }
   .out { margin-top: 14px; font-size: 14px; color: var(--mute); min-height: 22px; }
   .out.err { color: var(--bad); }
   .tbl { width: 100%; border-collapse: collapse; font-size: 13.5px; }
@@ -528,10 +533,22 @@
 
     <!-- ============================================================ COVER + LOG -->
     <section class="block" id="cover">
-      <div class="sh"><div><span class="num">03 · GET COVERED</span><h2>Cover a flight</h2><p>The keeper buys the signed schedule, quotes the premium (8% of cover) and opens the policy on-chain. Cover must be bought before the outcome is known. Buying needs the keeper's wallet, so this form only works with the keeper API running.</p></div></div>
+      <div class="sh"><div><span class="num">03 · GET COVERED</span><h2>Cover a flight</h2><p>The keeper buys the signed schedule, quotes the premium (8% of cover) and opens the policy on-chain. Cover must be bought before the outcome is known.</p></div></div>
       <div class="two-col">
         <div class="card pad">
-          <div class="form">
+          <div id="coverStatic" class="cover-static">
+            <h4>Every live policy was bought like this</h4>
+            <ol>
+              <li><b>Signed schedule.</b> The keeper pays 0.05 aUSD over x402 and gets the AeroDataBox status, signed by the Airnode, ≤ 15 min old.</li>
+              <li><b>Contract checks it.</b> <code>buyPolicy</code> verifies signer, request hash and freshness, accepts only a pre-departure status, and reads the scheduled arrival from the signature.</li>
+              <li><b>Premium in, cover reserved.</b> 8% premium to the pool, coverage locked until settlement.</li>
+            </ol>
+            <div class="buys" id="buysList"></div>
+            <div class="cmd">cd keeper && npm run api      # then open localhost:8787 to buy here
+npm run cli -- buy --flight LH1816 --date 2026-10-31 --holder 0x… --coverage 0.5</div>
+            <p class="muted">Buying needs the keeper's wallet, so it runs locally. Everything else on this page reads Base Sepolia directly.</p>
+          </div>
+          <div class="form" id="coverForm">
             <label class="f">Flight number<input id="flight" placeholder="LH1234" autocomplete="off" spellcheck="false" /></label>
             <label class="f">Departure date (local)<input id="date" type="date" /></label>
             <label class="f full">Payout address (Base Sepolia)<input id="holder" placeholder="0x…" spellcheck="false" /></label>
@@ -542,7 +559,7 @@
               <button class="btn-ghost needs-api" onclick="check()">Only check status</button>
             </div>
           </div>
-          <div class="out" id="buyOut"></div>
+          <div class="out" id="buyOut" hidden></div>
         </div>
         <div class="card" id="log">
           <div class="panel-h"><h3>Keeper log</h3><span class="tag" id="logCount">–</span></div>
@@ -1172,7 +1189,12 @@ function setStatus() {
   $('apistat').title = on ? `Reading ${CONTRACT} via ${rpcHost()} (eth_call, no key)${S.online ? `; keeper API at ${API || location.origin}` : ''}`
     : `Could not reach ${RPCS.join(' or ')}. The inspector still works offline.`;
   document.querySelectorAll('.needs-api').forEach((b) => (b.disabled = !S.online));
-  if (!S.online && !$('buyOut').textContent) $('buyOut').innerHTML = 'Buying cover needs the keeper\'s wallet: run <code>cd keeper && npm run api</code> and open <code>localhost:8787</code>. Everything else on this page reads the chain directly.';
+  $('coverStatic').hidden = S.online; $('coverForm').hidden = !S.online; $('buyOut').hidden = !S.online;
+  const bought = IS_LIVE ? LIVE_BOUGHT_TX : {};
+  $('buysList').innerHTML = Object.keys(bought).length ? 'Purchase txs: ' + Object.entries(bought).map(([id, h]) => {
+    const p = S.policies.find((x) => x.id === id);
+    return `<a href="${scan('tx', h)}" target="_blank" rel="noopener">#${id}${p ? ' ' + esc(p.flight) : ''} ↗</a>`;
+  }).join(' · ') : '';
 }
 
 /* ------------------------------------------------------------------ policies + stats */
@@ -1274,7 +1296,7 @@ function renderLog() {
   }
   if (!runs.length) {
     $('logCount').textContent = '–';
-    $('logSrc').textContent = 'No published run log yet.';
+    $('logSrc').textContent = S.keeperErr ? 'Run log not reachable from this page (it is public once the repo is).' : 'No published run log yet.';
     $('logBody').innerHTML = `<div class="empty" style="display:block">The keeper runs in GitHub Actions every ~15 min. Each run's full output is on the <a href="${ACTIONS_URL}" target="_blank" rel="noopener">Actions page ↗</a>.</div>`;
     return;
   }
