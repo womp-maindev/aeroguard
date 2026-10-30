@@ -1,9 +1,9 @@
 // pnpm cli <command>   — see README "Commands"
-import { readFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { formatEther, formatGwei, type Hex, keccak256, toHex } from 'viem';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import type { SignedResponse } from './airnode-v2.ts';
-import { cover, describe, keeperTick, resolveFlight, runKeeper, verdict } from './keeper.ts';
+import { cover, describe, keeperTick, log, resolveFlight, runKeeper, verdict } from './keeper.ts';
 import { allPolicies, balances, explorerTx, settleCost, getPolicy, revertReason, settle, STATUS } from './chain.ts';
 import { requestHashFor } from './flight.ts';
 
@@ -116,6 +116,8 @@ const main = async () => {
     }
     case 'tick': // --force: check every Active policy in its window now, ignoring the 30-min rhythm
       await keeperTick({ force: rest.includes('--force') || process.env.KEEPER_FORCE === 'true' });
+      // the workflow publishes this pass's log for the dashboard (src/publish.ts)
+      if (process.env.KEEPER_RUN_LOG) writeFileSync(process.env.KEEPER_RUN_LOG, JSON.stringify(log, null, 2));
       return;
     case 'keeper':
       await runKeeper(Number(flag('every') ?? 60));

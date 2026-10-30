@@ -14,6 +14,9 @@ on:
         type: boolean
         default: false
 
+permissions:
+  contents: write # publishes keeper.json to the keeper-data branch
+
 concurrency:
   group: keeper
   cancel-in-progress: false
@@ -27,6 +30,7 @@ jobs:
       FLIGHT_COVER_ADDRESS: "0x257054204c4Cd43846C4553eBe6D709841980a80"
       BASE_SEPOLIA_RPC: https://sepolia.base.org
       KEEPER_FORCE: ${{ inputs.force || false }}
+      KEEPER_RUN_LOG: ${{ github.workspace }}/keeper/.cache/run-log.json
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -59,3 +63,15 @@ jobs:
           name: settlement-evidence
           path: keeper/.cache/evidence/
           if-no-files-found: ignore
+      # The dashboard on GitHub Pages reads the run log and every signed Airnode response from this branch.
+      - name: Publish run log and signed responses (keeper-data branch)
+        if: always()
+        run: |
+          git config user.name womp-maindev
+          git config user.email 226526968+womp-maindev@users.noreply.github.com
+          if git fetch -q origin keeper-data; then git worktree add -q ../keeper-data FETCH_HEAD; else git worktree add -q --orphan -b keeper-data ../keeper-data; fi
+          RUN_STARTED_AT="${{ github.run_started_at }}" node keeper/src/publish.ts ../keeper-data/keeper.json
+          cd ../keeper-data
+          git add keeper.json
+          git commit -q -m "keeper run ${{ github.run_number }} (${{ github.event_name }})"
+          git push -q origin HEAD:keeper-data
