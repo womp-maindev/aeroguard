@@ -46,3 +46,16 @@ jobs:
       - name: Keeper tick
         working-directory: keeper
         run: node src/cli.ts tick
+      # The signed responses that settled policies (contracts/test/fixtures format): replayable in Solidity.
+      - name: Settlement evidence
+        if: always()
+        working-directory: keeper
+        run: |
+          shopt -s nullglob
+          for f in .cache/evidence/*.json; do echo "== $f"; cat "$f"; echo; done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: settlement-evidence
+          path: keeper/.cache/evidence/
+          if-no-files-found: ignore

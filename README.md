@@ -1,5 +1,7 @@
 # AeroGuard — your flight is late, you're already paid
 
+[![CI](https://github.com/womp-maindev/aeroguard/actions/workflows/ci.yml/badge.svg)](https://github.com/womp-maindev/aeroguard/actions/workflows/ci.yml) [![Keeper](https://github.com/womp-maindev/aeroguard/actions/workflows/keeper.yml/badge.svg)](https://github.com/womp-maindev/aeroguard/actions/workflows/keeper.yml)
+
 | Security Inspector: the real AirnodeHub-signed proof for policy #1, checked in the browser | Tamper lab: 4 forgeries, 4 reverts |
 |---|---|
 | [![Security Inspector](docs/img/inspector.png)](docs/img/inspector.png) | [![Tamper lab](docs/img/tamper-lab.png)](docs/img/tamper-lab.png) |
