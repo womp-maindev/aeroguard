@@ -1,5 +1,7 @@
 # AeroGuard dashboard (`web/`)
 
+> New here? Step-by-step for Windows and Mac: [README-Eskender.md](../README-Eskender.md).
+
 One static page: `index.html` plus fonts and images. It reads the live `FlightDelayCover` on Base Sepolia straight
 from the browser (`eth_call` to `https://sepolia.base.org`), runs the tamper lab as simulated `settle()` calls, and
 checks Airnode signatures locally. No keys, no build step, no server of ours.
