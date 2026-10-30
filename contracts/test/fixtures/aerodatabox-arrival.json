@@ -1,0 +1,11 @@
+{
+  "_note": "REAL: signed by the AeroDataBox Airnode via AirnodeHub (x402-paid, tx 0x76d334da55c86bbf61d37762f8ee843f4920bc874477a82d06852247b4e2054f)",
+  "flight": "LH400",
+  "date": "2026-10-30",
+  "kind": "arrival",
+  "airnode": "0x83FE2E8F24E66520B1902C3507De4F471248f2Ec",
+  "requestHash": "0xd60f7f1cfce0423125a21b8f7cec6a542725eeca9ee033e2e7495a7fb46fa178",
+  "timestamp": 1793378451,
+  "data": "{\"actual\":\"2026-10-30 19:03Z\",\"scheduled\":\"2026-10-30 18:35Z\",\"status\":\"EnRoute\"}",
+  "signature": "0xfd63f854ffd627c6e454022c657088216ec77a4e16a3863f37782594b69f76327452a03b071482aa10db6a060b122df8abdb2599bc9a25abcffa89e32d955dbb1b"
+}

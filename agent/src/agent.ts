@@ -20,7 +20,7 @@ export const say = (level: LogLine['level'], msg: string, link?: string) => {
 };
 
 const payer = () => {
-  const k = process.env.X402_PAYER_PK ?? process.env.AGENT_PK;
+  const k = process.env.X402_PAYER_PK || process.env.AGENT_PK;
   if (!k) throw new Error('Set X402_PAYER_PK (or AGENT_PK) in .env — it needs aUSD on Base Sepolia');
   return createPayingFetch(k as Hex);
 };

@@ -7,10 +7,22 @@ It is hired and paid on **Cardano** (Masumi / Sokosumi), buys **AeroDataBox data
 
 | | |
 |---|---|
-| Contract (Base Sepolia) | `FLIGHT_COVER_ADDRESS` → _filled in after deploy_ |
+| Contract (Base Sepolia) | [`0x257054204c4Cd43846C4553eBe6D709841980a80`](https://sepolia.basescan.org/address/0x257054204c4Cd43846C4553eBe6D709841980a80) (source verified on Sourcify) |
 | AeroDataBox Airnode signer | `0x83FE2E8F24E66520B1902C3507De4F471248f2Ec` |
 | Payment token | aUSD `0xbeA34973e5f67F18F656A2C6070C64326C791808` |
 | Masumi agent / Sokosumi Coworker | see [`docs/cardano-evidence.md`](docs/cardano-evidence.md) |
+
+## Live evidence (Base Sepolia, real AeroDataBox data)
+| Step | Tx |
+|---|---|
+| x402 payment for a signed AeroDataBox response (0.05 aUSD) | [0x76d334da…](https://sepolia.basescan.org/tx/0x76d334da55c86bbf61d37762f8ee843f4920bc874477a82d06852247b4e2054f) |
+| Policy #1 IB1314 MUC→MAD, bought with a signed pre-departure proof | [0xbfd3ae73…](https://sepolia.basescan.org/tx/0xbfd3ae73074ff63a3ef5f7e56b211d1ffb7223e2db944d0cc38ed069d1958b8d) |
+| Policy #2 LH1816 MUC→BCN | [0x7e71c55b…](https://sepolia.basescan.org/tx/0x7e71c55b970b96fb1588ddde1da029060d805c9b87691280ca2504098d4e69d2) |
+| Policy #3 EI357 MUC→DUB | [0x2aeed601…](https://sepolia.basescan.org/tx/0x2aeed6010ced165f66c26ea0f34e7068421a327cac0c6375d72ef7b794f41672) |
+| Policy #4 BA955 MUC→LHR | [0x7e675d8f…](https://sepolia.basescan.org/tx/0x7e675d8f94946db1d02a40c1eff87ac5a0ca29b65730751cf0d902d767d2b0d1) |
+
+Tamper test against the deployed contract with a REAL signed Airnode response (policy #1): edited value → `NotSignedByAirnode`, other flight → `WrongRequest`, attacker key → `NotSignedByAirnode`, genuine but pre-departure → `NotFinal(Expected)`. A captured real response (`contracts/test/fixtures/aerodatabox-arrival.json`, LH400) is verified in Solidity by `test_Fixture_RealAeroDataBoxCapture`: the on-chain request-hash derivation matches AirnodeHub byte for byte.
+The keeper runs on its own as a GitHub Actions cron (`.github/workflows/keeper.yml`, every 15 min) and settles these policies after landing.
 
 ## The problem
 Flight delays are common, and in the EU passengers are often owed compensation, but claiming it takes forms, weeks and often a claims agency fee. Many people never claim. Parametric cover fixes that: if the data says the flight landed ≥2 h late, you are paid. The hard part is **trusting the data**, and **who presses the button**.
