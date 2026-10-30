@@ -43,7 +43,7 @@ Only a commitment `keccak256(flight, date, salt)` is stored, so nobody can see w
 
 **"The AeroDataBox quota is shared by all teams. How do you avoid burning it?"**
 - One signed response settles every policy on that flight. The request hash is the same, so it is the same truth.
-- The keeper waits until 30 min after the scheduled arrival. It takes one early look 3 h before, for cancellations, and makes at most 6 paid lookups per policy.
+- The keeper takes one early look 3 h before arrival, for cancellations. From 30 min after the scheduled arrival it checks every 30 min until +6 h, then every 3 h until +24 h, at most 20 paid lookups per policy. Most flights settle on the first check.
 - Responses are cached on disk.
 - All tests and the rehearsal use captured fixtures (`contracts/test/fixtures`, `keeper/fixtures`), so CI never calls the API.
 

@@ -6,7 +6,13 @@ name: AeroGuard keeper
 on:
   schedule:
     - cron: "7,22,37,52 * * * *"
+  # A manual run is safe at any moment: the keeper decides from chain + saved state what is due (keeper/src/schedule.ts).
   workflow_dispatch:
+    inputs:
+      force:
+        description: "Check every Active policy in its window now, ignoring the 30-min rhythm (one paid lookup per flight)"
+        type: boolean
+        default: false
 
 concurrency:
   group: keeper
@@ -20,6 +26,7 @@ jobs:
       KEEPER_PK: ${{ secrets.KEEPER_PK }}
       FLIGHT_COVER_ADDRESS: "0x257054204c4Cd43846C4553eBe6D709841980a80"
       BASE_SEPOLIA_RPC: https://sepolia.base.org
+      KEEPER_FORCE: ${{ inputs.force || false }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
