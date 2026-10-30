@@ -1,7 +1,7 @@
 // Checks everything a real preprod run needs and says how to fix what is missing. `npm run preflight`.
 import { walletFor } from './cardano.ts';
 import { PRICES } from './server.ts';
-import { findEvidence } from './verdict.ts';
+import { findEvidence, tierOf } from './verdict.ts';
 
 export interface Check { name: string; ok: boolean; detail: string; fix?: string }
 
@@ -48,7 +48,7 @@ export const preflight = async (env: NodeJS.ProcessEnv, o: { baseUrl: string; fl
     return checks;
   }
   if (buyer) {
-    const need = BigInt(PRICES[evidence?.kind ?? 'arrival'].lovelace) + 2_000_000n; // price + fee + change headroom
+    const need = BigInt(PRICES[evidence ? tierOf(evidence.response) : 'final'].lovelace) + 2_000_000n; // price + fee + change headroom
     try {
       const have = await lovelaceAt(o.baseUrl, projectId, buyer, f);
       add({ name: 'Buyer balance', ok: have >= need, detail: `${Number(have) / 1e6} tADA (need ≥ ${Number(need) / 1e6})`,

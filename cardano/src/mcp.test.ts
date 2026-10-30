@@ -5,13 +5,13 @@ const textOf = (r: unknown) => JSON.parse((r as { content: { text: string }[] })
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { payingFetch, walletFor } from './cardano.ts';
-import { BUYER, fakeBlockfrost, listen, SELLER } from './fixture.test-util.ts';
+import { BUYER, fakeBlockfrost, listen, PINNED_EVIDENCE, SELLER } from './fixture.test-util.ts';
 import { createMcpServer } from './mcp.ts';
 import { createApp, localFacilitator } from './server.ts';
 
 test('an LLM agent lists flights for free and buys a verdict through MCP', async (t) => {
   const { provider, state } = await fakeBlockfrost(t, [walletFor(BUYER).getAddress()]);
-  const origin = await listen(await createApp({ facilitator: localFacilitator(provider, 50), payTo: walletFor(SELLER).getAddress() }), t);
+  const origin = await listen(await createApp({ facilitator: localFacilitator(provider, 50), payTo: walletFor(SELLER).getAddress(), evidenceDirs: PINNED_EVIDENCE }), t);
   const [a, b] = InMemoryTransport.createLinkedPair();
   await createMcpServer(origin, payingFetch(walletFor(BUYER, provider))).connect(a);
   const client = new Client({ name: 'test', version: '0' });

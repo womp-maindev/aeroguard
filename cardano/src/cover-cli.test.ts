@@ -7,7 +7,7 @@ import { requestHashFor } from '../../keeper/src/flight.ts';
 import { payingFetch, walletFor } from './cardano.ts';
 import { policyFor, proofFromVerdict } from './cover-cli.ts';
 import { coverAddress, coverUtxo, openCover, type Outcome, settleCover } from './cover.ts';
-import { BUYER, fakeBlockfrost, listen, SELLER } from './fixture.test-util.ts';
+import { BUYER, fakeBlockfrost, listen, PINNED_EVIDENCE, SELLER } from './fixture.test-util.ts';
 import { AERODATABOX_AIRNODE_PUBKEY } from './onchain.ts';
 import { buyVerdict } from './buy.ts';
 import { createApp, localFacilitator } from './server.ts';
@@ -27,7 +27,7 @@ test('a policy for a live flight binds the AeroDataBox Airnode and its exact req
 
 test('a verdict bought over x402 is turned into a proof; the live one is not final yet', async (t) => {
   const { provider } = await fakeBlockfrost(t, [walletFor(BUYER).getAddress()]);
-  const origin = await listen(await createApp({ facilitator: localFacilitator(provider, 50), payTo: walletFor(SELLER).getAddress() }), t);
+  const origin = await listen(await createApp({ facilitator: localFacilitator(provider, 50), payTo: walletFor(SELLER).getAddress(), evidenceDirs: PINNED_EVIDENCE }), t);
   const { body } = await buyVerdict({ server: origin, flight: 'IB1314', date: '2026-10-30', pay: payingFetch(walletFor(BUYER, provider)) });
   const { scheduled, outcome, proof } = proofFromVerdict(body);
   assert.equal(scheduled, '2026-10-30 21:25Z');

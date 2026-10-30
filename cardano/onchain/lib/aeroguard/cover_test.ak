@@ -346,3 +346,50 @@ test one_payout_cannot_settle_two_policies() {
     !settles(policy(v.test_arrived_200_pubkey), settle, other, both),
   }
 }
+
+// ---- a live arrival-projection answer (IB1314 en route), signed by the real Airnode
+
+test real_airnode_arrival_signature_verifies() {
+  proof.verify(
+    v.real_airnode_arrival_pubkey,
+    v.real_airnode_arrival_request,
+    v.real_airnode_arrival_timestamp,
+    proof.projected_data(
+      v.scheduled,
+      v.real_airnode_arrival_status,
+      Some(v.real_airnode_arrival_actual),
+    ),
+    v.real_airnode_arrival_signature,
+  )
+}
+
+test real_airnode_arrival_relabelled_as_arrived_fails() {
+  !proof.verify(
+    v.real_airnode_arrival_pubkey,
+    v.real_airnode_arrival_request,
+    v.real_airnode_arrival_timestamp,
+    proof.projected_data(
+      v.scheduled,
+      "Arrived",
+      Some(v.real_airnode_arrival_actual),
+    ),
+    v.real_airnode_arrival_signature,
+  )
+}
+
+test real_airnode_en_route_cannot_settle() fail {
+  settles(
+    Policy {
+      ..policy(v.real_airnode_arrival_pubkey),
+      arrival_request: v.real_airnode_arrival_request,
+    },
+    Settle(
+      v.real_airnode_arrival_timestamp,
+      v.real_airnode_arrival_status,
+      Some(v.real_airnode_arrival_actual),
+      v.real_airnode_arrival_signature,
+    ),
+    own,
+    tx([pay(holder, cover)]),
+  )
+}

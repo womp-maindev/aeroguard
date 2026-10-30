@@ -6,7 +6,7 @@ import { join } from 'node:path';
 import { test } from 'node:test';
 import { promisify } from 'node:util';
 import { walletFor } from './cardano.ts';
-import { BUYER, fakeBlockfrost, SELLER } from './fixture.test-util.ts';
+import { BUYER, fakeBlockfrost, PINNED_EVIDENCE, SELLER } from './fixture.test-util.ts';
 
 test('npm run qualify: preflight, serve, pay, record — as a separate process', async (t) => {
   const { state, provider } = await fakeBlockfrost(t, [walletFor(BUYER).getAddress()]);
@@ -14,7 +14,7 @@ test('npm run qualify: preflight, serve, pay, record — as a separate process',
   t.after(() => rmSync(dir, { recursive: true, force: true }));
   const { stdout } = await promisify(execFile)(process.execPath, [new URL('./qualify.ts', import.meta.url).pathname], {
     env: { ...process.env, BLOCKFROST_BASE_URL: provider.baseUrl, BLOCKFROST_PROJECT_ID: 'preprodFIXTURE', BUYER_MNEMONIC: BUYER,
-      SELLER_MNEMONIC: SELLER, EVIDENCE_MD: join(dir, 'EVIDENCE.md'), SALES_LOG: join(dir, 'sales.jsonl') },
+      SELLER_MNEMONIC: SELLER, EVIDENCE_DIR: PINNED_EVIDENCE[0], EVIDENCE_MD: join(dir, 'EVIDENCE.md'), SALES_LOG: join(dir, 'sales.jsonl') },
     timeout: 60_000,
   });
   assert.equal(state.submitted.length, 1, stdout);

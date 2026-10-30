@@ -20,14 +20,14 @@ export const decide = (v: Verdict): Decision => {
   return 'reject';
 };
 
-interface Listing { flight?: string; date?: string; kind: 'status' | 'arrival'; price: { lovelace: string } }
+interface Listing { flight?: string; date?: string; tier: 'live' | 'final'; status: string; price: { lovelace: string } }
 
 export interface AgentOptions {
   server: string;
   claims: Claim[];
   budgetLovelace: bigint;
-  // Pre-departure proofs cannot settle a claim; skip them unless asked.
-  includeStatus?: boolean;
+  // Live proofs (not arrived, not cancelled) cannot settle a claim; skip them unless asked.
+  includeLive?: boolean;
   pay: typeof fetch;
   log?: (line: string) => void;
 }
@@ -42,7 +42,7 @@ export const runAgent = async (o: AgentOptions) => {
     const listing = find(claim);
     const row = { ...claim, decision: 'wait' as Decision, reason: '', verdict: undefined as Verdict | undefined, tx: undefined as string | undefined, proof: undefined as unknown };
     if (!listing) { row.reason = 'no signed evidence yet (free check)'; report.push(row); log(`${claim.flight} ${claim.date}: ${row.reason}`); continue; }
-    if (listing.kind === 'status' && !o.includeStatus) { row.reason = 'only a pre-departure proof exists; not worth buying yet'; report.push(row); log(`${claim.flight} ${claim.date}: ${row.reason}`); continue; }
+    if (listing.tier === 'live' && !o.includeLive) { row.reason = `latest proof is ${listing.status}, not final; not worth buying yet`; report.push(row); log(`${claim.flight} ${claim.date}: ${row.reason}`); continue; }
     const price = BigInt(listing.price.lovelace);
     if (spent + price > o.budgetLovelace) { row.reason = `budget: ${spent + price} > ${o.budgetLovelace} lovelace`; report.push(row); log(`${claim.flight} ${claim.date}: skipped, ${row.reason}`); continue; }
 
@@ -71,14 +71,14 @@ if (import.meta.filename === process.argv[1]) {
       server: { type: 'string', default: process.env.SERVER_URL || 'http://localhost:4021' },
       claims: { type: 'string', default: new URL('../claims.json', import.meta.url).pathname },
       budget: { type: 'string', default: process.env.AGENT_BUDGET_LOVELACE || '10000000' },
-      'include-status': { type: 'boolean', default: false },
+      'include-live': { type: 'boolean', default: false },
     },
   });
   const wallet = walletFor(env('BUYER_MNEMONIC'), blockfrost());
   console.log(`claims agent ${wallet.getAddress()}  budget ${values.budget} lovelace`);
   const { report } = await runAgent({
     server: values.server!, claims: JSON.parse(readFileSync(values.claims!, 'utf8')) as Claim[], budgetLovelace: BigInt(values.budget!),
-    includeStatus: values['include-status'], pay: payingFetch(wallet),
+    includeLive: values['include-live'], pay: payingFetch(wallet),
   });
   console.table(report.map(({ flight, date, decision, reason, tx }) => ({ flight, date, decision, reason, tx: tx?.slice(0, 16) })));
 }

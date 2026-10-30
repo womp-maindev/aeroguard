@@ -5,7 +5,7 @@ import type { TransactionMetadatum } from '@evolution-sdk/evolution/TransactionM
 import { toBytes } from 'viem';
 import { blockfrost, env } from './cardano.ts';
 import type { Sale } from './payments.ts';
-import { buildVerdict } from './verdict.ts';
+import { buildVerdict, EVIDENCE_DIRS } from './verdict.ts';
 
 // CIP-20 message for explorers, plus our own label carrying the proof as bytes.
 export const MESSAGE_LABEL = 674n;
@@ -56,8 +56,8 @@ export const readAnchorProof = (proof: Map<TransactionMetadatum, TransactionMeta
   };
 };
 
-export const anchorSale = async (sale: Sale, provider = blockfrost(), mnemonic = env('SELLER_MNEMONIC')): Promise<Partial<Sale>> => {
-  const verdict = await buildVerdict(sale.flight, sale.date);
+export const anchorSale = async (sale: Sale, provider = blockfrost(), mnemonic = env('SELLER_MNEMONIC'), dirs = EVIDENCE_DIRS): Promise<Partial<Sale>> => {
+  const verdict = await buildVerdict(sale.flight, sale.date, dirs);
   if (!verdict) throw new Error(`No evidence to anchor for ${sale.flight} ${sale.date}`);
   const { message, proof } = buildAnchorMetadata(verdict, sale.tx);
   const seller = Client.make(preprod).withBlockfrost(provider).withSeed({ mnemonic });

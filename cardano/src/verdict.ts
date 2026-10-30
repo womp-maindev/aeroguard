@@ -9,7 +9,7 @@ import { AERODATABOX_AIRNODE, buildRequest, type Kind, normalizeFlight, readVerd
 export const COVER = { chain: 'base-sepolia', chainId: 84532, address: '0x257054204c4Cd43846C4553eBe6D709841980a80' } as const;
 
 // Committed evidence first, then whatever the keeper has cached locally.
-export const EVIDENCE_DIRS = [
+export const EVIDENCE_DIRS = process.env.EVIDENCE_DIR ? [process.env.EVIDENCE_DIR] : [
   new URL('../evidence/', import.meta.url).pathname,
   new URL('../../keeper/.cache/', import.meta.url).pathname,
 ];
@@ -30,7 +30,9 @@ const loadEvidence = (dirs: string[]) => {
     for (const file of readdirSync(dir).filter((f) => f.endsWith('.json'))) {
       try {
         const r = JSON.parse(readFileSync(join(dir, file), 'utf8'));
-        if (r.requestHash && r.signature && !byHash.has(r.requestHash)) byHash.set(r.requestHash, r);
+        // The same request answered twice (the keeper looks again): the newest answer wins.
+        const prior = byHash.get(r.requestHash);
+        if (r.requestHash && r.signature && (!prior || BigInt(r.timestamp) > BigInt(prior.timestamp))) byHash.set(r.requestHash, r);
       } catch { /* not a signed response */ }
     }
   }
@@ -53,9 +55,14 @@ export const findEvidence = (flight: string, date: string, dirs = EVIDENCE_DIRS)
 
 export const kindOfData = (data: string): Kind => ('actual' in JSON.parse(data) ? 'arrival' : 'status');
 
+/** Final (arrived or cancelled) proofs settle claims and sell at the higher price; live ones only inform. */
+export type Tier = 'live' | 'final';
+export const tierOf = (r: SignedResponse): Tier => (readVerdict(r).final ? 'final' : 'live');
+
 export const listEvidence = (dirs = EVIDENCE_DIRS) =>
   [...loadEvidence(dirs).values()].map((r) => ({
-    flight: r.flight, date: r.date, kind: kindOfData(r.data), requestHash: r.requestHash, data: r.data, timestamp: r.timestamp,
+    flight: r.flight, date: r.date, kind: kindOfData(r.data), tier: tierOf(r), status: readVerdict(r).status,
+    requestHash: r.requestHash, data: r.data, timestamp: r.timestamp,
   }));
 
 export const buildVerdict = async (flight: string, date: string, dirs = EVIDENCE_DIRS) => {

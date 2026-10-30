@@ -4,13 +4,13 @@ import { toCBORHex, fromCBORHex } from '@evolution-sdk/evolution/TransactionMeta
 import { recoverSigner } from '../../keeper/src/airnode-v2.ts';
 import { anchorSale, buildAnchorMetadata, readAnchorProof } from './anchor.ts';
 import { walletFor } from './cardano.ts';
-import { fakeBlockfrost, SELLER } from './fixture.test-util.ts';
+import { fakeBlockfrost, PINNED_EVIDENCE, SELLER } from './fixture.test-util.ts';
 import { buildVerdict } from './verdict.ts';
 
 const PAY_TX = 'f'.repeat(64);
 
 test('anchor metadata round-trips through CBOR into the exact proof a contract verifies', async () => {
-  const v = (await buildVerdict('IB1314', '2026-10-30'))!;
+  const v = (await buildVerdict('IB1314', '2026-10-30', PINNED_EVIDENCE))!;
   const { message, proof } = buildAnchorMetadata(v, PAY_TX);
   for (const m of [message, proof]) {
     for (const value of [...m.values()].flat()) {
@@ -26,7 +26,7 @@ test('anchor metadata round-trips through CBOR into the exact proof a contract v
 test('the seller signs and submits an anchor transaction carrying the proof', async (t) => {
   const { state, provider } = await fakeBlockfrost(t, [walletFor(SELLER).getAddress()]);
   const sale = { at: '', tx: PAY_TX, network: 'cardano:preprod', flight: 'IB1314', date: '2026-10-30', kind: 'status', requestHash: '', amount: '1000000', asset: 'lovelace' };
-  const { anchorTx } = await anchorSale(sale, provider, SELLER);
+  const { anchorTx } = await anchorSale(sale, provider, SELLER, PINNED_EVIDENCE);
   assert.equal(state.submitted.length, 1, JSON.stringify(state.unhandled));
   assert.equal(anchorTx, state.submitted[0]!.hash);
   const bytes = state.submitted[0]!.bytes;

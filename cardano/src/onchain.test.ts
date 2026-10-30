@@ -43,3 +43,16 @@ test('every Aiken test vector verifies, with the signer it claims', async () => 
     assert.equal(addressOf(v.pubkey as Hex), v.name.startsWith('real_') ? '0x83FE2E8F24E66520B1902C3507De4F471248f2Ec' : '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', v.name);
   }
 });
+
+test('real arrival-projection signatures verify with Plutus primitives, rebuilt from typed fields', async () => {
+  const dir = new URL('../evidence/', import.meta.url);
+  const { readdirSync } = await import('node:fs');
+  const files = readdirSync(dir).filter((f) => f.includes('-arrival-'));
+  assert.ok(files.length >= 4);
+  for (const f of files) {
+    const r = JSON.parse(readFileSync(new URL(f, dir), 'utf8'));
+    const d = JSON.parse(r.data) as { actual?: string; scheduled: string; status: string };
+    assert.equal(projectedData(d.scheduled, d.status, d.actual), r.data, f);
+    assert.ok(plutusVerify(AERODATABOX_AIRNODE_PUBKEY, messageHash(r.requestHash, BigInt(r.timestamp), r.data), r.signature), f);
+  }
+});

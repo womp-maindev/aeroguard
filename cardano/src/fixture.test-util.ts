@@ -10,6 +10,9 @@ import { decodeCardanoTransaction } from '@x402/cardano';
 export const BUYER = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about';
 export const SELLER = 'test test test test test test test test test test test junk';
 
+// Tests sell a fixed evidence set (the live IB1314 pre-departure proof), so new evidence never changes their answers.
+export const PINNED_EVIDENCE = [new URL('../test-evidence/', import.meta.url).pathname];
+
 export const listen = async (app: express.Express, t: TestContext) => {
   const server = app.listen(0, '127.0.0.1');
   await new Promise<void>((r) => server.once('listening', r));

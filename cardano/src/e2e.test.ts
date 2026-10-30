@@ -8,7 +8,7 @@ import { test, type TestContext } from 'node:test';
 import { decodePaymentRequiredHeader } from '@x402/core/http';
 import { decodePaymentResponseHeader } from '@x402/fetch';
 import { NETWORK, payingFetch, walletFor } from './cardano.ts';
-import { BUYER, fakeBlockfrost, listen, SELLER } from './fixture.test-util.ts';
+import { BUYER, fakeBlockfrost, listen, PINNED_EVIDENCE, SELLER } from './fixture.test-util.ts';
 import { SalesLog } from './payments.ts';
 import { createApp, localFacilitator, PRICES } from './server.ts';
 
@@ -21,7 +21,7 @@ const setup = async (t: TestContext, extra: Partial<Parameters<typeof createApp>
   const dir = mkdtempSync(join(tmpdir(), 'aeroguard-sales-'));
   t.after(() => rmSync(dir, { recursive: true, force: true }));
   const sales = new SalesLog(join(dir, 'sales.jsonl'));
-  const origin = await listen(await createApp({ facilitator: localFacilitator(chain.provider, 50), payTo, sales, ...extra }), t);
+  const origin = await listen(await createApp({ facilitator: localFacilitator(chain.provider, 50), payTo, sales, evidenceDirs: PINNED_EVIDENCE, ...extra }), t);
   return { ...chain, origin, payTo, sales, pay: payingFetch(walletFor(BUYER, chain.provider)) };
 };
 
@@ -33,9 +33,9 @@ test('unpaid request gets a 402 offer in tADA and tUSDM, priced by evidence kind
   assert.equal(ada!.network, NETWORK);
   assert.equal(ada!.payTo, payTo);
   assert.equal(ada!.asset, 'lovelace');
-  // IB1314 only has a pre-departure status proof, so it sells at the status price.
-  assert.equal(ada!.amount, PRICES.status.lovelace);
-  assert.equal(usdm!.amount, PRICES.status.usdm);
+  // IB1314's pinned proof is pre-departure (not final), so it sells at the live price.
+  assert.equal(ada!.amount, PRICES.live.lovelace);
+  assert.equal(usdm!.amount, PRICES.live.usdm);
   assert.match(usdm!.asset, /^[0-9a-f]{56}\.0014df10/);
 });
 
@@ -67,7 +67,7 @@ test('an agent pays 1 tADA and receives the Airnode-signed verdict; the sale is 
   assert.equal(state.submitted.length, 1);
   assert.equal(receipt.transaction, state.submitted[0]!.hash);
   assert.equal(body.paidWith.txHash, receipt.transaction);
-  assert.equal(body.paidWith.amount, PRICES.status.lovelace);
+  assert.equal(body.paidWith.amount, PRICES.live.lovelace);
 
   assert.equal(body.verdict.status, 'Expected');
   assert.equal(body.verify.signerRecovered, '0x83FE2E8F24E66520B1902C3507De4F471248f2Ec');

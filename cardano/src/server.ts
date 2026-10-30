@@ -12,12 +12,12 @@ import { type FacilitatorClient, type HTTPRequestContext, type HTTPTransportCont
 import { paymentMiddleware } from '@x402/express';
 import { blockfrost, NETWORK, sellerAddress, txLink } from './cardano.ts';
 import { confirmExpiry, PaymentOperations, type Sale, SalesLog } from './payments.ts';
-import { buildVerdict, EVIDENCE_DIRS, findEvidence, isValidQuery, listEvidence } from './verdict.ts';
+import { buildVerdict, EVIDENCE_DIRS, findEvidence, isValidQuery, listEvidence, tierOf } from './verdict.ts';
 
-// A final arrival proof is worth more than a pre-departure status. Lovelace and tUSDM units (6 decimals).
+// A final proof (arrived or cancelled) settles a claim and is worth more than a live one. Lovelace and tUSDM units.
 export const PRICES = {
-  status: { lovelace: process.env.STATUS_PRICE_LOVELACE || '1000000', usdm: '50000' },
-  arrival: { lovelace: process.env.ARRIVAL_PRICE_LOVELACE || '2000000', usdm: '100000' },
+  live: { lovelace: process.env.LIVE_PRICE_LOVELACE || '1000000', usdm: '50000' },
+  final: { lovelace: process.env.FINAL_PRICE_LOVELACE || '2000000', usdm: '100000' },
 };
 const QUERY_KEYS = new Set(['flight', 'date', 'requestId']);
 
@@ -54,9 +54,10 @@ export const createApp = async (o: AppOptions) => {
     const q = new URL(url, 'http://local').searchParams;
     return { flight: q.get('flight') ?? '', date: q.get('date') ?? '', requestId: q.get('requestId') ?? undefined };
   };
-  const kindOf = (ctx: HTTPRequestContext) => {
+  const tierFor = (ctx: HTTPRequestContext) => {
     const { flight, date } = queryOf(ctx.adapter.getUrl());
-    return findEvidence(flight, date, dirs)?.kind ?? 'arrival';
+    const found = findEvidence(flight, date, dirs);
+    return found ? tierOf(found.response) : 'final';
   };
   // One payment buys one (flight, date, requestId) operation; a resumed request with the same payment gets the same answer.
   const identity = (context: { paymentPayload: unknown; requirements: unknown; transportContext?: unknown }) => {
@@ -115,7 +116,7 @@ export const createApp = async (o: AppOptions) => {
     scheme: 'exact',
     network: NETWORK,
     payTo: o.payTo,
-    price: (ctx: HTTPRequestContext) => ({ amount: PRICES[kindOf(ctx)][asset], asset: asset === 'lovelace' ? 'lovelace' : usdm }),
+    price: (ctx: HTTPRequestContext) => ({ amount: PRICES[tierFor(ctx)][asset], asset: asset === 'lovelace' ? 'lovelace' : usdm }),
     maxTimeoutSeconds: 600,
     extra: { assetTransferMethod: 'default', areFeesSponsored: false, confirmationPolicy: { l1Confirmations: o.l1Confirmations ?? 0 } },
   });
@@ -136,7 +137,7 @@ export const createApp = async (o: AppOptions) => {
   app.get('/health', (_req, res) => { res.json({ status: 'ok', network: NETWORK, payTo: o.payTo }); });
 
   // Free discovery for agents: what is sold, for how much, and how to verify it.
-  const flights = () => listEvidence(dirs).map((e) => ({ ...e, price: { ...PRICES[e.kind], usdmAsset: usdm } }));
+  const flights = () => listEvidence(dirs).map((e) => ({ ...e, price: { ...PRICES[e.tier], usdmAsset: usdm } }));
   app.get('/flights', (_req, res) => { res.json(flights()); });
   app.get('/sales', (_req, res) => { res.json(sales.all().map((s) => ({ ...s, explorer: txLink(s.tx) }))); });
   app.get('/.well-known/x402', (_req, res) => {

@@ -16,6 +16,7 @@
     "preflight": "node --env-file-if-exists=.env src/preflight.ts",
     "qualify": "node --env-file-if-exists=.env src/qualify.ts",
     "cover": "node --env-file-if-exists=.env src/cover-cli.ts",
+    "import-evidence": "node src/import-evidence.ts",
     "balance": "node --env-file-if-exists=.env src/balance.ts",
     "test": "node --test \"src/**/*.test.ts\""
   },
