@@ -92,3 +92,16 @@ test('the insurer cannot reclaim before the deadline', async (t) => {
   const c = await setup(t, vectors.test_canceled!.pubkey, BigInt(Date.now() + 3_600_000));
   await assert.rejects(reclaimCover(c.insurer, c.utxo, c.policy), SCRIPT_FAILED);
 });
+
+// Runs once the keeper has bought a final answer (npm run import-evidence): the real Airnode signature settles a cover.
+const final = await (await import('./vectors.ts')).realFinal();
+test('a real final Airnode answer settles a cover by the rule', { skip: final ? false : 'no final Airnode answer in evidence/ yet' }, async (t) => {
+  const { payoutOf } = await import('./onchain.ts');
+  const { v, scheduled } = final!;
+  const c = await setup(t, v.pubkey);
+  const policy = { ...c.policy, arrivalRequest: v.requestHash as Hex, statusRequest: v.requestHash as Hex, scheduled };
+  const openTx = await openCover(c.insurer, policy);
+  const outcome = payoutOf(v.status, scheduled, v.actual) as Outcome;
+  const tx = await settleCover(c.holder, coverUtxo(openTx, policy), policy, proofOf(v), outcome);
+  assert.equal(c.state.submitted.at(-1)!.hash, tx);
+});
