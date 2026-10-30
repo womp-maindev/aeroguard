@@ -1,5 +1,6 @@
 // AeroGuard core: resolve → quote → buy → watch → fetch signed evidence → settle.
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { dirname } from 'node:path';
 import type { Hex } from 'viem';
 import { allPolicies, buyPolicy, coverAddress, explorerTx, revertReason, settle } from './chain.ts';
 import { fetchSignedFlight, normalizeFlight, readVerdict, type Verdict } from './flight.ts';
@@ -60,12 +61,13 @@ export const cover = async (a: { flight: string; date: string; holder: Hex; cove
 
 // ---------------------------------------------------------------- keeper (autonomous loop)
 
-const STATE = new URL('../.cache/keeper-state.json', import.meta.url).pathname;
+// KEEPER_STATE_FILE lets a throwaway chain (the anvil rehearsal) keep its own state: anvil redeploys at the same address.
+const statePath = () => process.env.KEEPER_STATE_FILE || new URL('../.cache/keeper-state.json', import.meta.url).pathname;
 type Attempt = { tries: number; next: number; last?: string };
-const loadState = (): Record<string, Attempt> => (existsSync(STATE) ? JSON.parse(readFileSync(STATE, 'utf8')) : {});
+const loadState = (): Record<string, Attempt> => (existsSync(statePath()) ? JSON.parse(readFileSync(statePath(), 'utf8')) : {});
 const saveState = (s: Record<string, Attempt>) => {
-  mkdirSync(new URL('../.cache/', import.meta.url).pathname, { recursive: true });
-  writeFileSync(STATE, JSON.stringify(s, null, 2));
+  mkdirSync(dirname(statePath()), { recursive: true });
+  writeFileSync(statePath(), JSON.stringify(s, null, 2));
 };
 
 const FIRST_CHECK = 30 * 60; // after scheduled arrival

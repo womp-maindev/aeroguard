@@ -71,7 +71,8 @@ export const publicClient = () => createPublicClient({ chain: baseSepolia, trans
 export const walletClient = () =>
   createWalletClient({ chain: baseSepolia, transport: http(rpc()), account: privateKeyToAccount((process.env.KEEPER_PK || env('AGENT_PK')) as Hex) });
 
-export const explorerTx = (h: string) => `https://sepolia.basescan.org/tx/${h}`;
+// a local chain (anvil rehearsal) has no explorer: label its txs instead of linking to Basescan
+export const explorerTx = (h: string) => (/127\.0\.0\.1|localhost/.test(rpc()) ? `local tx ${h}` : `https://sepolia.basescan.org/tx/${h}`);
 
 /** Turns viem's huge revert into "Stale(1793...)" */
 export const revertReason = (e: unknown): string => {

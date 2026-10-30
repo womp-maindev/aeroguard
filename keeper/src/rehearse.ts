@@ -2,7 +2,9 @@
 //   anvil --chain-id 84532 &   then:   npm run rehearse
 // Deploys MockUSD + FlightDelayCover (airnode = local FIXTURE signer), buys 5 policies with signed purchase proofs,
 // runs the keeper once (fixture mode), then runs the 4 tamper attacks + valid against the deployed bytecode.
-import { readFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { createWalletClient, createPublicClient, http, type Hex, parseAbi } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { baseSepolia } from 'viem/chains';
@@ -19,6 +21,17 @@ const deploy = async (a: { abi: unknown; bytecode: { object: Hex } }, args: unkn
   return (await p.waitForTransactionReceipt({ hash })).contractAddress!;
 };
 
+// `anvil &` may still be starting: wait up to 10 s for it
+for (let i = 0; ; i++) {
+  try {
+    await p.getChainId();
+    break;
+  } catch (e) {
+    if (i === 20) throw new Error(`no anvil on ${RPC}: start it with \`anvil --chain-id 84532 &\``);
+    await new Promise((r) => setTimeout(r, 500));
+  }
+}
+
 const usdArt = art('FlightDelayCover.t.sol/MockUSD.json');
 const usd = await deploy(usdArt, []);
 const cover = await deploy(art('FlightDelayCover.sol/FlightDelayCover.json'), [usd, privateKeyToAccount(FIXTURE_SIGNER).address, 800, 3600, 5_000_000n]);
@@ -33,6 +46,7 @@ process.env.KEEPER_PK = DEPLOYER;
 process.env.FLIGHT_COVER_ADDRESS = cover;
 process.env.FIXTURE_MODE = 'true';
 process.env.FIXTURE_SIGNER_PK = FIXTURE_SIGNER;
+process.env.KEEPER_STATE_FILE = join(mkdtempSync(join(tmpdir(), 'aeroguard-rehearse-')), 'keeper-state.json');
 console.log('deployed MockUSD', usd, 'cover', cover);
 
 const { cover: buyCover, keeperTick } = await import('./keeper.ts');
