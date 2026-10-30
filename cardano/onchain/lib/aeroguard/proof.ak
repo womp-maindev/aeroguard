@@ -34,13 +34,12 @@ pub fn projected_data(
   actual: Option<ByteArray>,
 ) -> ByteArray {
   // {"scheduled":"…","status":"…"}
-  let tail =
-    cat(
-      [
-        #"227363686564756c6564223a22", scheduled, #"222c22737461747573223a22",
-        status, #"227d",
-      ],
-    )
+  let tail = cat(
+    [
+      #"227363686564756c6564223a22", scheduled, #"222c22737461747573223a22",
+      status, #"227d",
+    ],
+  )
   when actual is {
     // {"actual":"…",
     Some(a) -> cat([#"7b2261637475616c223a22", a, #"222c", tail])
@@ -49,11 +48,14 @@ pub fn projected_data(
 }
 
 /// The 32-byte message the Airnode's key signed.
-pub fn message_hash(request_hash: ByteArray, timestamp: Int, data: ByteArray) -> ByteArray {
-  let inner =
-    keccak_256(
-      cat([request_hash, bytearray.from_int_big_endian(timestamp, 32), data]),
-    )
+pub fn message_hash(
+  request_hash: ByteArray,
+  timestamp: Int,
+  data: ByteArray,
+) -> ByteArray {
+  let inner = keccak_256(
+    cat([request_hash, bytearray.from_int_big_endian(timestamp, 32), data]),
+  )
   keccak_256(bytearray.concat(eth_prefix, inner))
 }
 
@@ -95,20 +97,18 @@ pub fn minutes_of(t: ByteArray) -> Int {
   let h = digits(t, 11, 2)
   let mi = digits(t, 14, 2)
   expect mo >= 1 && mo <= 12 && d >= 1 && d <= 31 && h <= 23 && mi <= 59
-  let y =
-    if mo <= 2 {
-      y0 - 1
-    } else {
-      y0
-    }
+  let y = if mo <= 2 {
+    y0 - 1
+  } else {
+    y0
+  }
   let era = y / 400
   let yoe = y - era * 400
-  let mp =
-    if mo > 2 {
-      mo - 3
-    } else {
-      mo + 9
-    }
+  let mp = if mo > 2 {
+    mo - 3
+  } else {
+    mo + 9
+  }
   let doy = ( 153 * mp + 2 ) / 5 + d - 1
   let doe = yoe * 365 + yoe / 4 - yoe / 100 + doy
   let days = era * 146097 + doe - 719468
@@ -116,7 +116,11 @@ pub fn minutes_of(t: ByteArray) -> Int {
 }
 
 /// Same rule as FlightDelayCover: cancelled or ≥ 180 min pays in full, ≥ 120 min pays half.
-pub fn payout(status: ByteArray, scheduled: ByteArray, actual: Option<ByteArray>) -> Payout {
+pub fn payout(
+  status: ByteArray,
+  scheduled: ByteArray,
+  actual: Option<ByteArray>,
+) -> Payout {
   if status == "Canceled" {
     Full
   } else if status != "Arrived" {

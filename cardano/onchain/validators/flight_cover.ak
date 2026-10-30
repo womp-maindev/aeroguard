@@ -5,9 +5,14 @@ use aeroguard/cover.{Action, Policy, settles}
 use cardano/transaction.{OutputReference, Transaction}
 
 validator flight_cover {
-  spend(datum: Option<Policy>, action: Action, _own: OutputReference, self: Transaction) {
+  spend(
+    datum: Option<Policy>,
+    action: Action,
+    own: OutputReference,
+    self: Transaction,
+  ) {
     expect Some(p) = datum
-    settles(p, action, self)
+    settles(p, action, own, self)
   }
 
   else(_) {

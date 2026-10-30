@@ -7,7 +7,7 @@ use aiken/crypto.{VerificationKeyHash}
 use aiken/interval.{Finite}
 use cardano/address.{VerificationKey}
 use cardano/assets.{lovelace_of}
-use cardano/transaction.{OutputReference, Transaction}
+use cardano/transaction.{InlineDatum, OutputReference, Transaction}
 
 pub type Policy {
   holder: VerificationKeyHash,
@@ -35,12 +35,17 @@ pub type Action {
   Reclaim
 }
 
-fn paid(self: Transaction, to: VerificationKeyHash) -> Int {
+/// Lovelace paid to `to` in outputs tagged with this policy's own input. The tag stops double satisfaction: one output
+/// cannot settle two policies of the same holder in a single transaction.
+fn paid(self: Transaction, to: VerificationKeyHash, own: OutputReference) -> Int {
+  let tag: Data = own
   list.foldl(
     self.outputs,
     0,
     fn(output, total) {
-      if output.address.payment_credential == VerificationKey(to) {
+      if output.address.payment_credential == VerificationKey(to) && output.datum == InlineDatum(
+        tag,
+      ) {
         total + lovelace_of(output.value)
       } else {
         total
@@ -49,21 +54,25 @@ fn paid(self: Transaction, to: VerificationKeyHash) -> Int {
   )
 }
 
-pub fn settles(p: Policy, action: Action, self: Transaction) -> Bool {
+pub fn settles(
+  p: Policy,
+  action: Action,
+  own: OutputReference,
+  self: Transaction,
+) -> Bool {
   when action is {
     Settle { timestamp, status, actual, signature } -> {
-      let request =
-        when actual is {
-          Some(_) -> p.arrival_request
-          None -> p.status_request
-        }
+      let request = when actual is {
+        Some(_) -> p.arrival_request
+        None -> p.status_request
+      }
       let data = proof.projected_data(p.scheduled, status, actual)
       expect proof.verify(p.airnode, request, timestamp, data, signature)
       when proof.payout(status, p.scheduled, actual) is {
-        Full -> paid(self, p.holder) >= p.cover
+        Full -> paid(self, p.holder, own) >= p.cover
         Half ->
-          paid(self, p.holder) >= p.cover / 2 && paid(self, p.insurer) >= p.cover - p.cover / 2
-        NoPayout -> paid(self, p.insurer) >= p.cover
+          paid(self, p.holder, own) >= p.cover / 2 && paid(self, p.insurer, own) >= p.cover - p.cover / 2
+        NoPayout -> paid(self, p.insurer, own) >= p.cover
         NotFinal -> False
       }
     }
