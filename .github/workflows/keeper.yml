@@ -13,6 +13,10 @@ on:
         description: "Check every Active policy in its window now, ignoring the 30-min rhythm (one paid lookup per flight)"
         type: boolean
         default: false
+      policy:
+        description: "Only this policy id (empty = all). With force: one lookup for one flight, e.g. one that landed early"
+        type: string
+        default: ""
 
 permissions:
   contents: write # publishes keeper.json to the keeper-data branch
@@ -30,6 +34,7 @@ jobs:
       FLIGHT_COVER_ADDRESS: "0x257054204c4Cd43846C4553eBe6D709841980a80"
       BASE_SEPOLIA_RPC: https://sepolia.base.org
       KEEPER_FORCE: ${{ inputs.force || false }}
+      KEEPER_ONLY: ${{ inputs.policy || '' }}
       KEEPER_RUN_LOG: ${{ github.workspace }}/keeper/.cache/run-log.json
     steps:
       - uses: actions/checkout@v4

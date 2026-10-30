@@ -114,11 +114,13 @@ const main = async () => {
         console.log(`#${p.id} ${p.flight} ${p.date} ${STATUS[p.status]} cover ${usd(p.coverage)} sched ${new Date(Number(p.scheduledArrival) * 1000).toISOString()}`);
       return;
     }
-    case 'tick': // --force: check every Active policy in its window now, ignoring the 30-min rhythm
-      await keeperTick({ force: rest.includes('--force') || process.env.KEEPER_FORCE === 'true' });
+    case 'tick': { // --force: check now, ignoring the 30-min rhythm · --policy N: only that policy
+      const only = flag('policy') || process.env.KEEPER_ONLY;
+      await keeperTick({ force: rest.includes('--force') || process.env.KEEPER_FORCE === 'true', only: only ? BigInt(only) : undefined });
       // the workflow publishes this pass's log for the dashboard (src/publish.ts)
       if (process.env.KEEPER_RUN_LOG) writeFileSync(process.env.KEEPER_RUN_LOG, JSON.stringify(log, null, 2));
       return;
+    }
     case 'keeper':
       await runKeeper(Number(flag('every') ?? 60));
       return;

@@ -80,14 +80,17 @@ const saveEvidence = (id: bigint, e: Record<string, unknown>) => {
 
 const hhmm = (t: number) => new Date(t * 1000).toISOString().slice(11, 16);
 
-/** One pass: look up and settle every Active policy whose check is due (see schedule.ts). `force` ignores the rhythm. */
-export const keeperTick = async ({ force = false } = {}) => {
+/**
+ * One pass: look up and settle every Active policy whose check is due (see schedule.ts). `force` ignores the rhythm;
+ * `only` restricts the pass to one policy id (e.g. a flight that landed early), so forcing it buys one lookup, not all.
+ */
+export const keeperTick = async ({ force = false, only }: { force?: boolean; only?: bigint } = {}) => {
   const raw = loadState();
   const state: Record<string, Attempt> = {};
   for (const [k, v] of Object.entries(raw)) state[k] = migrate(v);
   const now = Math.floor(Date.now() / 1000);
   for (const p of await allPolicies()) {
-    if (p.status !== 1) continue; // Active only
+    if (p.status !== 1 || (only !== undefined && p.id !== only)) continue; // Active only
     const sched = Number(p.scheduledArrival);
     if (expirable(now, sched)) {
       try {
