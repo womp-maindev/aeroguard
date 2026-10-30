@@ -2,7 +2,7 @@
 
 **Tagline:** Your flight is late, you're already paid. Flight-delay cover that settles itself on data signed by the AeroDataBox Airnode on API3 AirnodeHub.
 
-**Track:** API3 — Any API in your contract.
+**Tracks:** API3 — Any API in your contract · Cardano (one project in two tracks, confirmed by the organizers). This text covers the API3 part; the Cardano part is described in its own section of the submission.
 
 ## The problem
 

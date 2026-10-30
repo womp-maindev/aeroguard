@@ -1,6 +1,6 @@
 # Status — Fri 30 Oct 2026, 20:40 CET
 
-Track: **API3 "Any API in your contract"** (€2,000).
+Tracks: **one project, two tracks** (confirmed by the organizers): **API3 "Any API in your contract"** (€2,000, this repo's oracle/keeper work) + **Cardano** (Masumi/Sokosumi payment for policies, handled in the Cardano session; on-chain link = `cardanoJobRef` per policy).
 
 ## Live (Base Sepolia, chain 84532)
 - FlightDelayCover `0x257054204c4Cd43846C4553eBe6D709841980a80` (Sourcify-verified). Owner/keeper wallet `0xd9b446FbC743f2D592b8699fbfC80443af00Be24`.
@@ -20,7 +20,7 @@ Contract (purchase proof, private commit-reveal policies, per-policy settlement,
 2. Frontend session (owns `web/`): show the network from `GET /health` → `{ network: "Base Sepolia" | "Local anvil", explorer }` instead of the fixed "Base Sepolia"; Evidence view per settled policy. Live policies screenshot for README.
 3. Devfolio text: drafted in `docs/DEVFOLIO.md`; paste into tum.devfolio.co. Pitch + Q&A: `docs/PITCH.md`.
 4. Video ≤2:30: shot list in `docs/VIDEO.md`. Record the live tamper shot while policy #1 is still Active.
-5. Sat 14:30: repo public, submit on tum.devfolio.co (track API3). 15:00 live pitch.
+5. Sat 14:30: repo public, submit on tum.devfolio.co, one project, tracks API3 + Cardano. 15:00 live pitch.
 
 ## Known decisions / limits
 - Anyone may call `settle`; payout always to stored holder (enables autonomous keeper).

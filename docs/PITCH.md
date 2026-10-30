@@ -1,11 +1,13 @@
 # Live pitch — API3 track (2 min)
 
+AeroGuard is **one project entered in two tracks: API3 and Cardano** (confirmed by the organizers). This is the API3 version of the pitch: the oracle, the contract and the keeper. Say it in one sentence at the start so the API3 judges know the Cardano part exists and is judged separately.
+
 About 280 words, so it fits at a calm pace. Have the screen ready: dashboard on `http://localhost:8787`, Basescan tab with the contract, a terminal in `keeper/`.
 
 ## Script
 
 **0:00 — Problem (20 s)**
-> Your flight lands three hours late. To get money, you fill in forms, upload boarding passes, wait weeks, and a claims agency keeps a third. AeroGuard removes the claim: if signed flight data says you landed late, you are already paid.
+> *(One line first: "AeroGuard is in the API3 and Cardano tracks; this is the API3 part.")* Your flight lands three hours late. To get money, you fill in forms, upload boarding passes, wait weeks, and a claims agency keeps a third. AeroGuard removes the claim: if signed flight data says you landed late, you are already paid.
 
 **0:20 — What it is (25 s)**
 > AeroGuard is flight-delay cover on Base Sepolia. The contract pays out only on AeroDataBox responses signed by its Airnode on API3 AirnodeHub. A keeper buys that signed data over x402 for five cents a call, and settles. Nobody files a claim and nobody approves one.
@@ -46,6 +48,9 @@ Only a commitment `keccak256(flight, date, salt)` is stored, so nobody can see w
 - The keeper takes one early look 3 h before arrival, for cancellations. From 30 min after the scheduled arrival it checks every 30 min until +6 h, then every 3 h until +24 h, at most 20 paid lookups per policy. Most flights settle on the first check.
 - Responses are cached on disk.
 - All tests and the rehearsal use captured fixtures (`contracts/test/fixtures`, `keeper/fixtures`), so CI never calls the API.
+
+**"You're also in the Cardano track. What's the link?"**
+Same project, two tracks, confirmed by the organizers. On Cardano a traveller or their agent pays for the cover (Masumi/Sokosumi job). Every policy on Base Sepolia stores `cardanoJobRef`, the hash of the Cardano job that paid for it, so the two sides can be matched. The API3 part does not depend on it: the payout is decided only by AirnodeHub-signed data, whoever paid.
 
 **"Why Base Sepolia, why x402?"**
 AirnodeHub's x402 payments use aUSD on Base Sepolia, so the data and the contract sit on the same chain. With x402, an autonomous agent pays per call without an API key or an account, and it needs no ETH for the payment, because the facilitator submits the transfer. That is what a keeper needs.
