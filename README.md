@@ -131,6 +131,24 @@ Each forgery is simulated (`eth_call`, no transaction) against the deployed cont
 
 Once a policy is settled, the contract answers `NotActive` before any oracle check. The dashboard's tamper lab can still run the four forgeries on it (browser `eth_call` with a state override that reopens the policy for that call only, no key); `npm run tamper` needs an `Active` policy.
 
+### In the browser, as real transactions from your wallet
+The dashboard's tamper lab ends with **Send it for real** ([`web/wallet.js`](web/wallet.js)). It sends the same forgeries, or your own response, as real `settle()` transactions to the deployed contract. A rejected one is mined as a failed transaction, so the revert is on Basescan, not just in a simulation.
+
+1. Open the dashboard and scroll to **02 · Tamper lab → Send it for real**. **Connect wallet** (MetaMask, Rabby or Coinbase Wallet). The button switches you to Base Sepolia, and adds it to the wallet if needed. A few cents of Base Sepolia ETH pays for gas; the panel links to the [Base faucets](https://docs.base.org/get-started/get-funds) if the wallet has too little.
+2. Pick an **Active** policy as the target. A settled policy would stop every transaction at `NotActive`, so the panel refuses it and points to the `eth_call` lab above, which can reopen it.
+3. Press **Send** on an attack. The wallet may warn that the transaction will fail: for an attack that is the point, so confirm it. The panel shows the decoded revert, the plain-English reason and the Basescan link.
+4. **Your own response:** paste any AirnodeHub response, keeper fixture or `npm run cli -- proof <buyPolicy tx>` output, edit it, then **Check** (an `eth_call`, no wallet needed) or **Send for real**. If the check says the contract would accept it, sending asks first, because it settles the policy for good. Anyone may settle; the payout always goes to the stored holder.
+
+| What you send | On-chain answer |
+|---|---|
+| a real response with one value edited | `NotSignedByAirnode(<random signer>)` |
+| a real response for another flight's request | `WrongRequest(hash)` |
+| a response signed by a key that is not the Airnode's | `NotSignedByAirnode(attacker)` |
+| a real response older than the policy's `maxAge` | `Stale(timestamp)` |
+| a real, fresh, final response | `Settled` → payout to the holder |
+
+**Tip for a real base:** a new policy's own signed purchase proof is in its `buyPolicy` calldata. `cd keeper && npm run cli -- proof <buyPolicy tx>` prints it, with no key and no paid lookup. Load it in the Inspector and tick **Use the inspector's response as the base**, so the edit, wrong-request and wrong-signer attacks start from a real Airnode signature. Once it is more than an hour old, sent unmodified it shows `Stale`.
+
 Also rejected: buying after departure (`NotBuyable`), buying too close to arrival (`TooCloseToArrival`), schedule switched after purchase (`ScheduleMismatch`), settling twice (`NotActive`), future timestamps (`FromTheFuture`), "Arrived" signed before the landing it reports (`ObservedTooEarly`), non‑final status (`NotFinal`), selling cover the pool can't back (`Insolvent`).
 
 ## Run it
@@ -166,6 +184,8 @@ web/        dashboard: in-browser Security Inspector, tamper lab, policies, keep
 ## Security notes
 - Checks‑effects‑interactions + `ReentrancyGuard`, `SafeERC20`; reserved capital tracked so the owner can only withdraw capital **not** backing active policies.
 - Flight numbers restricted to `[A-Z0-9]{3,8}` so the on‑chain JSON hash can never diverge from AirnodeHub's (no escaping).
+- [`Hardening.t.sol`](contracts/test/Hardening.t.sol) pins the deployed behaviour without a redeploy. It covers empty, truncated, all-zero and malleable signatures (no zero-address recovery), a stranger settling (the payout still goes to the stored holder, for the stored coverage), payouts that revert, return false or re-enter (the policy stays `Active`), and the exact boundaries of `maxAge`, future skew, purchase-proof age and the 120/180-minute tiers.
+- Deliberate choices. Anyone may call `settle`, which is what lets the keeper be replaceable, and copying a valid settlement from the mempool gains nothing. The Airnode address is immutable: no admin key can switch which signer the contract trusts. The constructor does not reject `airnode = address(0)`, but such a deployment fails closed (tested), and the live one is set to the AeroDataBox Airnode.
 - Hackathon simplifications: owner key sets premium/limits; premium is a flat 8 % (real pricing would use route/airline delay statistics, which AeroDataBox's priced tier offers).
 
 ## What's next
