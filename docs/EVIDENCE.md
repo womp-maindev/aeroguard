@@ -15,7 +15,7 @@ Every signed response below can be re-verified offline without trusting us. Reco
 
 Every purchase proof sits in its `buyPolicy` calldata (`timestamp`, `data`, `signature`). [`proofs.yml`](../.github/workflows/proofs.yml) reads all four back (`keeper cli proof <tx>`, read-only); IB1314's matched our earlier capture byte for byte.
 
-## Policies (31 Oct 2026, bought 30 Oct 23:28Z for the pitch day, 0.5 aUSD cover each)
+## Policies (31 Oct 2026, bought 30 Oct 23:28–23:38Z for the pitch day, 0.5 aUSD cover each)
 
 Bought in one batch with the `Buy policies` workflow, each with a fresh signed `Expected` status. Two flights that do not operate on Saturdays were rejected before any payment, and the batch stopped when AeroDataBox answered 429, because the quota is shared. The keeper settles these on Saturday morning. A payout happens only if the Airnode signs a real delay of 2 h or more, or a cancellation.
 
@@ -25,6 +25,9 @@ Bought in one batch with the `Buy policies` workflow, each with a fresh signed `
 | 6 | LH2472 MUC→LHR | 10:25Z | [0xe82e30cd…](https://sepolia.basescan.org/tx/0xe82e30cd9c6b1b8f9442bb4ea48d618d793d389ef2b96c06f0f39e211d50a55e) | [0x34309557…](https://sepolia.basescan.org/tx/0x34309557c8e5510bfd1fa2b52ff25a810272f219ef5ceb502eae63c22cae09a1) | pending | pending |
 | 7 | EI352 DUB→MUC | 09:10Z | [0xebee9181…](https://sepolia.basescan.org/tx/0xebee91819106c8e56bc8ef9b76b56dee96cd2638e4060ead67fc62a50b5909e5) | [0x8ea848ff…](https://sepolia.basescan.org/tx/0x8ea848ff1a5e5e9965f98e0ffa6c0218d00642b6616f267ab73a8d7ee61d6e1a) | pending | pending |
 | 8 | LH1810 MUC→BCN | 10:00Z | [0x8f5eb0b9…](https://sepolia.basescan.org/tx/0x8f5eb0b9efa6f63fa7bfba1b895efc9c4ea1e4ff424088dcde4c7be064feeb57) | [0x0258eb12…](https://sepolia.basescan.org/tx/0x0258eb121c1fa5e03a9a1c907adc7aeaee3773a0a8530e54fdf8028049f02b76) | pending | pending |
+| 9 | LH1814 MUC→BCN | 16:35Z | [0xd6c0b35d…](https://sepolia.basescan.org/tx/0xd6c0b35d0fa11f9bc84b7f0cb5b333836a5c9c100355bfe5a08cb9ed892b6130) | [0xd0992dc8…](https://sepolia.basescan.org/tx/0xd0992dc8c5e2d37089520a0961d2f1c44dd37d1514d1cdfc14ef298a0eb4359a) | pending | pending |
+| 10 | LH1868 MUC→FCO | 12:15Z | [0x668017d6…](https://sepolia.basescan.org/tx/0x668017d68099092c8614508a94cff53ff9f2f9b3ac296f3cfbdf5fdd3153f1bd) | [0xd03a12f0…](https://sepolia.basescan.org/tx/0xd03a12f0cb447a363cfc47f42c8ee0b069e6cac481ca61c7c8baaf483e831aa6) | pending | pending |
+| 11 | LH2476 MUC→LHR | 15:50Z | [0xe0ee4b2a…](https://sepolia.basescan.org/tx/0xe0ee4b2a69b447e09d927d202c9fe8e34f2be34f0ed14a7791b4bb9c6e87d011) | [0x41f00a0b…](https://sepolia.basescan.org/tx/0x41f00a0bd7f57fc40e6e33031a25316e310efa1a25b49704658af99365860def) | pending | pending |
 
 ## Keeper lookups
 
