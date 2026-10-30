@@ -23,6 +23,8 @@ pub type Policy {
   cover: Int,
   /// POSIX ms after which the insurer may take the cover back if nobody settled.
   deadline: Int,
+  /// Longest age (ms) a signed answer may have when it settles, like FlightDelayCover's maxAge.
+  max_age: Int,
 }
 
 pub type Action {
@@ -66,6 +68,18 @@ pub fn settles(
         Some(_) -> p.arrival_request
         None -> p.status_request
       }
+      // Freshness, as FlightDelayCover checks it (Stale, FromTheFuture): the whole validity window of this transaction
+      // lies within [signed at, signed at + max_age], so an old answer (say, a cancellation later reversed) cannot settle.
+      expect Finite(from) = self.validity_range.lower_bound.bound_type
+      expect Finite(to) = self.validity_range.upper_bound.bound_type
+      let signed_at = timestamp * 1000
+      expect from >= signed_at && to <= signed_at + p.max_age
+      // ObservedTooEarly: an answer signed before the landing it reports is not evidence of that landing.
+      expect
+        when actual is {
+          Some(a) -> timestamp >= proof.minutes_of(a) * 60
+          None -> True
+        }
       let data = proof.projected_data(p.scheduled, status, actual)
       expect proof.verify(p.airnode, request, timestamp, data, signature)
       when proof.payout(status, p.scheduled, actual) is {

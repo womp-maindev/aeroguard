@@ -32,8 +32,9 @@ a UTxO holding the cover is released only by an Airnode proof that the flight is
 rule as the EVM contract (cancelled or ≥ 180 min: full, ≥ 120 min: half, else back to the insurer). Plutus has no
 `ecrecover`, so it checks `verifyEcdsaSecp256k1Signature` against the Airnode's compressed key over
 `keccak_256(prefix ‖ keccak_256(requestHash ‖ timestamp ‖ data))`, rebuilding the signed bytes instead of parsing
-JSON. 26 Aiken tests pass, including **real** AeroDataBox Airnode signatures (a pre-departure status and a live
-arrival answer bought by our keeper) and forgeries; payouts are tagged
+JSON. 32 Aiken tests pass, including **real** AeroDataBox Airnode signatures (a pre-departure status and a live
+arrival answer bought by our keeper), forgeries and the same freshness rules as the EVM contract (stale, from the future,
+observed before the landing); payouts are tagged
 with the policy input against double satisfaction. A settlement costs ≈ 0.46M mem / 0.19B cpu. The off-chain side
 (open / settle / reclaim) builds real transactions and executes the validator with Aiken's UPLC evaluator before
 submitting; **the verdict body an agent buys over x402 is exactly the redeemer that settles the cover.**

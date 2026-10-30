@@ -37,14 +37,14 @@ pub const test_arrived_200_pubkey: ByteArray =
 pub const test_arrived_200_request: ByteArray =
   #"4bf6755e32c0231b2f3dd9861b9e30ccf5e701e08e32dfda39137b78095023d0"
 
-pub const test_arrived_200_timestamp: Int = 1793400000
+pub const test_arrived_200_timestamp: Int = 1793426400
 
 pub const test_arrived_200_status: ByteArray = "Arrived"
 
 pub const test_arrived_200_actual: ByteArray = "2026-10-31 00:45Z"
 
 pub const test_arrived_200_signature: ByteArray =
-  #"196cb825aeb7991824547448ae906ae332c249dee31884d123d1b54f416f8bc8261a75e643439d19580bdb6a7936ab731813e5ccb5c43fdf677bebdc0d373bf9"
+  #"0fac5eb1c183b9619952f1f2f277cef697223d468e514597ec198d29e87be2f1612c563d9eb2a058b532817b3a90b842083e69288062f1fb5993d46d44a4e8fb"
 
 pub const test_arrived_130_pubkey: ByteArray =
   #"038318535b54105d4a7aae60c08fc45f9687181b4fdfc625bd1a753fa7397fed75"
@@ -52,14 +52,14 @@ pub const test_arrived_130_pubkey: ByteArray =
 pub const test_arrived_130_request: ByteArray =
   #"4bf6755e32c0231b2f3dd9861b9e30ccf5e701e08e32dfda39137b78095023d0"
 
-pub const test_arrived_130_timestamp: Int = 1793400000
+pub const test_arrived_130_timestamp: Int = 1793426400
 
 pub const test_arrived_130_status: ByteArray = "Arrived"
 
 pub const test_arrived_130_actual: ByteArray = "2026-10-30 23:35Z"
 
 pub const test_arrived_130_signature: ByteArray =
-  #"24cab31e8e8b4c3bb03274a39f0943f69e51cf98afc3aa782026c5a0740dbb8b23a3d447cec93e063bf9cf27f8a0e4fa988c1a3d4bf79ef8a1320a4c96c1ee7c"
+  #"0a7a4fce78f45f965d217d40b0eac755b9c40f4b22ab937955ea56146291af2a25411b0f1169529938536fad7ee45090ce69a530f4965960425a6c9523c4903e"
 
 pub const test_arrived_30_pubkey: ByteArray =
   #"038318535b54105d4a7aae60c08fc45f9687181b4fdfc625bd1a753fa7397fed75"
@@ -67,14 +67,14 @@ pub const test_arrived_30_pubkey: ByteArray =
 pub const test_arrived_30_request: ByteArray =
   #"4bf6755e32c0231b2f3dd9861b9e30ccf5e701e08e32dfda39137b78095023d0"
 
-pub const test_arrived_30_timestamp: Int = 1793400000
+pub const test_arrived_30_timestamp: Int = 1793426400
 
 pub const test_arrived_30_status: ByteArray = "Arrived"
 
 pub const test_arrived_30_actual: ByteArray = "2026-10-30 21:55Z"
 
 pub const test_arrived_30_signature: ByteArray =
-  #"101475e2e7de0cdad0a0434029b7cbc3ed23c93d212f12a6ee45daf6b438c55829ccb548ed4b86b068774bf1cb892fa8c5d821a0982c6c0eb3b2abc94b8775dc"
+  #"5df4597d7bc14f4c9ddc20cade65caf6395a212569cad2f288765741bbf89e3b2a25c118056814efe07a4ed05cb204a7d7fed62234b4aee498397bc31b7ffeef"
 
 pub const test_canceled_pubkey: ByteArray =
   #"038318535b54105d4a7aae60c08fc45f9687181b4fdfc625bd1a753fa7397fed75"
@@ -82,9 +82,24 @@ pub const test_canceled_pubkey: ByteArray =
 pub const test_canceled_request: ByteArray =
   #"782dcb07ea17581332987058650693af56cf1150a2734228ac3dc8347840c54c"
 
-pub const test_canceled_timestamp: Int = 1793400000
+pub const test_canceled_timestamp: Int = 1793426400
 
 pub const test_canceled_status: ByteArray = "Canceled"
 
 pub const test_canceled_signature: ByteArray =
-  #"5857e5ddfebc456d604a03ccc34727c547cfc54f0ec3820173dc8f1eee396b3b056968b0704c791400c08618634d60d2e6731fd4c3dadc1a73f71c0ca94b7722"
+  #"32fedbdd17dcfe27ade1a74f6956c04ef3a36345ba5230d0fe2a22474af105f73360dfcd810f7ef62273204dbb98aded07c7db8ac265fb3f29a05c179792965c"
+
+pub const test_arrived_early_pubkey: ByteArray =
+  #"038318535b54105d4a7aae60c08fc45f9687181b4fdfc625bd1a753fa7397fed75"
+
+pub const test_arrived_early_request: ByteArray =
+  #"4bf6755e32c0231b2f3dd9861b9e30ccf5e701e08e32dfda39137b78095023d0"
+
+pub const test_arrived_early_timestamp: Int = 1793400000
+
+pub const test_arrived_early_status: ByteArray = "Arrived"
+
+pub const test_arrived_early_actual: ByteArray = "2026-10-31 00:45Z"
+
+pub const test_arrived_early_signature: ByteArray =
+  #"196cb825aeb7991824547448ae906ae332c249dee31884d123d1b54f416f8bc8261a75e643439d19580bdb6a7936ab731813e5ccb5c43fdf677bebdc0d373bf9"

@@ -7,8 +7,8 @@ Agents pay per request on Cardano for flight outcomes any contract can verify.
 **For judges (3 min, no funds, no keys):**
 
 ```bash
-cd cardano && npm i && npm test     # 47 tests: real signed Cardano txs, x402 round trips, Aiken cover executed via UPLC
-cd onchain && aiken check           # 26 tests, incl. real AeroDataBox Airnode signatures verified with Plutus builtins
+cd cardano && npm i && npm test     # 50 tests: real signed Cardano txs, x402 round trips, Aiken cover executed via UPLC
+cd onchain && aiken check           # 32 tests, incl. real AeroDataBox Airnode signatures verified with Plutus builtins
 ```
 
 Paid preprod transactions: [EVIDENCE.md](EVIDENCE.md). Live run: `npm run qualify` (needs a Blockfrost preprod key and a
@@ -94,6 +94,11 @@ Airnode proof that the flight is final, paying the holder by `FlightDelayCover`'
 Each payout output must carry the spent policy's `OutputReference` as inline datum, so one output can never settle
 two policies at once (double satisfaction).
 
+Freshness mirrors `FlightDelayCover` (`Stale`, `FromTheFuture`, `ObservedTooEarly`): the settle transaction's whole
+validity window must lie within `[signed at, signed at + max_age]` (set per policy, default 60 min), and an arrival
+answer must be signed after the landing it reports. An old answer, e.g. a cancellation the airline later reversed,
+cannot settle a cover.
+
 Plutus has no `ecrecover`, so the validator stores the Airnode's compressed secp256k1 key and checks
 `verifyEcdsaSecp256k1Signature(key, keccak_256(prefix ‖ keccak_256(requestHash ‖ uint256(timestamp) ‖ data)), r‖s)`.
 It never parses JSON: it rebuilds the exact signed bytes from typed redeemer fields. `src/onchain.ts` is a byte-exact
@@ -101,15 +106,15 @@ model of that path; its tests verify the **real** Airnode signature with Plutus 
 `0x83FE…F2Ec`. `npm run vectors` regenerates `onchain/lib/aeroguard/vectors.ak` (then `aiken fmt`).
 
 ```bash
-cd onchain && aiken check      # 26 tests: real Airnode signatures, forgeries, time, payout rule, validator paths
+cd onchain && aiken check      # 32 tests: real Airnode signatures, forgeries, freshness, time, payout rule, validator paths
 aiken build                    # plutus.json
 ```
 
 | | |
 |---|---|
 | Compiler / stdlib | Aiken v1.1.24, stdlib v2.2.0, Plutus V3 |
-| Script hash | `58d832a40020e79da24d7b444845ff27fe22ccd4a19f5b50971dfa27` (2,022 bytes) |
-| Preprod script address | `addr_test1wpvdsv4yqqsw08dzf4a5gjz9lunlugkv6jse7k6sjuwl5fchwmjh4` |
+| Script hash | `107d68180f4399c12060b76c4869e9790aeffc9957c7ef44fb2447c7` (2,194 bytes) |
+| Preprod script address | `addr_test1wqg866qcpapensfqvzmkcjrfa9us4mlun9tu0m6ylvjy03cx080wx` |
 | Real Airnode signature check | ≈ 34–48k mem / 59–64M cpu; a full settlement ≈ 0.46M mem / 0.19B cpu (tx limit 14M / 10B) |
 
 **Off-chain** (`src/cover.ts`, `npm run cover`): the insurer (seller wallet, needs a few tADA) opens a cover; anyone
@@ -137,7 +142,7 @@ on the real signature automatically.
 npm test
 ```
 
-47 tests. The buyer signs real Cardano transactions with the SDK's reference signer and the server's facilitator
+50 tests. The buyer signs real Cardano transactions with the SDK's reference signer and the server's facilitator
 verifies and submits them; the Aiken cover's transactions are built and **executed** with Aiken's UPLC evaluator
 (PlutusV3 cost model). Only Blockfrost is a local fixture (as in the official demo's tests). Covers the 402 offer,
 refusals, discovery, paid verdicts, replay, sales log, anchor transaction, claims agent, MCP, preflight, the whole

@@ -22,7 +22,7 @@ const setup = async (t: TestContext, airnode = vectors.test_canceled!.pubkey, de
   const policy: Policy = {
     holder: keyHashOf(holderAddr), insurer: keyHashOf(insurerAddr), airnode: airnode as Hex,
     arrivalRequest: vectors.test_arrived_200!.requestHash as Hex, statusRequest: vectors.test_canceled!.requestHash as Hex,
-    scheduled: '2026-10-30 21:25Z', cover: 10_000_000n, deadline,
+    scheduled: '2026-10-30 21:25Z', cover: 10_000_000n, deadline, maxAge: 3_600_000n,
   };
   const insurer = client(SELLER);
   const holder = client(BUYER);
@@ -38,7 +38,7 @@ const settle = async (t: TestContext, v: Vector, outcome: Outcome, edit: Partial
 
 test('the off-chain script is the compiled Aiken validator', () => {
   assert.equal(coverHash, blueprintHash);
-  assert.equal(coverHash, '58d832a40020e79da24d7b444845ff27fe22ccd4a19f5b50971dfa27');
+  assert.equal(coverHash, '107d68180f4399c12060b76c4869e9790aeffc9957c7ef44fb2447c7');
 });
 
 test('a 200 min delay pays the holder in full', async (t) => {
@@ -90,7 +90,7 @@ test('the insurer reclaims an unsettled cover after the deadline', async (t) => 
 
 test('the insurer cannot reclaim before the deadline', async (t) => {
   const c = await setup(t, vectors.test_canceled!.pubkey, BigInt(Date.now() + 3_600_000));
-  await assert.rejects(reclaimCover(c.insurer, c.utxo, c.policy), SCRIPT_FAILED);
+  await assert.rejects(reclaimCover(c.insurer, c.utxo, c.policy), /has not passed yet/);
 });
 
 // Runs once the keeper has bought a final answer (npm run import-evidence): the real Airnode signature settles a cover.

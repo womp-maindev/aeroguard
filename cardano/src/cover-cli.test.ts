@@ -14,7 +14,7 @@ import { createApp, localFacilitator } from './server.ts';
 import { testVectors } from './vectors.ts';
 
 test('the cover address is the blueprint script on preprod', () => {
-  assert.equal(Address.toBech32(coverAddress()), 'addr_test1wpvdsv4yqqsw08dzf4a5gjz9lunlugkv6jse7k6sjuwl5fchwmjh4');
+  assert.equal(Address.toBech32(coverAddress()), 'addr_test1wqg866qcpapensfqvzmkcjrfa9us4mlun9tu0m6ylvjy03cx080wx');
 });
 
 test('a policy for a live flight binds the AeroDataBox Airnode and its exact requests', () => {

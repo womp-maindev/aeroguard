@@ -9,17 +9,18 @@ import { AERODATABOX_AIRNODE_PUBKEY, compressedSigner, payoutOf, projectedData }
 
 const TEST_KEY = '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
 const SCHEDULED = '2026-10-30 21:25Z';
-const TIMESTAMP = 1793400000n;
+// Test answers are signed at 06:00Z on 31 Oct, after every landing they report (as a real final answer is).
+const TIMESTAMP = 1793426400n;
 
 export interface Vector { name: string; pubkey: string; requestHash: string; timestamp: bigint; status: string; actual?: string; data: string; signature: string }
 
-const sign = async (name: string, status: string, actual?: string): Promise<Vector> => {
+const sign = async (name: string, status: string, actual?: string, timestamp = TIMESTAMP): Promise<Vector> => {
   const account = privateKeyToAccount(TEST_KEY);
   const requestHash = requestHashFor('IB1314', '2026-10-30', actual === undefined ? 'status' : 'arrival');
   const data = projectedData(SCHEDULED, status, actual);
-  const signature = await account.signMessage({ message: { raw: keccak256(encodePacked(['bytes32', 'uint256', 'bytes'], [requestHash, TIMESTAMP, toHex(data)])) } });
-  const r: SignedResponse = { airnode: account.address, requestHash, timestamp: String(TIMESTAMP), data, signature };
-  return { name, pubkey: await compressedSigner(r), requestHash, timestamp: TIMESTAMP, status, actual, data, signature };
+  const signature = await account.signMessage({ message: { raw: keccak256(encodePacked(['bytes32', 'uint256', 'bytes'], [requestHash, timestamp, toHex(data)])) } });
+  const r: SignedResponse = { airnode: account.address, requestHash, timestamp: String(timestamp), data, signature };
+  return { name, pubkey: await compressedSigner(r), requestHash, timestamp, status, actual, data, signature };
 };
 
 export const testVectors = async (): Promise<Vector[]> => {
@@ -37,6 +38,8 @@ export const testVectors = async (): Promise<Vector[]> => {
     await sign('test_arrived_130', 'Arrived', '2026-10-30 23:35Z'),
     await sign('test_arrived_30', 'Arrived', '2026-10-30 21:55Z'),
     await sign('test_canceled', 'Canceled'),
+    // Signed at 22:40Z but reporting a landing at 00:45Z: observed too early to prove it.
+    await sign('test_arrived_early', 'Arrived', '2026-10-31 00:45Z', 1793400000n),
   ];
 };
 
@@ -73,6 +76,7 @@ use aeroguard/cover.{Policy, Settle, settles}
 use aeroguard/proof
 use cardano/address.{from_verification_key}
 use cardano/assets.{from_lovelace}
+use aiken/interval.{Finite, Interval, IntervalBound}
 use cardano/transaction.{InlineDatum, Output, OutputReference, Transaction, placeholder}
 
 const airnode: ByteArray = ${bytes(v.pubkey)}
@@ -101,6 +105,7 @@ fn policy() -> Policy {
     scheduled: ${text(scheduled)},
     cover,
     deadline: 1_800_000_000_000,
+    max_age: 3_600_000,
   }
 }
 
@@ -118,7 +123,14 @@ fn pay(to: ByteArray, amount: Int) -> Output {
 }
 
 fn tx(outputs: List<Output>) -> Transaction {
-  Transaction { ..placeholder, outputs: outputs }
+  Transaction {
+    ..placeholder,
+    outputs: outputs,
+    validity_range: Interval {
+      lower_bound: IntervalBound { bound_type: Finite(${v.timestamp * 1000n}), is_inclusive: True },
+      upper_bound: IntervalBound { bound_type: Finite(${v.timestamp * 1000n + 600_000n}), is_inclusive: True },
+    },
+  }
 }
 
 test real_final_signature_verifies() {

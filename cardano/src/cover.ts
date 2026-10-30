@@ -27,6 +27,7 @@ export interface Policy {
   scheduled: string; // "YYYY-MM-DD HH:MMZ"
   cover: bigint; // lovelace
   deadline: bigint; // POSIX ms
+  maxAge: bigint; // ms: how old a signed answer may be when it settles
 }
 
 export interface Proof { timestamp: bigint; status: string; actual?: string; signature: Hex }
@@ -35,7 +36,7 @@ const b = (hex: string) => Data.bytearray(hex.replace(/^0x/, ''));
 const s = (text: string) => Data.bytearray(toHex(text).slice(2));
 
 export const policyDatum = (p: Policy) => Data.constr(0n, [
-  b(p.holder), b(p.insurer), b(p.airnode), b(p.arrivalRequest), b(p.statusRequest), s(p.scheduled), Data.int(p.cover), Data.int(p.deadline),
+  b(p.holder), b(p.insurer), b(p.airnode), b(p.arrivalRequest), b(p.statusRequest), s(p.scheduled), Data.int(p.cover), Data.int(p.deadline), Data.int(p.maxAge),
 ]);
 
 // r ‖ s only: Plutus verifies 64-byte signatures and has no use for the recovery byte.
@@ -77,9 +78,12 @@ export type Outcome = 'full' | 'half' | 'none';
 export const settleCover = async (submitter: SigningClient, utxo: UTxO.UTxO, p: Policy, proof: Proof, outcome: Outcome) => {
   const tag = payoutTag(utxo);
   const holderShare = outcome === 'full' ? p.cover : outcome === 'half' ? p.cover / 2n : 0n;
+  // The validator wants the whole validity window inside [signed at, signed at + maxAge]: settle while the answer is fresh.
+  const signedAt = proof.timestamp * 1000n;
   let tx = submitter.newTx()
     .collectFrom({ inputs: [utxo], redeemer: settleRedeemer(proof), label: 'settle' })
-    .attachScript({ script: coverScript });
+    .attachScript({ script: coverScript })
+    .setValidity({ from: signedAt, to: signedAt + p.maxAge - 1000n });
   if (holderShare > 0n) tx = tx.payToAddress({ address: keyAddress(p.holder), assets: Assets.fromLovelace(holderShare), datum: tag });
   if (p.cover - holderShare > 0n) tx = tx.payToAddress({ address: keyAddress(p.insurer), assets: Assets.fromLovelace(p.cover - holderShare), datum: tag });
   const signed = await tx.build({ evaluator: createAikenEvaluator });
@@ -88,11 +92,14 @@ export const settleCover = async (submitter: SigningClient, utxo: UTxO.UTxO, p: 
 
 /** After the deadline the insurer takes an unsettled cover back. */
 export const reclaimCover = async (insurer: SigningClient, utxo: UTxO.UTxO, p: Policy, nowMs = BigInt(Date.now())) => {
+  // The validator wants the window to start after the deadline; whole seconds, as slots are.
+  const from = ((p.deadline > nowMs - 60_000n ? p.deadline : nowMs - 60_000n) / 1000n + 1n) * 1000n;
+  if (from > nowMs) throw new Error(`The deadline ${new Date(Number(p.deadline)).toISOString()} has not passed yet`);
   const signed = await insurer.newTx()
     .collectFrom({ inputs: [utxo], redeemer: reclaimRedeemer, label: 'reclaim' })
     .attachScript({ script: coverScript })
     .addSigner({ keyHash: KeyHash.fromHex(p.insurer) })
-    .setValidity({ from: nowMs - 60_000n, to: nowMs + 600_000n })
+    .setValidity({ from, to: nowMs + 600_000n })
     .build({ evaluator: createAikenEvaluator });
   return TransactionHash.toHex(await signed.signAndSubmit());
 };
