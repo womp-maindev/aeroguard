@@ -1,10 +1,10 @@
 // pnpm cli <command>   — see README "Commands"
 import { readFileSync } from 'node:fs';
-import { formatEther, type Hex, keccak256, toHex } from 'viem';
+import { formatEther, formatGwei, type Hex, keccak256, toHex } from 'viem';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import type { SignedResponse } from './airnode-v2.ts';
 import { cover, describe, keeperTick, resolveFlight, runKeeper, verdict } from './keeper.ts';
-import { allPolicies, balances, explorerTx, getPolicy, revertReason, settle, STATUS } from './chain.ts';
+import { allPolicies, balances, explorerTx, settleCost, getPolicy, revertReason, settle, STATUS } from './chain.ts';
 import { requestHashFor } from './flight.ts';
 
 const [cmd, ...rest] = process.argv.slice(2);
@@ -105,7 +105,12 @@ const main = async () => {
       const usd = (v: bigint) => (Number(v) / 1e6).toFixed(2);
       console.log(`keeper ${b.keeper}: ${formatEther(b.keeperEth)} ETH, ${usd(b.keeperAusd)} aUSD`);
       console.log(`pool: ${usd(b.pool)} aUSD, reserved ${usd(b.reserved)}, free ${usd(b.free)}`);
-      for (const p of await allPolicies())
+      const policies = await allPolicies();
+      const active = policies.filter((p) => p.status === 1).length;
+      const { maxFeePerGas, cost } = await settleCost(active);
+      const verdict = !active ? 'no active policies' : b.keeperEth >= cost ? `ok, ${(Number(b.keeperEth) / Number(cost)).toFixed(1)}x headroom` : 'NOT ENOUGH, top up';
+      console.log(`gas: maxFee ${formatGwei(maxFeePerGas)} gwei, ${active} settles need ≤ ${formatEther(cost)} ETH: ${verdict}`);
+      for (const p of policies)
         console.log(`#${p.id} ${p.flight} ${p.date} ${STATUS[p.status]} cover ${usd(p.coverage)} sched ${new Date(Number(p.scheduledArrival) * 1000).toISOString()}`);
       return;
     }

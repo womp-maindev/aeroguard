@@ -148,6 +148,14 @@ export const balances = async () => {
   return { keeper, keeperEth, keeperAusd, pool, reserved, free };
 };
 
+/** settle measured at ≤ 159k gas (contracts/README gas table); 200k leaves room for a longer signed payload */
+export const SETTLE_GAS = 200_000n;
+/** ETH a keeper needs for `n` settles at the current fee (maxFeePerGas, the most a tx can be charged per gas). */
+export const settleCost = async (n: number) => {
+  const { maxFeePerGas } = await publicClient().estimateFeesPerGas();
+  return { maxFeePerGas, cost: BigInt(n) * SETTLE_GAS * maxFeePerGas };
+};
+
 export const getPolicy = (id: bigint) =>
   publicClient().readContract({ address: coverAddress(), abi: coverAbi, functionName: 'policy', args: [id] });
 
