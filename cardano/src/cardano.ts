@@ -23,8 +23,8 @@ export const walletFor = (mnemonic: string, provider = { baseUrl: BLOCKFROST_URL
 export const sellerAddress = () => process.env.SELLER_ADDRESS?.trim() || walletFor(env('SELLER_MNEMONIC')).getAddress();
 
 // An agent's wallet with a hard cap: it pays at most MAX_LOVELACE_PER_REQUEST in tADA per request, nothing else.
-export const payingFetch = (wallet: ReturnType<typeof walletFor>) =>
-  wrapFetchWithPayment(fetch, x402Client.fromConfig({
+export const payingFetch = (wallet: ReturnType<typeof walletFor>, baseFetch: typeof fetch = fetch) =>
+  wrapFetchWithPayment(baseFetch, x402Client.fromConfig({
     schemes: [{ network: NETWORK, client: new ExactCardanoScheme(wallet) }],
     spendControls: { allowedAssets: [{ network: NETWORK, asset: 'lovelace', maxAmountPerPayment: process.env.MAX_LOVELACE_PER_REQUEST || '5000000' }] },
   }));

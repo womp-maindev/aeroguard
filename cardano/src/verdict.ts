@@ -14,8 +14,11 @@ export const EVIDENCE_DIRS = [
   new URL('../../keeper/.cache/', import.meta.url).pathname,
 ];
 
+// Committed evidence files also carry `flight` and `date`, so /flights can list them.
+type Evidence = SignedResponse & { paymentTx?: string; flight?: string; date?: string };
+
 const loadEvidence = (dirs: string[]) => {
-  const byHash = new Map<string, SignedResponse & { paymentTx?: string }>();
+  const byHash = new Map<string, Evidence>();
   for (const dir of dirs.filter(existsSync)) {
     for (const file of readdirSync(dir).filter((f) => f.endsWith('.json'))) {
       try {
@@ -40,8 +43,12 @@ export const findEvidence = (flight: string, date: string, dirs = EVIDENCE_DIRS)
   return undefined;
 };
 
+export const kindOfData = (data: string): Kind => ('actual' in JSON.parse(data) ? 'arrival' : 'status');
+
 export const listEvidence = (dirs = EVIDENCE_DIRS) =>
-  [...loadEvidence(dirs).values()].map((r) => ({ requestHash: r.requestHash, data: r.data, timestamp: r.timestamp }));
+  [...loadEvidence(dirs).values()].map((r) => ({
+    flight: r.flight, date: r.date, kind: kindOfData(r.data), requestHash: r.requestHash, data: r.data, timestamp: r.timestamp,
+  }));
 
 export const buildVerdict = async (flight: string, date: string, dirs = EVIDENCE_DIRS) => {
   const found = findEvidence(flight, date, dirs);
