@@ -6,6 +6,11 @@ checks Airnode signatures locally. No keys, no build step, no server of ours.
 
 ## Open it
 
+**Quickest, no git needed.** On GitHub: **Code → Download ZIP**, unzip, open the `web` folder and double-click
+**`start.command`** (macOS) or **`start.bat`** (Windows). It serves the folder and opens the dashboard in the browser.
+macOS may refuse a downloaded script the first time: right-click `start.command` → **Open** → **Open**.
+
+
 **In GitHub, one click (Codespaces).** Needs access to the repo.
 
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/womp-maindev/aeroguard?quickstart=1)
