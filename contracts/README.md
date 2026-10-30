@@ -8,7 +8,7 @@
 Nobody files a claim and nobody approves one.
 
 ```
-forge test --use /usr/local/bin/solc --offline            # 49 pass, 1 skipped (real capture fixture not present yet)
+forge test --use /usr/local/bin/solc --offline            # 50 pass (incl. the real AirnodeHub capture)
 forge test --use /usr/local/bin/solc --offline --gas-report
 forge coverage --use /usr/local/bin/solc --offline --ir-minimum --report summary
 ```
@@ -106,4 +106,4 @@ Coverage: `FlightDelayCover.sol` has 98.8% line and 86.8% branch coverage.
 - Hardening: `SameEvidenceSettlesEveryPolicyOnThatFlightOnce`, `RejectSettlingTwice`, `RejectFutureTimestamp`, `RejectNotYetLanded`, `RejectObservationBeforeLanding`, `InsolventPoolBlocksPurchase`, `RejectFlightNeedingJsonEscape`, `ExpireAfterWindow`, `OwnerCannotWithdrawReservedCapital`.
 - Purchase proof: `Buy_StoresSignedScheduledArrival`, `Buy_AcceptsEveryPreDepartureStatus`, `Buy_RejectOutcomeAlreadyKnown` (Delayed, Arrived, Canceled, CanceledUncertain, Diverted, Departed, EnRoute, GateClosed), `Buy_RejectStaleProof`, `Buy_RejectFutureProof`, `Buy_RejectProofForOtherFlightOrProjection`, `Buy_RejectEditedProof`, `Buy_RejectWrongSignerProof`, `Buy_RejectTooCloseToArrival`, `Buy_MinLeadTimeIsOwnerSetting`, `RejectSettleEvidenceWithOtherSchedule`.
 - Private policies: `Private_StoresNoFlightInfo`, `Private_HappyPathFullPayout`, `Private_CancelledPaysFull`, `Private_RejectWrongSalt`, `Private_RejectOtherFlightReveal`, `Private_RejectPublicSettleAndViceVersa`, `Private_RejectZeroCommitment`, `Private_RejectBadFlightCharsEvenIfCommitted`, `Private_Tamper1..4`, `Private_RejectSettlingTwice`, `Private_RejectBeyondHorizon`, `Private_RejectTooCloseToArrival`, `Private_AcceptScheduleWithin1h`, `Private_RejectScheduleBeyond1h`, `Private_ExpiresLikePublic`.
-- Fixtures: `Fixture_SyntheticSampleLoadsAndSettles`, `Fixture_RealAeroDataBoxCapture` (skipped while the capture is missing).
+- Fixtures: `Fixture_SyntheticSampleLoadsAndSettles`, `Fixture_RealAeroDataBoxCapture` (real AirnodeHub capture, LH400).
