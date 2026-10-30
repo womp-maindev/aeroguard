@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { createServer } from 'node:http';
 import type { Hex } from 'viem';
 import { cover, describe, log, runKeeper, verdict } from './keeper.ts';
-import { allPolicies, coverAddress, STATUS } from './chain.ts';
+import { allPolicies, coverAddress, isLocalRpc, networkName, STATUS } from './chain.ts';
 import { spendLog } from './flight.ts';
 import { tamper } from './cli.ts';
 
@@ -25,7 +25,8 @@ createServer(async (req, res) => {
       res.writeHead(200, { 'content-type': 'text/html' });
       return res.end(readFileSync(new URL('../../web/index.html', import.meta.url)));
     }
-    if (url.pathname === '/health') return json(res, 200, { ok: true, contract: coverAddress() });
+    if (url.pathname === '/health')
+      return json(res, 200, { ok: true, contract: coverAddress(), network: networkName(), explorer: isLocalRpc() ? null : 'https://sepolia.basescan.org' });
     if (url.pathname === '/policies') return json(res, 200, (await allPolicies()).map((p) => ({ ...p, statusName: STATUS[p.status] })));
     if (url.pathname === '/log') return json(res, 200, { log, spend: spendLog });
     if (url.pathname === '/verdict') {
@@ -46,4 +47,5 @@ createServer(async (req, res) => {
   }
 }).listen(Number(process.env.PORT ?? 8787), () => console.log(`AeroGuard API on :${process.env.PORT ?? 8787}`));
 
-if (process.env.KEEPER !== 'off') runKeeper(Number(process.env.KEEPER_EVERY ?? 60));
+// Opt-in: the live policies already have a keeper (GitHub Actions), and a second one would spend the shared quota.
+if (process.env.KEEPER === 'on') runKeeper(Number(process.env.KEEPER_EVERY ?? 60));

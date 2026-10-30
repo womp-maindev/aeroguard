@@ -1,8 +1,10 @@
 // AeroGuard core: resolve → quote → buy → watch → fetch signed evidence → settle.
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
 import type { Hex } from 'viem';
-import { allPolicies, buyPolicy, coverAddress, explorerTx, revertReason, settle } from './chain.ts';
+import { allPolicies, buyPolicy, coverAddress, expirePolicy, explorerTx, revertReason, settle } from './chain.ts';
 import { fetchSignedFlight, normalizeFlight, readVerdict, type Verdict } from './flight.ts';
+import { type Attempt, due, expirable, MAX_CHECKS, migrate, nextCheckAt, record } from './schedule.ts';
 import { createPayingFetch } from './x402.ts';
 
 export interface LogLine {
@@ -60,40 +62,68 @@ export const cover = async (a: { flight: string; date: string; holder: Hex; cove
 
 // ---------------------------------------------------------------- keeper (autonomous loop)
 
-const STATE = new URL('../.cache/keeper-state.json', import.meta.url).pathname;
-type Attempt = { tries: number; next: number; last?: string };
-const loadState = (): Record<string, Attempt> => (existsSync(STATE) ? JSON.parse(readFileSync(STATE, 'utf8')) : {});
+// KEEPER_STATE_FILE lets a throwaway chain (the anvil rehearsal) keep its own state: anvil redeploys at the same address.
+const statePath = () => process.env.KEEPER_STATE_FILE || new URL('../.cache/keeper-state.json', import.meta.url).pathname;
+const loadState = (): Record<string, unknown> => (existsSync(statePath()) ? JSON.parse(readFileSync(statePath(), 'utf8')) : {});
 const saveState = (s: Record<string, Attempt>) => {
-  mkdirSync(new URL('../.cache/', import.meta.url).pathname, { recursive: true });
-  writeFileSync(STATE, JSON.stringify(s, null, 2));
+  mkdirSync(dirname(statePath()), { recursive: true });
+  writeFileSync(statePath(), JSON.stringify(s, null, 2));
 };
 
-const FIRST_CHECK = 30 * 60; // after scheduled arrival
-const RETRY = 45 * 60;
-const MAX_TRIES = 6; // quota discipline: at most 6 paid lookups per policy
+// The signed response that settled a policy, in the contracts/test/fixtures format, so the payout can be replayed in
+// Solidity and checked by anyone. The Actions workflow prints these files and uploads them as an artifact.
+const saveEvidence = (id: bigint, e: Record<string, unknown>) => {
+  const dir = join(dirname(statePath()), 'evidence');
+  mkdirSync(dir, { recursive: true });
+  writeFileSync(join(dir, `${coverAddress().slice(0, 10)}-policy-${id}.json`), JSON.stringify(e, (_, v) => (typeof v === 'bigint' ? Number(v) : v), 2));
+};
 
-export const keeperTick = async () => {
-  const state = loadState();
+const hhmm = (t: number) => new Date(t * 1000).toISOString().slice(11, 16);
+
+/**
+ * One pass: look up and settle every Active policy whose check is due (see schedule.ts). `force` ignores the rhythm;
+ * `only` restricts the pass to one policy id (e.g. a flight that landed early), so forcing it buys one lookup, not all.
+ */
+export const keeperTick = async ({ force = false, only }: { force?: boolean; only?: bigint } = {}) => {
+  const raw = loadState();
+  const state: Record<string, Attempt> = {};
+  for (const [k, v] of Object.entries(raw)) state[k] = migrate(v);
   const now = Math.floor(Date.now() / 1000);
   for (const p of await allPolicies()) {
-    if (p.status !== 1) continue; // Active only
+    if (p.status !== 1 || (only !== undefined && p.id !== only)) continue; // Active only
+    const sched = Number(p.scheduledArrival);
+    if (expirable(now, sched)) {
+      try {
+        say('chain', `policy #${p.id} expired after the settlement window, coverage released`, explorerTx(await expirePolicy(p.id)));
+      } catch (e) {
+        say('warn', `policy #${p.id}: expire failed: ${revertReason(e)}`);
+      }
+      continue;
+    }
+    // a private policy stores no flight: only its holder can reveal it (settlePrivate); never pay for a blank lookup
+    if (!p.flight) continue;
     const key = `${coverAddress()}:${p.id}`;
-    const s = (state[key] ??= { tries: 0, next: Number(p.scheduledArrival) + FIRST_CHECK });
-    // cancellations can be known early: one cheap look 3h before arrival
-    if (s.tries === 0 && now < s.next && now > Number(p.scheduledArrival) - 3 * 3600) s.next = now;
-    if (now < s.next || s.tries >= MAX_TRIES) continue;
-    s.tries++;
-    s.next = now + RETRY;
+    const a = (state[key] ??= migrate(undefined));
+    const kind = due(now, sched, a, force);
+    if (!kind) {
+      const at = nextCheckAt(sched, a);
+      say('info', `policy #${p.id} ${p.flight}: nothing due${at === undefined ? ', keeper done with it' : `, next check ≥ ${hhmm(at)}Z`}`);
+      continue;
+    }
+    record(now, kind, a);
     try {
-      say('info', `policy #${p.id}: checking ${p.flight} ${p.date} (try ${s.tries}/${MAX_TRIES})`);
+      const what = kind === 'early' ? 'early look for a cancellation' : `check ${a.checks}/${MAX_CHECKS}`;
+      say('info', `policy #${p.id}: ${p.flight} ${p.date} sched ${hhmm(sched)}Z, ${what}`);
       const v = await verdict(p.flight, p.date, 600); // one paid lookup serves every policy on that flight
-      s.last = describe(v.verdict);
+      a.last = describe(v.verdict);
       if (!v.verdict.final) {
-        say('info', `policy #${p.id}: ${s.last} — not final, next look in ${RETRY / 60} min`);
+        const at = nextCheckAt(sched, a);
+        say('info', `policy #${p.id}: ${a.last} — not final${at === undefined ? '' : `, next check ≥ ${hhmm(at)}Z`}`);
         continue;
       }
       const res = await settle(p.id, v.evidence);
-      say('chain', `policy #${p.id} settled ${res.status}: ${s.last}, payout ${Number(res.payout) / 1e6} aUSD`, explorerTx(res.txHash));
+      saveEvidence(p.id, { policyId: p.id, flight: p.flight, date: p.date, kind: v.kind, ...v.evidence, timestamp: Number(v.evidence.timestamp), settleTx: res.txHash, outcome: res.status, payout: res.payout, delayMinutes: res.delayMinutes });
+      say('chain', `policy #${p.id} settled ${res.status}: ${a.last}, payout ${Number(res.payout) / 1e6} aUSD`, explorerTx(res.txHash));
     } catch (e) {
       say('warn', `policy #${p.id}: ${revertReason(e)}`);
     } finally {

@@ -1,10 +1,10 @@
 // pnpm cli <command>   — see README "Commands"
-import { readFileSync } from 'node:fs';
-import { type Hex, keccak256, toHex } from 'viem';
+import { readFileSync, writeFileSync } from 'node:fs';
+import { formatEther, formatGwei, type Hex, keccak256, toHex } from 'viem';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import type { SignedResponse } from './airnode-v2.ts';
-import { cover, describe, keeperTick, resolveFlight, runKeeper, verdict } from './keeper.ts';
-import { allPolicies, explorerTx, getPolicy, revertReason, settle, STATUS } from './chain.ts';
+import { cover, describe, keeperTick, log, resolveFlight, runKeeper, verdict } from './keeper.ts';
+import { allPolicies, balances, explorerTx, settleCost, getPolicy, revertReason, settle, STATUS } from './chain.ts';
 import { requestHashFor } from './flight.ts';
 
 const [cmd, ...rest] = process.argv.slice(2);
@@ -100,9 +100,27 @@ const main = async () => {
     case 'policies':
       for (const p of await allPolicies()) console.log(`#${p.id} ${p.flight} ${p.date} ${STATUS[p.status]} cover ${Number(p.coverage) / 1e6}`);
       return;
-    case 'tick':
-      await keeperTick();
+    case 'status': {
+      const b = await balances();
+      const usd = (v: bigint) => (Number(v) / 1e6).toFixed(2);
+      console.log(`keeper ${b.keeper}: ${formatEther(b.keeperEth)} ETH, ${usd(b.keeperAusd)} aUSD`);
+      console.log(`pool: ${usd(b.pool)} aUSD, reserved ${usd(b.reserved)}, free ${usd(b.free)}`);
+      const policies = await allPolicies();
+      const active = policies.filter((p) => p.status === 1).length;
+      const { maxFeePerGas, cost } = await settleCost(active);
+      const verdict = !active ? 'no active policies' : b.keeperEth >= cost ? `ok, ${(Number(b.keeperEth) / Number(cost)).toFixed(1)}x headroom` : 'NOT ENOUGH, top up';
+      console.log(`gas: maxFee ${formatGwei(maxFeePerGas)} gwei, ${active} settles need ≤ ${formatEther(cost)} ETH: ${verdict}`);
+      for (const p of policies)
+        console.log(`#${p.id} ${p.flight} ${p.date} ${STATUS[p.status]} cover ${usd(p.coverage)} sched ${new Date(Number(p.scheduledArrival) * 1000).toISOString()}`);
       return;
+    }
+    case 'tick': { // --force: check now, ignoring the 30-min rhythm · --policy N: only that policy
+      const only = flag('policy') || process.env.KEEPER_ONLY;
+      await keeperTick({ force: rest.includes('--force') || process.env.KEEPER_FORCE === 'true', only: only ? BigInt(only) : undefined });
+      // the workflow publishes this pass's log for the dashboard (src/publish.ts)
+      if (process.env.KEEPER_RUN_LOG) writeFileSync(process.env.KEEPER_RUN_LOG, JSON.stringify(log, null, 2));
+      return;
+    }
     case 'keeper':
       await runKeeper(Number(flag('every') ?? 60));
       return;
@@ -114,7 +132,7 @@ const main = async () => {
       return;
     }
     default:
-      console.log('commands: wallet | hash | resolve | verdict | buy | policies | tick | keeper | tamper');
+      console.log('commands: wallet | hash | resolve | verdict | buy | policies | status | tick | keeper | tamper');
   }
 };
 

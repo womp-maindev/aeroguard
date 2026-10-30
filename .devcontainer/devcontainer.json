@@ -1,0 +1,19 @@
+{
+  // GitHub Codespaces: Code → Codespaces → Create. The dashboard (web/) is served on port 8080 and opens in the
+  // browser by itself; it reads Base Sepolia from the browser, so no keys are needed. The keeper API (port 8787)
+  // is optional: put KEEPER_PK and FLIGHT_COVER_ADDRESS in Codespaces secrets, then run `cd keeper && npm run api`.
+  "name": "AeroGuard",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:1-22-bookworm",
+  "postCreateCommand": "cd keeper && npm ci",
+  "postAttachCommand": {
+    "dashboard": "python3 -m http.server 8080 --directory web"
+  },
+  "forwardPorts": [8080, 8787],
+  "portsAttributes": {
+    "8080": { "label": "Dashboard", "onAutoForward": "openBrowser" },
+    "8787": { "label": "Keeper API (optional)", "onAutoForward": "notify" }
+  },
+  "customizations": {
+    "codespaces": { "openFiles": ["web/README.md"] }
+  }
+}

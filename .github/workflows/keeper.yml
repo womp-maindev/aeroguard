@@ -1,9 +1,25 @@
 name: AeroGuard keeper
+# The autonomous keeper: every ~15 min it reads active policies on Base Sepolia, buys signed AeroDataBox data via x402
+# once a flight should have landed, and settles on-chain. GitHub runs schedules only from the default branch and on a
+# best-effort basis; minutes off :00/:15/:30/:45 are dropped less often under load.
 
 on:
   schedule:
-    - cron: "*/15 * * * *"
+    - cron: "7,22,37,52 * * * *"
+  # A manual run is safe at any moment: the keeper decides from chain + saved state what is due (keeper/src/schedule.ts).
   workflow_dispatch:
+    inputs:
+      force:
+        description: "Check every Active policy in its window now, ignoring the 30-min rhythm (one paid lookup per flight)"
+        type: boolean
+        default: false
+      policy:
+        description: "Only this policy id (empty = all). With force: one lookup for one flight, e.g. one that landed early"
+        type: string
+        default: ""
+
+permissions:
+  contents: write # publishes keeper.json to the keeper-data branch
 
 concurrency:
   group: keeper
@@ -13,6 +29,13 @@ jobs:
   tick:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    env:
+      KEEPER_PK: ${{ secrets.KEEPER_PK }}
+      FLIGHT_COVER_ADDRESS: "0x257054204c4Cd43846C4553eBe6D709841980a80"
+      BASE_SEPOLIA_RPC: https://sepolia.base.org
+      KEEPER_FORCE: ${{ inputs.force || false }}
+      KEEPER_ONLY: ${{ inputs.policy || '' }}
+      KEEPER_RUN_LOG: ${{ github.workspace }}/keeper/.cache/run-log.json
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -26,10 +49,34 @@ jobs:
       - name: Install
         working-directory: keeper
         run: npm ci
+      - name: Balances and policies
+        working-directory: keeper
+        run: node src/cli.ts status
       - name: Keeper tick
         working-directory: keeper
-        env:
-          KEEPER_PK: ${{ secrets.KEEPER_PK }}
-          FLIGHT_COVER_ADDRESS: "0x257054204c4Cd43846C4553eBe6D709841980a80"
-          BASE_SEPOLIA_RPC: https://sepolia.base.org
         run: node src/cli.ts tick
+      # The signed responses that settled policies (contracts/test/fixtures format): replayable in Solidity.
+      - name: Settlement evidence
+        if: always()
+        working-directory: keeper
+        run: |
+          shopt -s nullglob
+          for f in .cache/evidence/*.json; do echo "== $f"; cat "$f"; echo; done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: settlement-evidence
+          path: keeper/.cache/evidence/
+          if-no-files-found: ignore
+      # The dashboard on GitHub Pages reads the run log and every signed Airnode response from this branch.
+      - name: Publish run log and signed responses (keeper-data branch)
+        if: always()
+        run: |
+          git config user.name womp-maindev
+          git config user.email 226526968+womp-maindev@users.noreply.github.com
+          if git fetch -q origin keeper-data; then git worktree add -q ../keeper-data FETCH_HEAD; else git worktree add -q --orphan -b keeper-data ../keeper-data; fi
+          node keeper/src/publish.ts ../keeper-data/keeper.json
+          cd ../keeper-data
+          git add keeper.json
+          git commit -q -m "keeper run ${{ github.run_number }} (${{ github.event_name }})"
+          git push -q origin HEAD:keeper-data

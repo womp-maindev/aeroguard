@@ -71,7 +71,11 @@ export const publicClient = () => createPublicClient({ chain: baseSepolia, trans
 export const walletClient = () =>
   createWalletClient({ chain: baseSepolia, transport: http(rpc()), account: privateKeyToAccount((process.env.KEEPER_PK || env('AGENT_PK')) as Hex) });
 
-export const explorerTx = (h: string) => `https://sepolia.basescan.org/tx/${h}`;
+/** The anvil rehearsal also uses chain id 84532, so only the RPC tells it apart from Base Sepolia. */
+export const isLocalRpc = () => /127\.0\.0\.1|localhost/.test(rpc());
+export const networkName = () => (isLocalRpc() ? 'Local anvil' : 'Base Sepolia');
+// a local chain has no explorer: label its txs instead of linking to Basescan
+export const explorerTx = (h: string) => (isLocalRpc() ? `local tx ${h}` : `https://sepolia.basescan.org/tx/${h}`);
 
 /** Turns viem's huge revert into "Stale(1793...)" */
 export const revertReason = (e: unknown): string => {
@@ -125,6 +129,40 @@ export const settle = async (id: bigint, r: SignedResponse) => {
   const rc = await p.waitForTransactionReceipt({ hash });
   const [ev] = parseEventLogs({ abi: coverAbi, logs: rc.logs, eventName: 'Settled' });
   return { txHash: hash, payout: ev?.args.payout ?? 0n, status: STATUS[ev?.args.status ?? 0], delayMinutes: ev?.args.delayMinutes };
+};
+
+/** Everything a keeper needs to stay solvent: gas, x402 money, pool capital. All amounts in base units. */
+export const balances = async () => {
+  const p = publicClient();
+  const keeper = walletClient().account.address;
+  const token = await p.readContract({ address: coverAddress(), abi: coverAbi, functionName: 'token' });
+  const aUsd = (a: Hex) => p.readContract({ address: token, abi: erc20Abi, functionName: 'balanceOf', args: [a] });
+  const read = (functionName: 'reserved' | 'freeCapital') => p.readContract({ address: coverAddress(), abi: coverAbi, functionName });
+  const [keeperEth, keeperAusd, pool, reserved, free] = await Promise.all([
+    p.getBalance({ address: keeper }),
+    aUsd(keeper),
+    aUsd(coverAddress()),
+    read('reserved'),
+    read('freeCapital'),
+  ]);
+  return { keeper, keeperEth, keeperAusd, pool, reserved, free };
+};
+
+/** settle measured at ≤ 159k gas (contracts/README gas table); 200k leaves room for a longer signed payload */
+export const SETTLE_GAS = 200_000n;
+/** ETH a keeper needs for `n` settles at the current fee (maxFeePerGas, the most a tx can be charged per gas). */
+export const settleCost = async (n: number) => {
+  const { maxFeePerGas } = await publicClient().estimateFeesPerGas();
+  return { maxFeePerGas, cost: BigInt(n) * SETTLE_GAS * maxFeePerGas };
+};
+
+/** Releases an unsettled policy's coverage after the settlement window. Simulated first, like settle. */
+export const expirePolicy = async (id: bigint) => {
+  const p = publicClient();
+  await p.simulateContract({ address: coverAddress(), abi: coverAbi, functionName: 'expire', args: [id], account: walletClient().account });
+  const hash = await walletClient().writeContract({ address: coverAddress(), abi: coverAbi, functionName: 'expire', args: [id] });
+  await p.waitForTransactionReceipt({ hash });
+  return hash;
 };
 
 export const getPolicy = (id: bigint) =>
