@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>AeroGuard — your flight is late, you're already paid</title>
+<style>
+  :root { --bg:#0b0d12; --card:#12151d; --line:#232838; --text:#e8ebf2; --mute:#8b93a7; --accent:#7cf2c5; --bad:#ff6b7a; --warn:#ffcc66; }
+  * { box-sizing: border-box; }
+  body { margin:0; font:15px/1.5 ui-sans-serif,system-ui,-apple-system,Segoe UI,Inter,sans-serif; background:var(--bg); color:var(--text); }
+  header { padding:40px 24px 16px; max-width:1100px; margin:auto; }
+  h1 { font-size:40px; line-height:1.1; margin:0 0 8px; letter-spacing:-.02em; }
+  h1 em { color:var(--accent); font-style:normal; }
+  .sub { color:var(--mute); max-width:720px; }
+  main { max-width:1100px; margin:auto; padding:0 24px 60px; display:grid; gap:16px; grid-template-columns:1fr 1fr; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:18px; }
+  .wide { grid-column:1/-1; }
+  h2 { font-size:13px; text-transform:uppercase; letter-spacing:.12em; color:var(--mute); margin:0 0 12px; }
+  .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+  .stat b { display:block; font-size:28px; }
+  .stat span { color:var(--mute); font-size:13px; }
+  input,select,button { font:inherit; background:#0d1017; color:var(--text); border:1px solid var(--line); border-radius:9px; padding:9px 11px; }
+  button { background:var(--accent); color:#05110c; border:0; font-weight:600; cursor:pointer; }
+  button.ghost { background:transparent; color:var(--text); border:1px solid var(--line); }
+  .row { display:flex; gap:8px; flex-wrap:wrap; }
+  table { width:100%; border-collapse:collapse; font-size:14px; }
+  td,th { text-align:left; padding:8px 6px; border-bottom:1px solid var(--line); }
+  th { color:var(--mute); font-weight:500; }
+  .pill { padding:2px 8px; border-radius:99px; font-size:12px; background:#1b2030; }
+  .PaidFull,.PaidHalf { background:#123a2c; color:var(--accent); }
+  .Active { background:#2c2a14; color:var(--warn); }
+  .Expired,.ClosedNoPayout { color:var(--mute); }
+  a { color:var(--accent); }
+  #log { font:12px/1.6 ui-monospace,Menlo,monospace; max-height:300px; overflow:auto; white-space:pre-wrap; }
+  .ok { color:var(--accent); } .no { color:var(--bad); }
+  .tamper div { padding:8px 0; border-bottom:1px solid var(--line); font-family:ui-monospace,Menlo,monospace; font-size:13px; }
+  .flow { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; font-size:13px; }
+  .flow div { border:1px solid var(--line); border-radius:10px; padding:10px; }
+  .flow b { display:block; color:var(--accent); font-size:12px; }
+  @media (max-width:800px){ main{grid-template-columns:1fr} .stats,.flow{grid-template-columns:1fr 1fr} }
+</style>
+</head>
+<body>
+<header>
+  <h1>Your flight is late.<br /><em>You're already paid.</em></h1>
+  <p class="sub">AeroGuard is an autonomous agent that sells flight-delay cover and settles it with no claim form. It is hired and paid on Cardano (Masumi), buys AeroDataBox data signed by its AirnodeHub Airnode over x402, and the FlightDelayCover contract on Base Sepolia pays out only when that signed evidence passes its signer, request and freshness checks.</p>
+</header>
+<main>
+  <section class="card wide">
+    <div class="flow">
+      <div><b>1 · HIRE</b>Traveller or travel agent hires AeroGuard on Sokosumi, pays on Cardano preprod</div>
+      <div><b>2 · RESOLVE</b>Agent buys the flight schedule from AirnodeHub via x402 (0.05 aUSD)</div>
+      <div><b>3 · COVER</b>Policy opened on Base Sepolia; request hashes derived on-chain from flight + date</div>
+      <div><b>4 · WATCH</b>Keeper wakes after landing, buys signed arrival data, no human in the loop</div>
+      <div><b>5 · PAY</b>Contract verifies signer, request, freshness, replay → pays 50% / 100%</div>
+    </div>
+  </section>
+  <section class="card wide">
+    <div class="stats">
+      <div class="stat"><b id="sPol">–</b><span>policies</span></div>
+      <div class="stat"><b id="sAct">–</b><span>active</span></div>
+      <div class="stat"><b id="sPaid">–</b><span>aUSD paid out</span></div>
+      <div class="stat"><b id="sSpend">–</b><span>x402 data calls bought by agent</span></div>
+    </div>
+  </section>
+  <section class="card">
+    <h2>Get covered</h2>
+    <div class="row">
+      <input id="flight" placeholder="Flight e.g. LH1234" size="12" />
+      <input id="date" type="date" />
+      <input id="holder" placeholder="Payout address 0x…" size="24" />
+      <input id="cov" type="number" value="2" min="0.5" max="5" step="0.5" style="width:80px" title="aUSD" />
+      <button onclick="buy()">Cover me</button>
+      <button class="ghost" onclick="check()">Just check status</button>
+    </div>
+    <p id="buyOut" class="sub"></p>
+  </section>
+  <section class="card tamper">
+    <h2>Tamper lab (API3 qualification)</h2>
+    <div class="row">
+      <select id="tPolicy"></select>
+      <button onclick="tamperAll()">Run all 4 forgeries + valid</button>
+    </div>
+    <p class="sub" style="font-size:13px">Each forgery is simulated against the deployed contract (no gas). Judges: run <code>pnpm tamper --policy N --response your.json</code> to submit your own.</p>
+    <div id="tOut"></div>
+  </section>
+  <section class="card wide">
+    <h2>Policies (live from Base Sepolia)</h2>
+    <table><thead><tr><th>#</th><th>Flight</th><th>Date</th><th>Cover</th><th>Status</th><th>Holder</th><th>Cardano job</th></tr></thead><tbody id="pol"></tbody></table>
+  </section>
+  <section class="card wide">
+    <h2>Agent log — autonomous keeper</h2>
+    <div id="log"></div>
+  </section>
+</main>
+<script>
+  const API = new URLSearchParams(location.search).get('api') || (location.port === '8787' ? '' : 'http://localhost:8787');
+  const $ = (id) => document.getElementById(id);
+  $('date').value = new Date().toISOString().slice(0, 10);
+  const j = async (p, o) => { const r = await fetch(API + p, o); const b = await r.json(); if (!r.ok) throw new Error(b.error); return b; };
+  const short = (a) => a ? a.slice(0, 6) + '…' + a.slice(-4) : '';
+  async function refresh() {
+    try {
+      const ps = await j('/policies');
+      $('sPol').textContent = ps.length;
+      $('sAct').textContent = ps.filter((p) => p.statusName === 'Active').length;
+      $('pol').innerHTML = ps.map((p) => `<tr><td>${p.id}</td><td>${p.flight}</td><td>${p.date}</td><td>${p.coverage / 1e6} aUSD</td><td><span class="pill ${p.statusName}">${p.statusName}</span></td><td>${short(p.holder)}</td><td>${/^0x0+$/.test(p.cardanoJobRef) ? '–' : short(p.cardanoJobRef)}</td></tr>`).join('');
+      const sel = $('tPolicy'), cur = sel.value;
+      sel.innerHTML = ps.map((p) => `<option value="${p.id}">#${p.id} ${p.flight} ${p.statusName}</option>`).join('');
+      if (cur) sel.value = cur;
+      const { log, spend } = await j('/log');
+      $('sSpend').textContent = spend.filter((s) => s.ok).length;
+      const paid = log.filter((l) => /payout/.test(l.msg)).map((l) => +(l.msg.match(/payout ([\d.]+)/) || [0, 0])[1]).reduce((a, b) => a + b, 0);
+      $('sPaid').textContent = paid;
+      $('log').innerHTML = log.slice().reverse().map((l) => `<div>${l.at.slice(11, 19)} <b>${l.level}</b> ${l.msg} ${l.link ? `<a target=_blank href="${l.link}">tx ↗</a>` : ''}</div>`).join('');
+    } catch (e) { $('log').textContent = 'API not reachable at ' + (API || location.origin) + ' — run: pnpm --dir agent api'; }
+  }
+  async function buy() {
+    $('buyOut').textContent = 'Agent is buying signed schedule via x402 and opening the policy…';
+    try {
+      const p = await j('/cover', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ flight: $('flight').value, date: $('date').value, holder: $('holder').value, coverage: +$('cov').value }) });
+      $('buyOut').innerHTML = `Policy #${p.policyId} active · scheduled ${p.scheduled} · <a target=_blank href="https://sepolia.basescan.org/tx/${p.txHash}">tx ↗</a>`;
+      refresh();
+    } catch (e) { $('buyOut').textContent = e.message; }
+  }
+  async function check() {
+    $('buyOut').textContent = 'Buying signed status…';
+    try { const v = await j(`/verdict?flight=${$('flight').value}&date=${$('date').value}`); $('buyOut').textContent = `${$('flight').value}: ${v.summary} (signed ${new Date(v.evidence.timestamp * 1000).toLocaleTimeString()})`; }
+    catch (e) { $('buyOut').textContent = e.message; }
+  }
+  async function tamperAll() {
+    const id = $('tPolicy').value; $('tOut').innerHTML = '';
+    for (const m of ['edit', 'stale', 'wrongreq', 'wrongsigner', 'valid']) {
+      const r = await j('/tamper', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ policyId: id, mode: m }) }).catch((e) => ({ reason: e.message }));
+      $('tOut').innerHTML += `<div>${m.padEnd(12)} ${r.accepted ? `<span class=ok>ACCEPTED → ${r.status}</span> <a target=_blank href="${r.link}">tx ↗</a>` : `<span class=no>REJECTED</span> ${r.reason || r.skipped || ''}`}</div>`;
+    }
+    refresh();
+  }
+  refresh(); setInterval(refresh, 8000);
+</script>
+</body>
+</html>

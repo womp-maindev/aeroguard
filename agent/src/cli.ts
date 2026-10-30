@@ -1,0 +1,115 @@
+// pnpm cli <command>   — see README "Commands"
+import { readFileSync } from 'node:fs';
+import { type Hex, keccak256, toHex } from 'viem';
+import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
+import type { SignedResponse } from './airnode-v2.ts';
+import { cover, describe, keeperTick, resolveFlight, runKeeper, verdict } from './agent.ts';
+import { allPolicies, explorerTx, getPolicy, revertReason, settle, STATUS } from './chain.ts';
+import { requestHashFor } from './flight.ts';
+
+const [cmd, ...rest] = process.argv.slice(2);
+const flag = (n: string) => {
+  const i = rest.indexOf(`--${n}`);
+  return i >= 0 ? rest[i + 1] : undefined;
+};
+const need = (n: string) => {
+  const v = flag(n);
+  if (!v) throw new Error(`--${n} is required`);
+  return v;
+};
+
+/** Signs like an Airnode v2 (EIP-191 over keccak(requestHash, timestamp, data)) — used to forge with a random key. */
+const forgeSign = async (pk: Hex, r: Omit<SignedResponse, 'signature'>) => {
+  const { encodePacked } = await import('viem');
+  const digest = keccak256(encodePacked(['bytes32', 'uint256', 'bytes'], [r.requestHash, BigInt(r.timestamp), toHex(r.data)]));
+  return privateKeyToAccount(pk).signMessage({ message: { raw: digest } });
+};
+
+/** The API3 tamper test against the DEPLOYED contract. Judges: pass your own --response file.json. */
+export const tamper = async (id: bigint, mode: string, base?: SignedResponse) => {
+  const p = await getPolicy(id);
+  const real = base ?? (await verdict(p.flight, p.date, 3600)).evidence;
+  let r: SignedResponse = { ...real };
+  switch (mode) {
+    case 'valid':
+      break;
+    case 'edit': // one value edited, original signature kept
+      r.data = r.data.replace(/"actual":"[^"]+"/, '"actual":"2099-01-01 00:00Z"').replace(/"status":"[^"]+"/, '"status":"Canceled"');
+      if (r.data === real.data) r.data = r.data.replace('"', ' "');
+      break;
+    case 'stale': {
+      // a GENUINE, correctly signed response that is older than the policy's maxAge (pass it with --response old.json)
+      const age = Math.floor(Date.now() / 1000) - Number(r.timestamp);
+      if (age <= Number(p.maxAge))
+        return { accepted: false, skipped: `response is only ${age}s old; pass --response with one older than ${p.maxAge}s (e.g. agent/fixtures/*.json)` };
+      break;
+    }
+    case 'wrongreq': // genuine-looking response for another flight, signed by a random key cannot pass either
+      r.requestHash = requestHashFor('LH9999', p.date, 'arrival');
+      break;
+    case 'wrongsigner': // correct request + data, signed by an attacker key
+      r.signature = await forgeSign(generatePrivateKey(), r);
+      break;
+    default:
+      throw new Error('mode: valid | edit | stale | wrongreq | wrongsigner');
+  }
+  try {
+    const res = await settle(id, r);
+    return { accepted: true, ...res, link: explorerTx(res.txHash) };
+  } catch (e) {
+    return { accepted: false, reason: revertReason(e) };
+  }
+};
+
+const main = async () => {
+  switch (cmd) {
+    case 'wallet': {
+      const pk = generatePrivateKey();
+      console.log(`AGENT_PK=${pk}\n# address: ${privateKeyToAccount(pk).address}`);
+      return;
+    }
+    case 'hash':
+      console.log(requestHashFor(need('flight'), need('date'), (flag('kind') as 'arrival' | 'status') ?? 'arrival'));
+      return;
+    case 'resolve':
+      console.log(await resolveFlight(need('flight'), need('date')));
+      return;
+    case 'verdict': {
+      const v = await verdict(need('flight'), need('date'));
+      console.log(describe(v.verdict));
+      console.log(JSON.stringify(v.evidence, null, 2));
+      return;
+    }
+    case 'buy':
+      console.log(
+        await cover({
+          flight: need('flight'),
+          date: need('date'),
+          holder: need('holder') as Hex,
+          coverage: BigInt(Math.round(Number(flag('coverage') ?? '2') * 1e6)),
+          cardanoJobId: flag('job'),
+        }),
+      );
+      return;
+    case 'policies':
+      for (const p of await allPolicies()) console.log(`#${p.id} ${p.flight} ${p.date} ${STATUS[p.status]} cover ${Number(p.coverage) / 1e6}`);
+      return;
+    case 'tick':
+      await keeperTick();
+      return;
+    case 'keeper':
+      await runKeeper(Number(flag('every') ?? 60));
+      return;
+    case 'tamper': {
+      const file = flag('response');
+      const base = file ? (JSON.parse(readFileSync(file, 'utf8')) as SignedResponse) : undefined;
+      const modes = flag('mode') ? [flag('mode')!] : ['edit', 'stale', 'wrongreq', 'wrongsigner', 'valid'];
+      for (const m of modes) console.log(m.padEnd(12), JSON.stringify(await tamper(BigInt(need('policy')), m, base), (_, v) => (typeof v === 'bigint' ? v.toString() : v)));
+      return;
+    }
+    default:
+      console.log('commands: wallet | hash | resolve | verdict | buy | policies | tick | keeper | tamper');
+  }
+};
+
+if (import.meta.url === `file://${process.argv[1]}`) main().catch((e) => (console.error(revertReason(e)), process.exit(1)));

@@ -1,0 +1,19 @@
+{
+  "name": "@aeroguard/agent",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22.18" },
+  "scripts": {
+    "test": "node --test \"src/**/*.test.ts\"",
+    "cli": "node --env-file-if-exists=../.env src/cli.ts",
+    "keeper": "node --env-file-if-exists=../.env src/cli.ts keeper",
+    "tamper": "node --env-file-if-exists=../.env src/cli.ts tamper",
+    "api": "node --env-file-if-exists=../.env src/api.ts"
+  },
+  "dependencies": {
+    "@x402/evm": "^2.28.0",
+    "@x402/fetch": "^2.28.0",
+    "viem": "^2.57.3"
+  },
+  "devDependencies": { "@types/node": "^24.19.1", "typescript": "~6.0.3" }
+}
