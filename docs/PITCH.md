@@ -49,3 +49,34 @@ Only a commitment `keccak256(flight, date, salt)` is stored, so nobody can see w
 
 **"Why Base Sepolia, why x402?"**
 AirnodeHub's x402 payments use aUSD on Base Sepolia, so the data and the contract sit on the same chain. With x402, an autonomous agent pays per call without an API key or an account, and it needs no ETH for the payment, because the facilitator submits the transfer. That is what a keeper needs.
+
+## Live purchase on stage (optional, ~20 s)
+
+Buying a real policy live proves the purchase-side oracle check on the deployed contract. It costs **one** paid AeroDataBox lookup (0.05 aUSD) plus the premium. Only do it if the morning dry run worked.
+
+**What the contract will demand.** A fresh (≤ 15 min) signed status for the flight, the status must still be pre-departure (`Expected / Unknown / CheckIn / Boarding`), and the scheduled arrival must be **≥ 2 h after the purchase block** (`minLeadTime`).
+
+**Pick the flight the evening before, without the API.** Use the public MUC departures board to choose one flight landing between about **17:30 and 20:00 CET on Sat 31 Oct**, plus one backup. That keeps it ≥ 2 h ahead at 15:00 while the keeper can still settle it the same evening. Do **not** run `resolve` or `verdict` to check it: every call is a paid lookup from the shared quota, and `buy` already does that lookup.
+
+**Before the pitch (14:30):**
+- `cd keeper && npm run cli -- status` shows that the keeper wallet has ≥ 0.1 aUSD (lookup + premium) and some ETH for gas, and that the pool's `free` ≥ the coverage you will buy.
+- Have the dashboard ready with `KEEPER=off npm run api`, or the terminal command below in the shell history.
+
+**On stage**, either click **Cover me** in the dashboard section "Cover a flight" (flight, local departure date, holder, coverage 0.5), or run:
+```bash
+npm run cli -- buy --flight <FLIGHT> --date 2026-10-31 --holder <YOUR_ADDRESS> --coverage 0.5
+```
+
+| Step | What happens | Expected time |
+|---|---|---|
+| 1 | The keeper pays 0.05 aUSD over x402 and receives the signed status | ~3–8 s (the Airnode answers, then the facilitator settles the payment) |
+| 2 | `buyPolicy` with the signed proof as calldata. The contract checks the signer, request hash, freshness, pre-departure status and lead time | ~2–4 s (Base Sepolia ~2 s blocks + receipt) |
+| 3 | The output shows the policy id and a Basescan link. Open it and point at `PolicyBought` | ~5 s |
+
+About **10–20 s** in total. These times are estimates; time steps 1–2 in the morning dry run and replace them. The allowance was already approved during the first purchase, so there is no extra `approve` transaction.
+
+**Say while it runs:** "The keeper is buying a signed status from the AeroDataBox Airnode. The contract won't sell cover unless the Airnode says this flight hasn't left yet, and it takes the schedule from the signature, not from me."
+
+**If something fails:** the error is a decoded revert (`NotBuyable(Delayed)`, `TooCloseToArrival`, `Insolvent`, …). That is a demo of the checks too: say so, and move on to the backup flight or to the local `npm run rehearse`. Never retry more than once on stage: each retry is another paid lookup.
+
+**Afterwards:** the GitHub Actions keeper settles this policy after it lands, with no further action.
