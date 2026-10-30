@@ -15,6 +15,17 @@ Every signed response below can be re-verified offline without trusting us. Reco
 
 Every purchase proof sits in its `buyPolicy` calldata (`timestamp`, `data`, `signature`). [`proofs.yml`](../.github/workflows/proofs.yml) reads all four back (`keeper cli proof <tx>`, read-only); IB1314's matched our earlier capture byte for byte.
 
+## Policies (31 Oct 2026, bought 30 Oct 23:28Z for the pitch day, 0.5 aUSD cover each)
+
+Bought in one batch with the `Buy policies` workflow, each with a fresh signed `Expected` status. Two flights that do not operate on Saturdays were rejected before any payment, and the batch stopped when AeroDataBox answered 429, because the quota is shared. The keeper settles these on Saturday morning. A payout happens only if the Airnode signs a real delay of 2 h or more, or a cancellation.
+
+| # | Flight | Scheduled arrival (signed) | Purchase | x402 for the proof | Settlement | Outcome · payout |
+|---|---|---|---|---|---|---|
+| 5 | LH1866 MUC→FCO | 10:20Z | [0x823fd0d2…](https://sepolia.basescan.org/tx/0x823fd0d28a58f1bd57b061502f00ebe66ab969ebce577a9bc05d3b47abb329a3) | [0x3f59c05c…](https://sepolia.basescan.org/tx/0x3f59c05c939048d7e2329a57e1dbf54dc9da4cc65356e6779ffbbd33ae8733ff) | pending | pending |
+| 6 | LH2472 MUC→LHR | 10:25Z | [0xe82e30cd…](https://sepolia.basescan.org/tx/0xe82e30cd9c6b1b8f9442bb4ea48d618d793d389ef2b96c06f0f39e211d50a55e) | [0x34309557…](https://sepolia.basescan.org/tx/0x34309557c8e5510bfd1fa2b52ff25a810272f219ef5ceb502eae63c22cae09a1) | pending | pending |
+| 7 | EI352 DUB→MUC | 09:10Z | [0xebee9181…](https://sepolia.basescan.org/tx/0xebee91819106c8e56bc8ef9b76b56dee96cd2638e4060ead67fc62a50b5909e5) | [0x8ea848ff…](https://sepolia.basescan.org/tx/0x8ea848ff1a5e5e9965f98e0ffa6c0218d00642b6616f267ab73a8d7ee61d6e1a) | pending | pending |
+| 8 | LH1810 MUC→BCN | 10:00Z | [0x8f5eb0b9…](https://sepolia.basescan.org/tx/0x8f5eb0b9efa6f63fa7bfba1b895efc9c4ea1e4ff424088dcde4c7be064feeb57) | [0x0258eb12…](https://sepolia.basescan.org/tx/0x0258eb121c1fa5e03a9a1c907adc7aeaee3773a0a8530e54fdf8028049f02b76) | pending | pending |
+
 ## Keeper lookups
 
 | When (UTC) | Policy | Why | Signed answer | x402 payment |

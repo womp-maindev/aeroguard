@@ -18,6 +18,9 @@ Tracks: **one project, two tracks** (confirmed by the organizers): **API3 "Any A
 - **CI** (`ci.yml`): forge test · keeper typecheck + tests · anvil rehearsal (5 policies + 1 private, 4 forgeries, settlements, expiry; exits 1 on any mismatch). Green.
 - **Docs for judges**: README (quickstart with a link per claim, architecture SVG, screenshots, tamper table with live results), `docs/EVIDENCE.md` (every policy, proof, lookup, x402 receipt), `docs/DEVFOLIO.md` (incl. feedback for API3), `docs/PITCH.md` (2-min + Q&A + on-stage purchase runbook), `docs/VIDEO.md` (shot list). All relative links/anchors/line refs checked.
 
+## Saturday policies #5–#8 (bought 30 Oct 23:28Z)
+LH1866 MUC→FCO 10:20Z · LH2472 MUC→LHR 10:25Z · EI352 DUB→MUC 09:10Z · LH1810 MUC→BCN 10:00Z, 0.5 aUSD each, holder = keeper wallet. The API3 session runs the keeper at 09:42, 10:32, 10:57, 11:32 and 12:32 UTC. A real delay of 2 h or more, or a cancellation, pays 50–100 % on the Airnode signature; anything else closes with no payout. Pool after purchase: 4.32 aUSD, reserved 2.00. Do not buy more: AeroDataBox answered 429 (shared quota).
+
 ## Night (API3 session, automatic)
 Each run: settle what landed → push notification with the first payout tx → `<FLIGHT>-settlement.json` into `contracts/test/fixtures` (activates its replay test, must pass) → tx into README "Live evidence", DEVFOLIO Links, EVIDENCE → push to main. The Cardano session reads the same final responses from `keeper-data` (22:45 UTC).
 

@@ -52,6 +52,7 @@ anvil --chain-id 84532 & npm run rehearse        # local deploy, 5 signed purcha
 
 ## Live evidence (Base Sepolia, real AeroDataBox data)
 Every policy, signed response and x402 payment in one place: [docs/EVIDENCE.md](docs/EVIDENCE.md).
+Pitch day: policies #5–#8 on Saturday-morning flights (LH1866, LH2472, EI352, LH1810) were bought at 23:28Z with signed pre-departure proofs. The keeper settles them from 09:40Z; see [EVIDENCE](docs/EVIDENCE.md).
 
 | Step | Tx |
 |---|---|
