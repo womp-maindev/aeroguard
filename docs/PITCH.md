@@ -18,7 +18,7 @@ About 280 words, so it fits at a calm pace. Have the screen ready: dashboard on 
 **1:20 — Proof (30 s)** *(README "Live evidence" → a settlement tx, then the tamper table; terminal already showing `npm run rehearse` output)*
 > These are four real policies on last night's flights from Munich, bought with signed proofs. Our keeper settled them; nobody filed a claim. Here is a payout. Before landing, we attacked policy #1 on the deployed contract with a real Airnode response. Edit one value: NotSignedByAirnode. Another flight: WrongRequest. An attacker key: rejected. A genuine but old response: Stale. And here is the same run locally, in two seconds: only the valid, final response pays.
 
-> Do **not** run `npm run tamper` on policies #1–#4 live: once a policy is settled, every attempt answers `NotActive` before any oracle check. The live on-chain proof is the recorded table; the live terminal demo is `anvil --chain-id 84532 & npm run rehearse`.
+> Live, use the dashboard's tamper lab rather than `npm run tamper`: it runs the four forgeries as `eth_call`s from the browser against the deployed contract, no key, and its **Reopen** option (a state override for that call) lets the oracle checks run even on a policy that is already settled. `npm run tamper` on a settled policy stops at `NotActive` first. Backup: `anvil --chain-id 84532 & npm run rehearse`.
 
 **1:50 — Close (10 s)**
 > Same contract shape works for rail, weather or any event an Airnode can sign. Thank you.
@@ -68,7 +68,7 @@ Buying a real policy live proves the purchase-side oracle check on the deployed 
 
 **Before the pitch (14:30):**
 - `cd keeper && npm run cli -- status` shows that the keeper wallet has ≥ 0.1 aUSD (lookup + premium) and some ETH for gas, and that the pool's `free` ≥ the coverage you will buy.
-- Have the dashboard ready with `KEEPER=off npm run api`, or the terminal command below in the shell history.
+- For the purchase, the dashboard's **Cover me** needs the local keeper API: `cd keeper && KEEPER=off npm run api`, then open http://localhost:8787. Or keep the terminal command below in the shell history.
 
 **On stage**, either click **Cover me** in the dashboard section "Cover a flight" (flight, local departure date, holder, coverage 0.5), or run:
 ```bash
