@@ -1,0 +1,18 @@
+{
+  "_note": "REAL: the AeroDataBox Airnode response that settled policy #1 on Base Sepolia (settle tx 0xf0aa5db2e08a9b9aa7298c92853642b39d7ff330fe3e42cd8b441aa136246b44), written by the keeper (keeper-data / artifact settlement-evidence of run 41134861847)",
+  "policyId": 1,
+  "flight": "IB1314",
+  "date": "2026-10-30",
+  "kind": "arrival",
+  "airnode": "0x83FE2E8F24E66520B1902C3507De4F471248f2Ec",
+  "requestHash": "0x4bf6755e32c0231b2f3dd9861b9e30ccf5e701e08e32dfda39137b78095023d0",
+  "timestamp": 1793397513,
+  "data": "{\"actual\":\"2026-10-30 21:00Z\",\"scheduled\":\"2026-10-30 21:25Z\",\"status\":\"Arrived\"}",
+  "signature": "0x8497f39767330901cdec705059be29a1f2b94ff00b51fc1faa44b29338a0e5a2737944973e9428fd6a5c831f414b4780fbca2e6f356e0740c3b8d42174418df91b",
+  "fetchedAt": 1793397514,
+  "paymentTx": "0xaaa74d0e408f5558f14e71f43b7a37b6e37764d454d0425291f7dfb7b36e2104",
+  "settleTx": "0xf0aa5db2e08a9b9aa7298c92853642b39d7ff330fe3e42cd8b441aa136246b44",
+  "outcome": "ClosedNoPayout",
+  "payout": 0,
+  "delayMinutes": 0
+}
