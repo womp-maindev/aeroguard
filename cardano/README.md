@@ -2,6 +2,18 @@
 
 Agents pay per request on Cardano for flight outcomes any contract can verify.
 
+![Agent pays over x402 on Cardano preprod; the server returns an Airnode-signed verdict that the Aiken cover and FlightDelayCover both verify](docs/architecture.svg)
+
+**For judges (3 min, no funds, no keys):**
+
+```bash
+cd cardano && npm i && npm test     # 38 tests: real signed Cardano txs, x402 round trips, Aiken cover executed via UPLC
+cd onchain && aiken check           # 26 tests, incl. real AeroDataBox Airnode signatures verified with Plutus builtins
+```
+
+Paid preprod transactions: [EVIDENCE.md](EVIDENCE.md). Live run: `npm run qualify` (needs a Blockfrost preprod key and a
+faucet-funded wallet, see below).
+
 `GET /verdict?flight=IB1314&date=2026-10-30` answers **402** with a price on `cardano:preprod`: **1 tADA** while the
 flight is live (scheduled, en route…), **2 tADA** once the proof is final (arrived or cancelled); tUSDM offered too. The agent's wallet signs a Cardano
 transaction (never broadcasts it), retries with `PAYMENT-SIGNATURE`, the facilitator verifies and submits it, and the
