@@ -6,6 +6,7 @@ import { cover, describe, log, runKeeper, verdict } from './keeper.ts';
 import { allPolicies, coverAddress, isLocalRpc, networkName, STATUS } from './chain.ts';
 import { spendLog } from './flight.ts';
 import { tamper } from './cli.ts';
+import { handleRehearse } from './rehearse-route.ts';
 
 const json = (res: import('node:http').ServerResponse, code: number, body: unknown) => {
   res.writeHead(code, { 'content-type': 'application/json', 'access-control-allow-origin': '*', 'access-control-allow-headers': '*' });
@@ -25,10 +26,12 @@ createServer(async (req, res) => {
       res.writeHead(200, { 'content-type': 'text/html' });
       return res.end(readFileSync(new URL('../../web/index.html', import.meta.url)));
     }
-    if (url.pathname === '/wallet.js') {
+    // the dashboard's add-on modules, next to index.html
+    if (url.pathname === '/wallet.js' || url.pathname === '/rehearsal.js') {
       res.writeHead(200, { 'content-type': 'text/javascript' });
-      return res.end(readFileSync(new URL('../../web/wallet.js', import.meta.url)));
+      return res.end(readFileSync(new URL(`../../web${url.pathname}`, import.meta.url)));
     }
+    if (await handleRehearse(req, res, url, json)) return;
     if (url.pathname === '/health')
       return json(res, 200, { ok: true, contract: coverAddress(), network: networkName(), explorer: isLocalRpc() ? null : 'https://sepolia.basescan.org' });
     if (url.pathname === '/policies') return json(res, 200, (await allPolicies()).map((p) => ({ ...p, statusName: STATUS[p.status] })));

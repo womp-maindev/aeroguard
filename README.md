@@ -174,6 +174,12 @@ cd keeper && npm run rehearse   # deploy locally, buy 5 policies with signed pro
 ```
 Rehearsal responses are signed with a local test key and labelled; the real deployment rejects them with `NotSignedByAirnode`.
 
+**From the dashboard, one click (for a demo).** Start the keeper API with the rehearsal switched on, no keys needed:
+```bash
+cd keeper && REHEARSE=on FLIGHT_COVER_ADDRESS=0x257054204c4Cd43846C4553eBe6D709841980a80 npm run api
+```
+Open <http://localhost:8787> and find **Local rehearsal → Run the full rehearsal**. The API starts a fresh anvil on `:8545` and runs the same script. The page shows the phases, the purchases, every attack with the contract's answer, the keeper's settlements and the expiry, then links to the rehearsal chain in the same dashboard. `REHEARSE=on` starts processes, so use it on your own laptop only. It answers pages on `localhost` only, runs one fixed script, keeps private keys out of that script's environment, and refuses to run if something else already serves `:8545`.
+
 ## Repo
 ```
 contracts/  FlightDelayCover.sol + AirnodeHub libraries (api3dao/airnodehub-hackathon-starter), Foundry tests, threat model
