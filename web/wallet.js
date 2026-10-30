@@ -131,12 +131,23 @@
     }
   }
 
-  async function send(mode) {
+  // The lab's selected policy, or null after explaining in `box` why a real transaction would be pointless.
+  function activePolicy(box) {
     const p = g('labPolicy')();
-    if (!p) return result(mode, 'sk', 'NO POLICY', 'Pick a target policy above first.');
-    if (Number(p.status) !== 1) {
-      return result(mode, 'sk', 'NOT ACTIVE', `Policy #${p.id} is ${p.statusName} on-chain, so a real transaction stops at NotActive before any oracle check. Pick an Active policy, or use the eth_call lab above, which can reopen it.`);
+    if (!p) {
+      result(box, 'sk', 'NO POLICY', 'Pick a target policy above first.');
+      return null;
     }
+    if (Number(p.status) !== 1) {
+      result(box, 'sk', 'NOT ACTIVE', `Policy #${p.id} is ${p.statusName} on-chain, so a real transaction stops at NotActive before any oracle check. Pick an Active policy, or use the eth_call lab above, which can reopen it.`);
+      return null;
+    }
+    return p;
+  }
+
+  async function send(mode) {
+    const p = activePolicy(mode);
+    if (!p) return;
     const base = g('labBase')(p);
     if ((mode === 'stale' || mode === 'valid') && !base.genuine && !el('tUseInsp')?.checked) {
       return result(mode, 'sk', 'SKIPPED', `Needs a genuine Airnode response for ${p.flight}; none is published for this policy yet.`);
@@ -148,33 +159,133 @@
       return result(mode, 'sk', 'CANCELLED', 'Not sent.');
     }
     const r = mode === 'valid' ? { ...base.r } : g('mutate')(mode, base, p);
-    const tx = { from: W.account, to: g('CONTRACT'), data: settleCalldata(p.id, r), gas: GAS_LIMIT };
+    await submit(mode, p, r);
+  }
 
+  const withExplanation = (reason) => {
+    const explain = g('explain');
+    const plain = typeof explain === 'function' ? explain(reason) : '';
+    return `<code>${escape(reason)}</code>${plain ? `<span class="e">${escape(plain)}</span>` : ''}`;
+  };
+
+  // Sends settle(policy, response) from the wallet and reports the on-chain outcome in `box`.
+  async function submit(box, p, r) {
+    let tx;
+    try {
+      tx = { from: W.account, to: g('CONTRACT'), data: settleCalldata(p.id, r), gas: GAS_LIMIT };
+    } catch (e) {
+      return result(box, 'no', 'NOT SENDABLE', escape(e.message));
+    }
     W.busy = true;
     render();
     try {
-      result(mode, '', 'CONFIRM IN WALLET', 'Your wallet may warn that this transaction will fail. For an attack, that is the point: send it anyway.');
+      result(box, '', 'CONFIRM IN WALLET', 'Your wallet may warn that this transaction will fail. For an attack, that is the point: send it anyway.');
       const hash = await eth().request({ method: 'eth_sendTransaction', params: [tx] });
       const link = `<a href="${EXPLORER}/tx/${hash}" target="_blank" rel="noopener">${short(hash)}</a>`;
-      result(mode, '', 'PENDING', `Sent ${link}. Waiting for Base Sepolia…`);
+      result(box, '', 'PENDING', `Sent ${link}. Waiting for Base Sepolia…`);
       const receipt = await waitForReceipt(hash);
       if (receipt.status === '0x1') {
-        result(mode, 'ok', 'CONFIRMED · ON-CHAIN', `settle() succeeded in ${link}. Policy state refreshed below.`);
+        result(box, 'ok', 'CONFIRMED · ON-CHAIN', `<span class="e">settle() succeeded in ${link}. Policy state refreshed.</span>`);
       } else {
-        const reason = await revertReason(tx, receipt.blockNumber);
-        const explain = g('explain');
-        const plain = typeof explain === 'function' ? explain(reason) : '';
-        result(mode, 'no', 'REVERTED · ON-CHAIN', `<code>${escape(reason)}</code> in ${link}${plain ? `<span class="e">${escape(plain)}</span>` : ''}`);
+        result(box, 'no', 'REVERTED · ON-CHAIN', `${withExplanation(await revertReason(tx, receipt.blockNumber))}<span class="e">Transaction ${link}</span>`);
       }
       const refresh = g('refreshChain');
       if (typeof refresh === 'function') await refresh();
     } catch (e) {
-      if (e.code === 4001) result(mode, 'sk', 'REJECTED', 'You rejected the transaction in the wallet. Nothing was sent.');
-      else result(mode, 'no', 'ERROR', escape(e.message || String(e)));
+      if (e.code === 4001) result(box, 'sk', 'REJECTED', 'You rejected the transaction in the wallet. Nothing was sent.');
+      else result(box, 'no', 'ERROR', escape(e.message || String(e)));
     } finally {
       W.busy = false;
       render();
     }
+  }
+
+  // ------------------------------------------------------------------------------------- your own response
+
+  // Takes an AirnodeHub response ({requestHash, timestamp, data, signature}), a keeper fixture with the same fields,
+  // or a proof that nests them under `response`. data must be the exact string that was signed.
+  function parseOwn(text) {
+    let o;
+    try {
+      o = JSON.parse(text);
+    } catch {
+      throw new Error('Not valid JSON.');
+    }
+    const r = o && typeof o === 'object' && o.response && typeof o.response === 'object' ? o.response : o;
+    if (!r || typeof r !== 'object') throw new Error('Expected a JSON object.');
+    const warnings = [];
+    let data = r.data;
+    if (data && typeof data === 'object') {
+      data = JSON.stringify(data);
+      warnings.push('data was an object, so it was written back as compact JSON; the signature only matches if that is byte for byte what was signed.');
+    }
+    const timestamp = String(r.timestamp ?? '').trim();
+    if (!/^0x[0-9a-fA-F]{64}$/.test(String(r.requestHash ?? ''))) throw new Error('requestHash must be 0x and 64 hex digits.');
+    if (!/^\d+$/.test(timestamp)) throw new Error('timestamp must be a unix time in seconds, such as "1793378516".');
+    if (typeof data !== 'string') throw new Error('data must be the signed JSON string.');
+    if (!/^0x([0-9a-fA-F]{2})*$/.test(String(r.signature ?? ''))) throw new Error('signature must be 0x and hex bytes.');
+    return { r: { airnode: r.airnode, requestHash: r.requestHash, timestamp, data, signature: r.signature }, warnings };
+  }
+
+  function readOwn() {
+    try {
+      const parsed = parseOwn(el('wOwn').value);
+      const iso = new Date(Number(parsed.r.timestamp) * 1000).toISOString().replace('T', ' ').slice(0, 16) + 'Z';
+      const sigBytes = (parsed.r.signature.length - 2) / 2;
+      result('own', '', 'READ', `<span class="e">Signed ${iso}, request ${short(parsed.r.requestHash)}, data ${parsed.r.data.length} characters, signature ${sigBytes} bytes.${parsed.warnings.map((w) => ` ${escape(w)}`).join('')}</span>`);
+      return parsed.r;
+    } catch (e) {
+      result('own', 'sk', 'NOT READABLE', escape(e.message));
+      return null;
+    }
+  }
+
+  // eth_call first, so a judge knows what the real transaction will do. Needs no wallet when the page's simulator exists.
+  async function checkOwn() {
+    const r = readOwn();
+    if (!r) return null;
+    const p = activePolicy('own');
+    if (!p) return null;
+    result('own', '', 'CHECKING', 'eth_call settle() against the live contract…');
+    try {
+      const simulate = typeof simulateSettle !== 'undefined' ? simulateSettle : undefined;
+      let out;
+      if (simulate) out = await simulate(p, r, {});
+      else {
+        try {
+          await eth().request({ method: 'eth_call', params: [{ to: g('CONTRACT'), data: settleCalldata(p.id, r) }, 'latest'] });
+          out = { ok: true };
+        } catch (e) {
+          const raw = e?.data?.data ?? e?.data;
+          out = { ok: false, reason: typeof raw === 'string' && g('decodeRevert') ? g('decodeRevert')(raw) : e.message };
+        }
+      }
+      if (out.ok) result('own', 'ok', 'WOULD SETTLE', `<span class="e">The contract accepts it: sending it for real settles policy #${p.id} for good.</span>`);
+      else if (out.error) result('own', 'sk', 'RPC ERROR', escape(out.error));
+      else result('own', 'no', 'WOULD REVERT', withExplanation(out.reason));
+      return out;
+    } catch (e) {
+      result('own', 'no', 'ERROR', escape(e.message));
+      return null;
+    }
+  }
+
+  async function sendOwn() {
+    const r = readOwn();
+    if (!r) return;
+    const p = activePolicy('own');
+    if (!p) return;
+    const check = await checkOwn();
+    if (check?.ok && !confirm(`The contract accepts this response, so sending it settles policy #${p.id} for good and pays the holder. Send it?`)) {
+      return result('own', 'sk', 'CANCELLED', 'Not sent.');
+    }
+    await submit('own', p, r);
+  }
+
+  function fillOwn(r, label) {
+    el('wOwn').value = JSON.stringify({ requestHash: r.requestHash, timestamp: String(r.timestamp), data: r.data, signature: r.signature }, null, 2);
+    readOwn();
+    result('own', '', 'LOADED', `<span class="e">${escape(label)}. Edit anything, then check or send it.</span>`);
   }
 
   // ---------------------------------------------------------------------------------------------------- UI
@@ -214,6 +325,7 @@
       btn.textContent = W.account && W.chainId !== CHAIN_ID ? 'Switch to Base Sepolia' : 'Connect wallet';
     }
     document.querySelectorAll('[data-wsend]').forEach((b) => (b.disabled = !ready || W.busy));
+    document.querySelectorAll('[data-wbusy]').forEach((b) => (b.disabled = !!missing.length || W.busy));
   }
 
   function mount() {
@@ -228,6 +340,10 @@
       #wPanel .wgrid { display: grid; gap: .75rem; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
       #wPanel .wcell { display: flex; flex-direction: column; gap: .4rem; }
       #wPanel .res { min-height: 2.5rem; overflow-wrap: anywhere; }
+      #wPanel .wown { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line, #e1e5eb); }
+      #wPanel .wown > p { font-size: 13px; color: var(--mute, #556071); margin: 4px 0 10px; }
+      #wPanel .wown textarea { width: 100%; min-height: 120px; box-sizing: border-box; font: 12px/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+      #wPanel .wrow { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
       @media (max-width: 480px) { #wPanel .wtop button { width: 100%; } }`;
     document.head.appendChild(style);
 
@@ -244,11 +360,39 @@
           <div class="res" id="wres-${a.m}"><span class="e">Not sent.</span></div></div>`).join('')}
         <div class="wcell"><button class="btn-primary btn-sm" type="button" data-wsend="valid">Send: Genuine</button>
           <div class="res" id="wres-valid"><span class="e">Settles for good if final. Asks first.</span></div></div>
+      </div>
+      <div class="wown">
+        <h4>Your own response</h4>
+        <p>Paste any AirnodeHub response (or a keeper fixture) for the target policy, edit it however you like, then
+        check it with an <code>eth_call</code> or send it for real. <code>data</code> must be the exact string that was
+        signed.</p>
+        <textarea id="wOwn" spellcheck="false" placeholder='{"requestHash":"0x…","timestamp":"1793378516","data":"{\\"scheduled\\":\\"…\\",\\"status\\":\\"…\\"}","signature":"0x…"}'></textarea>
+        <div class="wrow">
+          <button class="btn-ghost btn-sm" type="button" id="wOwnBase">Start from the lab's base</button>
+          <button class="btn-ghost btn-sm" type="button" id="wOwnInsp">Copy from the Inspector</button>
+          <button class="btn-ghost btn-sm" type="button" id="wOwnCheck" data-wbusy>Check (eth_call)</button>
+          <button class="btn-primary btn-sm" type="button" data-wsend="own">Send for real</button>
+        </div>
+        <div class="res" id="wres-own"><span class="e">Nothing pasted yet.</span></div>
       </div>`;
     lab.appendChild(panel);
 
     el('wConnect').addEventListener('click', () => (W.account && W.chainId !== CHAIN_ID ? switchChain().catch((e) => note(e.message)) : connect()));
-    panel.querySelectorAll('[data-wsend]').forEach((b) => b.addEventListener('click', () => send(b.dataset.wsend)));
+    panel.querySelectorAll('[data-wsend]').forEach((b) => b.addEventListener('click', () => (b.dataset.wsend === 'own' ? sendOwn() : send(b.dataset.wsend))));
+    el('wOwn').addEventListener('input', readOwn);
+    el('wOwnCheck').addEventListener('click', checkOwn);
+    el('wOwnBase').addEventListener('click', () => {
+      const p = g('labPolicy')();
+      if (!p) return result('own', 'sk', 'NO POLICY', 'Pick a target policy above first.');
+      const base = g('labBase')(p);
+      fillOwn(base.r, `Loaded ${base.label}`);
+    });
+    el('wOwnInsp').addEventListener('click', () => {
+      const read = typeof readResp !== 'undefined' ? readResp : undefined;
+      const r = read?.();
+      if (!r?.signature) return result('own', 'sk', 'EMPTY', 'The Inspector has no response loaded. Paste or load one there, or paste it here.');
+      fillOwn(r, "Copied the Inspector's response");
+    });
     if (eth()?.on) {
       eth().on('accountsChanged', (a) => {
         W.account = a[0] ?? null;
