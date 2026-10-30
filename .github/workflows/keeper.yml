@@ -1,10 +1,14 @@
 name: AeroGuard keeper
-# The autonomous keeper, running on its own every 15 minutes: scans active policies on Base Sepolia,
-# buys signed AeroDataBox data via x402 when a flight should have landed, and settles on-chain.
+
 on:
-  schedule: [{ cron: '*/15 * * * *' }]
-  workflow_dispatch: {}
-concurrency: { group: keeper, cancel-in-progress: false }
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: keeper
+  cancel-in-progress: false
+
 jobs:
   tick:
     runs-on: ubuntu-latest
@@ -12,14 +16,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 22 }
+        with:
+          node-version: "22"
       - uses: actions/cache@v4
-        with: { path: keeper/.cache, key: keeper-${{ github.run_id }}, restore-keys: keeper- }
-      - run: npm ci || npm i
+        with:
+          path: keeper/.cache
+          key: keeper-${{ github.run_id }}
+          restore-keys: keeper-
+      - name: Install
         working-directory: keeper
-      - run: node src/cli.ts tick
+        run: npm ci
+      - name: Keeper tick
         working-directory: keeper
         env:
-          KEEPER_PK: ${{ secrets.KEEPER_PK || secrets.AGENT_PK }}
-          FLIGHT_COVER_ADDRESS: ${{ vars.FLIGHT_COVER_ADDRESS || '0x257054204c4Cd43846C4553eBe6D709841980a80' }}
+          KEEPER_PK: ${{ secrets.KEEPER_PK }}
+          FLIGHT_COVER_ADDRESS: "0x257054204c4Cd43846C4553eBe6D709841980a80"
           BASE_SEPOLIA_RPC: https://sepolia.base.org
+        run: node src/cli.ts tick
