@@ -8,7 +8,7 @@
 Nobody files a claim and nobody approves one.
 
 ```
-forge test --use /usr/local/bin/solc --offline            # 52 pass, 1 skipped until the live settlement is captured
+forge test --use /usr/local/bin/solc --offline            # 55 pass, 4 skipped until the live settlements are captured
 forge test --use /usr/local/bin/solc --offline --gas-report
 forge coverage --use /usr/local/bin/solc --offline --ir-minimum --report summary
 ```
@@ -99,7 +99,7 @@ Coverage: `FlightDelayCover.sol` has 98.8% line and 86.8% branch coverage.
 - `sample-signed-arrival.json` is **synthetic** (signed with the test key `0xA11CE`). It tests the loader and settles end to end.
 - `aerodatabox-arrival.json` is a **real** AirnodeHub capture. Drop it in and the test checks the following: the signer recovers to `0x83FE…f2Ec`, `requestHash == requestHashFor(flight, date, kind == "arrival")`, and one edited byte is rejected. If the status is final, it also opens a policy through a test-only `CoverHarness` (which skips the purchase proof, since a captured settlement response has no matching purchase response) and settles it end to end. The test is skipped while the file is missing. `data` must be the exact signed string.
 
-## Tests (53)
+## Tests (59)
 
 - Payout and happy paths: `RequestHashMatchesAirnodeHubScheme`, `FullPayoutAfter3hDelay`, `HalfPayoutAfter2hDelay`, `NoPayoutWhenOnTime`, `FullPayoutWhenCancelled`, and `testFuzz_PayoutTiers` (1000 runs).
 - API3 tamper tests: `Tamper1_RejectEditedValue`, `Tamper2_RejectTooOld`, `Tamper3_RejectOtherRequest`, `Tamper4_RejectUnexpectedSigner`.
@@ -107,4 +107,4 @@ Coverage: `FlightDelayCover.sol` has 98.8% line and 86.8% branch coverage.
 - Purchase proof: `Buy_StoresSignedScheduledArrival`, `Buy_AcceptsEveryPreDepartureStatus`, `Buy_RejectOutcomeAlreadyKnown` (Delayed, Arrived, Canceled, CanceledUncertain, Diverted, Departed, EnRoute, GateClosed), `Buy_RejectStaleProof`, `Buy_RejectFutureProof`, `Buy_RejectProofForOtherFlightOrProjection`, `Buy_RejectEditedProof`, `Buy_RejectWrongSignerProof`, `Buy_RejectTooCloseToArrival`, `Buy_MinLeadTimeIsOwnerSetting`, `RejectSettleEvidenceWithOtherSchedule`.
 - Private policies: `Private_StoresNoFlightInfo`, `Private_HappyPathFullPayout`, `Private_CancelledPaysFull`, `Private_RejectWrongSalt`, `Private_RejectOtherFlightReveal`, `Private_RejectPublicSettleAndViceVersa`, `Private_RejectZeroCommitment`, `Private_RejectBadFlightCharsEvenIfCommitted`, `Private_Tamper1..4`, `Private_RejectSettlingTwice`, `Private_RejectBeyondHorizon`, `Private_RejectTooCloseToArrival`, `Private_AcceptScheduleWithin1h`, `Private_RejectScheduleBeyond1h`, `Private_ExpiresLikePublic`.
 - Fixtures: `Fixture_SyntheticSampleLoadsAndSettles`, `Fixture_RealAeroDataBoxCapture` (real AirnodeHub capture, LH400).
-- Live replay of policy #1 (`test/LiveReplay.t.sol`), on the exact Airnode signatures used on Base Sepolia, through the real `buyPolicy` and `settle` with the deploy-script parameters (no harness, no test signer): `Live_IB1314_BoughtWithRealSignedProof`, `Live_IB1314_PurchaseProofCannotSettle` (`NotFinal(Expected)`, then `Stale(1793378516)` as on-chain), `Live_IB1314_SettlesLikeOnChain` (skipped until the keeper's real settlement response is committed as `test/fixtures/IB1314-settlement.json`; then it must reproduce the on-chain outcome and payout).
+- Live replay of all 4 policies (`test/LiveReplay.t.sol`) on the exact Airnode signatures used on Base Sepolia, through the real `buyPolicy` and `settle` with the deploy-script parameters (no harness, no test signer). Purchase proofs (`test/fixtures/<FLIGHT>-purchase-proof.json`) are read back from each `buyPolicy` calldata (`keeper cli proof <tx>`, workflow `proofs.yml`); the one for IB1314 matched our earlier capture byte for byte. Tests: `Live_<FLIGHT>_BoughtWithRealSignedProof` for IB1314, LH1816, EI357, BA955; `Live_IB1314_PurchaseProofCannotSettle` (`NotFinal(Expected)`, then `Stale(1793378516)` as on-chain); `Live_<FLIGHT>_SettlesLikeOnChain` (skipped until the keeper's real settlement response is committed as `test/fixtures/<FLIGHT>-settlement.json`; then it must reproduce the on-chain outcome and payout).
