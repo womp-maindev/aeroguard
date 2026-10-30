@@ -68,6 +68,8 @@ The keeper is scheduled in GitHub Actions ([`.github/workflows/keeper.yml`](http
 Flight delays are common and compensation claims are slow: forms, evidence, weeks of waiting, often a claims-agency fee. Parametric cover removes the claim: if trustworthy data says the flight landed late, money moves. The hard parts are **trusting the data** and **who presses the button**. AeroGuard answers both: AirnodeHub signatures checked by the contract, and a keeper that anyone can replace because it has no special power.
 
 ## How it works
+![AeroGuard architecture: signed status → buyPolicy, signed arrival via x402 → keeper → settle → payout](docs/img/architecture.svg)
+
 ```
 Traveller / travel app
   │ 1  buy: attach a fresh signed AeroDataBox STATUS response (pre-departure)        → buyPolicy
