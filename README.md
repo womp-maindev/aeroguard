@@ -38,7 +38,7 @@ The same forgeries were also run against the **deployed** contract with a real A
 **3 · Run it yourself (90 s, no keys, no funds).**
 ```bash
 git clone --recurse-submodules https://github.com/womp-maindev/aeroguard && cd aeroguard
-cd contracts && forge test                       # 56 tests, incl. all 4 live policies replayed on their real Airnode signatures (+3 payouts pending)
+cd contracts && forge test                       # 59 tests, incl. all 4 live policies replayed, purchase to settlement, on their real Airnode signatures
 cd ../keeper && npm ci && npm test
 anvil --chain-id 84532 & npm run rehearse        # local deploy, 5 signed purchases, 4 attacks + valid, keeper settles all
 ```
@@ -61,6 +61,9 @@ Every policy, signed response and x402 payment in one place: [docs/EVIDENCE.md](
 | Policy #3 EI357 MUC→DUB | [0x2aeed601…](https://sepolia.basescan.org/tx/0x2aeed6010ced165f66c26ea0f34e7068421a327cac0c6375d72ef7b794f41672) |
 | Policy #4 BA955 MUC→LHR | [0x7e675d8f…](https://sepolia.basescan.org/tx/0x7e675d8f94946db1d02a40c1eff87ac5a0ca29b65730751cf0d902d767d2b0d1) |
 | **Settled by the keeper:** #1 IB1314 landed 21:00Z, 25 min early → `ClosedNoPayout` (premium stays in the pool), on the Airnode-signed "Arrived" ([x402 0xaaa74d0e…](https://sepolia.basescan.org/tx/0xaaa74d0e408f5558f14e71f43b7a37b6e37764d454d0425291f7dfb7b36e2104)); replayed in [`test_Live_IB1314_SettlesLikeOnChain`](contracts/test/LiveReplay.t.sol) | [0xf0aa5db2…](https://sepolia.basescan.org/tx/0xf0aa5db2e08a9b9aa7298c92853642b39d7ff330fe3e42cd8b441aa136246b44) |
+| **Settled by the keeper:** #2 LH1816 landed 22:06Z, 11 min late → `ClosedNoPayout` ([x402 0x557e5d5b…](https://sepolia.basescan.org/tx/0x557e5d5b3d60626c9d23593fada9d43c81de82e5f6e02b8663336f6a03635156)); replayed in [`test_Live_LH1816_SettlesLikeOnChain`](contracts/test/LiveReplay.t.sol) | [0x5270aa58…](https://sepolia.basescan.org/tx/0x5270aa58d63db79af041e74bb40115a801381f28caca028d90c285280594c535) |
+| **Settled by the keeper:** #3 EI357 landed 21:26Z, 29 min early → `ClosedNoPayout` ([x402 0x856458f5…](https://sepolia.basescan.org/tx/0x856458f50e565ae958ecc5ec385bd01b954f28daf20be41daa07b342bea24e15)); replayed in [`test_Live_EI357_SettlesLikeOnChain`](contracts/test/LiveReplay.t.sol) | [0x5a5e4fc7…](https://sepolia.basescan.org/tx/0x5a5e4fc750464b0f4043aa2318da55705ae0eb94603adf17d417068de4f2ff9a) |
+| **Settled by the keeper:** #4 BA955 landed 21:47Z, 3 min early → `ClosedNoPayout` ([x402 0x764671bf…](https://sepolia.basescan.org/tx/0x764671bfb440405891e8190fe99168cded5f51acaede70273ce5b4fa18bbc8c3)); replayed in [`test_Live_BA955_SettlesLikeOnChain`](contracts/test/LiveReplay.t.sol) | [0x973e29d8…](https://sepolia.basescan.org/tx/0x973e29d8195ce6bfe7bde0b749b308cfe1e8200e2465c849810a0a01dd01c7ee) |
 
 Tamper test against the deployed contract with a REAL signed Airnode response (policy #1): edited value → `NotSignedByAirnode`, other flight → `WrongRequest`, attacker key → `NotSignedByAirnode`, genuine but older than `maxAge` → `Stale(1793378516)`, genuine but pre-departure → `NotFinal(Expected)`. A captured real response (`contracts/test/fixtures/aerodatabox-arrival.json`, LH400) is verified in Solidity by `test_Fixture_RealAeroDataBoxCapture`: the on-chain request-hash derivation matches AirnodeHub byte for byte.
 The keeper is scheduled in GitHub Actions ([`.github/workflows/keeper.yml`](https://github.com/womp-maindev/aeroguard/actions/workflows/keeper.yml), every ~15 min) to settle these policies after landing. On 30 Oct the schedule did not fire until it was re-registered, so the first runs were started by hand (`workflow_dispatch`); every run, scheduled or manual, is listed [here](https://github.com/womp-maindev/aeroguard/actions/workflows/keeper.yml). GitHub runs schedules on a best-effort basis: they can be late or skipped, and the keeper does not depend on them, since anyone can run `npm run keeper` or call `settle`.
@@ -136,7 +139,7 @@ Node ≥ 22.18 and [Foundry](https://getfoundry.sh).
 git clone --recurse-submodules https://github.com/womp-maindev/aeroguard && cd aeroguard
 cp .env.example .env                    # set KEEPER_PK (Base Sepolia ETH + aUSD)
 
-cd contracts && forge test              # 56 tests (+3 settlement replays once those payouts are captured)
+cd contracts && forge test              # 59 tests incl. the full live lifecycle of all 4 policies
 forge script script/Deploy.s.sol --rpc-url $BASE_SEPOLIA_RPC --broadcast --private-key $DEPLOYER_PK
 
 cd ../keeper && npm i

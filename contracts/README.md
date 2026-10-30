@@ -8,7 +8,7 @@
 Nobody files a claim and nobody approves one.
 
 ```
-forge test --use /usr/local/bin/solc --offline            # 56 pass, 3 skipped until the remaining live settlements are captured
+forge test --use /usr/local/bin/solc --offline            # 59 pass, incl. the full live lifecycle of all 4 policies
 forge test --use /usr/local/bin/solc --offline --gas-report
 forge coverage --use /usr/local/bin/solc --offline --ir-minimum --report summary
 ```
