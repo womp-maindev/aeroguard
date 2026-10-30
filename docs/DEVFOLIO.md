@@ -38,7 +38,7 @@ FlightDelayCover
   │         simulates settle, then sends it. The payout always goes to the stored holder.
 ```
 
-The contract builds the AirnodeHub request hash itself, `keccak256(JSON.stringify([operation, sortedParams, sortedProjection]))`, from the policy's own flight and date. Even the agent that sold the policy cannot settle it with data about another flight, day or projection. A real AirnodeHub capture is checked byte for byte in Solidity ([`Fixture_RealAeroDataBoxCapture`](../contracts/test/Fixtures.t.sol#L105)).
+The contract builds the AirnodeHub request hash itself, `keccak256(JSON.stringify([operation, sortedParams, sortedProjection]))`, from the policy's own flight and date. Even the agent that sold the policy cannot settle it with data about another flight, day or projection. A real AirnodeHub capture is checked byte for byte in Solidity ([`Fixture_RealAeroDataBoxCapture`](https://github.com/womp-maindev/aeroguard/blob/main/contracts/test/Fixtures.t.sol#L105)).
 
 Two small projections keep the signed payload tiny:
 - **arrival** `{actual, scheduled, status}`: proves the delay;
@@ -55,19 +55,19 @@ Two small projections keep the signed payload tiny:
 ### What breaks if the data is forged
 | Forgery | Without signed data | AeroGuard's answer |
 |---|---|---|
-| "My flight was 4 h late" | the pool is drained by fake claims | `NotSignedByAirnode` ([test](../contracts/test/FlightDelayCover.t.sol#L129)) |
-| A genuine response for another flight or day | a late flight pays every policy | `WrongRequest` ([test](../contracts/test/FlightDelayCover.t.sol#L151)) |
-| An old response from before the delay was revised | outcome picked from history | `Stale` ([test](../contracts/test/FlightDelayCover.t.sol#L140)) |
-| "Arrived" signed before the landing it reports | early, wrong verdict | `ObservedTooEarly` ([test](../contracts/test/FlightDelayCover.t.sol#L224)) |
-| Insure a flight that is already delayed | adverse selection drains the pool | `NotBuyable` ([test](../contracts/test/FlightDelayCover.t.sol#L287)) |
-| Lie about the schedule at purchase | delay computed against a fake baseline | scheduled time read from the signature; `ScheduleMismatch` at settlement ([test](../contracts/test/FlightDelayCover.t.sol#L373)) |
+| "My flight was 4 h late" | the pool is drained by fake claims | `NotSignedByAirnode` ([test](https://github.com/womp-maindev/aeroguard/blob/main/contracts/test/FlightDelayCover.t.sol#L129)) |
+| A genuine response for another flight or day | a late flight pays every policy | `WrongRequest` ([test](https://github.com/womp-maindev/aeroguard/blob/main/contracts/test/FlightDelayCover.t.sol#L151)) |
+| An old response from before the delay was revised | outcome picked from history | `Stale` ([test](https://github.com/womp-maindev/aeroguard/blob/main/contracts/test/FlightDelayCover.t.sol#L140)) |
+| "Arrived" signed before the landing it reports | early, wrong verdict | `ObservedTooEarly` ([test](https://github.com/womp-maindev/aeroguard/blob/main/contracts/test/FlightDelayCover.t.sol#L224)) |
+| Insure a flight that is already delayed | adverse selection drains the pool | `NotBuyable` ([test](https://github.com/womp-maindev/aeroguard/blob/main/contracts/test/FlightDelayCover.t.sol#L287)) |
+| Lie about the schedule at purchase | delay computed against a fake baseline | scheduled time read from the signature; `ScheduleMismatch` at settlement ([test](https://github.com/womp-maindev/aeroguard/blob/main/contracts/test/FlightDelayCover.t.sol#L373)) |
 
 An honest traveller can also be hurt by forged data, for example a fake "on time" response that closes their policy. The same checks protect them.
 
 ### Trust assumptions
 - The signature proves that **the AeroDataBox Airnode returned exactly this data for exactly this request at this time**. It does not prove that AeroDataBox is right about the real world. We picked a recognised aviation data source and only pay on a final status.
 - The Airnode address is immutable in the contract. If the key rotates, active policies can only expire, and a new deployment is needed.
-- The pool owner sets the premium and limits for **new** policies only. The owner can never withdraw capital that backs active policies (`withdrawFree` takes only `balance − reserved`, [test](../contracts/test/FlightDelayCover.t.sol#L261)).
+- The pool owner sets the premium and limits for **new** policies only. The owner can never withdraw capital that backs active policies (`withdrawFree` takes only `balance − reserved`, [test](https://github.com/womp-maindev/aeroguard/blob/main/contracts/test/FlightDelayCover.t.sol#L261)).
 - The keeper is not trusted. Anyone can call `settle`, and the money always goes to the stored holder.
 - Private policies: the purchase proof cannot be checked without revealing the flight. A private buyer is therefore limited only by the lead time and a ±1 h schedule window. This is documented, and the production fix is a ZK proof of the purchase-time status.
 
@@ -84,5 +84,5 @@ An honest traveller can also be hurt by forged data, for example a fake "on time
 - x402 payment for signed data: https://sepolia.basescan.org/tx/0x76d334da55c86bbf61d37762f8ee843f4920bc874477a82d06852247b4e2054f
 - Policy #1 purchase with a signed proof: https://sepolia.basescan.org/tx/0xbfd3ae73074ff63a3ef5f7e56b211d1ffb7223e2db944d0cc38ed069d1958b8d
 - Keeper runs: https://github.com/womp-maindev/aeroguard/actions/workflows/keeper.yml
-- Threat model: [`contracts/README.md`](../contracts/README.md#threat-model)
-- Video: see [`docs/VIDEO.md`](VIDEO.md) (the link is added after recording)
+- Threat model: [`contracts/README.md`](https://github.com/womp-maindev/aeroguard/blob/main/contracts/README.md#threat-model)
+- Video: see [`docs/VIDEO.md`](https://github.com/womp-maindev/aeroguard/blob/main/docs/VIDEO.md) (the link is added after recording)
