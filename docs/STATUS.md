@@ -24,14 +24,14 @@ LH1866 MUC→FCO 10:20Z · LH2472 MUC→LHR 10:25Z · EI352 DUB→MUC 09:10Z · 
 ## Night (API3 session, automatic)
 Each run: settle what landed → push notification with the first payout tx → `<FLIGHT>-settlement.json` into `contracts/test/fixtures` (activates its replay test, must pass) → tx into README "Live evidence", DEVFOLIO Links, EVIDENCE → push to main. The Cardano session reads the same final responses from `keeper-data` (22:45 UTC).
 
-## Owner checklist (Sat)
-1. Tonight: pick the on-stage flight (lands Sat 17:30–20:00 CET) + a backup — from the public MUC board, not the API (`docs/PITCH.md`).
-2. GitHub → Settings → Advanced Security: enable **Secret Protection** + **Push protection**.
-3. Morning: dry-run the live purchase with a timer (`npm run cli -- buy …`, or dashboard **Cover me** with `npm run api`); `npm run cli -- status` shows keeper aUSD ≥ 0.1 and pool `free` ≥ coverage.
-4. Record the video (`docs/VIDEO.md`; the tamper shot works any time from the dashboard), upload unlisted, send the link → it goes into README + DEVFOLIO.
-5. Live policies screenshot (dashboard, Policies section) for README — or ask the API3 session if `sepolia.base.org` is allowed in its network settings.
-6. By 14:30: repo **public** → run the "Dashboard on GitHub Pages" workflow (Pages needs a public repo) → submit on tum.devfolio.co: one project, tracks **API3 + Cardano**, text from `docs/DEVFOLIO.md`.
-7. 15:00: pitch from `docs/PITCH.md` (first sentence: "API3 and Cardano tracks; this is the API3 part").
+## Owner checklist (Sat) — phone only, no laptop needed
+Everything runs in GitHub Actions or in the browser. The keeper key never leaves the GitHub secret.
+1. **GitHub (mobile browser, "Desktop site" on)** → Settings → Advanced Security: enable **Secret Protection** + **Push protection**.
+2. **By 14:00 CET**: Settings → General → Danger zone → **Change visibility → Public**. Then Actions → "Dashboard on GitHub Pages" → **Run workflow**. Open https://womp-maindev.github.io/aeroguard/ on the phone and check that the policies and the keeper log show up.
+3. **Video** (optional): screen-record the phone on the Pages dashboard (Inspector → load a real response; Tamper lab → Run the 4 attacks) plus one Basescan settle tx, about 2 min (`docs/VIDEO.md`). Upload it unlisted and send the link in this chat: it goes into README + DEVFOLIO.
+4. **By 14:30**: tum.devfolio.co on the phone → one project, tracks **API3 + Cardano**, text copied from `docs/DEVFOLIO.md` (open it on GitHub → Raw → copy).
+5. **Pitch 15:00**: `docs/PITCH.md`. Show the Pages dashboard on the phone, or on the venue screen by opening the URL. Live purchase on stage: send **"купи <FLIGHT>@<YYYY-MM-DD>"** in this chat; the API3 session runs the "Buy policies" workflow and replies with the Basescan link in about 30 s. Or tap Actions → "Buy policies" → Run workflow yourself.
+6. Payouts: the API3 session sends a push if a Saturday policy pays out; otherwise the pitch line in `docs/PITCH.md` ("no delay → no payout, and nobody can fake one") applies.
 
 ## Open issues
 - GitHub's schedule for `keeper.yml` has never fired (0 scheduled runs); manual `workflow_dispatch` runs cover it.

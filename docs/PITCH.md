@@ -58,6 +58,12 @@ Same project, two tracks, confirmed by the organizers. On Cardano a traveller or
 **"Why Base Sepolia, why x402?"**
 AirnodeHub's x402 payments use aUSD on Base Sepolia, so the data and the contract sit on the same chain. With x402, an autonomous agent pays per call without an API key or an account, and it needs no ETH for the payment, because the facilitator submits the transfer. That is what a keeper needs.
 
+## No laptop? Everything from the phone
+- **Dashboard**: https://womp-maindev.github.io/aeroguard/ (once the repo is public and the Pages workflow has run). Inspector and tamper lab run in the phone's browser: `eth_call`s to the deployed contract, no key, no paid lookups.
+- **Live purchase**: send "купи LH1234@2026-10-31" in the Claude chat (the API3 session dispatches the `Buy policies` workflow, ~30 s, answers with the Basescan link), or GitHub → Actions → Buy policies → Run workflow. The key stays in the GitHub secret.
+- **Keeper**: runs from GitHub Actions, triggered by the API3 session; nothing to start.
+- **Evidence**: `docs/EVIDENCE.md` on GitHub has every purchase, proof, x402 receipt and settlement.
+
 ## Live purchase on stage (optional, ~20 s)
 
 Buying a real policy live proves the purchase-side oracle check on the deployed contract. It costs **one** paid AeroDataBox lookup (0.05 aUSD) plus the premium. Only do it if the morning dry run worked.
