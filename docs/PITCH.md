@@ -68,7 +68,7 @@ Buying a real policy live proves the purchase-side oracle check on the deployed 
 
 **Before the pitch (14:30):**
 - `cd keeper && npm run cli -- status` shows that the keeper wallet has ≥ 0.1 aUSD (lookup + premium) and some ETH for gas, and that the pool's `free` ≥ the coverage you will buy.
-- For the purchase, the dashboard's **Cover me** needs the local keeper API: `cd keeper && KEEPER=off npm run api`, then open http://localhost:8787. Or keep the terminal command below in the shell history.
+- For the purchase, the dashboard's **Cover me** needs the local keeper API: `cd keeper && npm run api`, then open http://localhost:8787. Or keep the terminal command below in the shell history.
 
 **On stage**, either click **Cover me** in the dashboard section "Cover a flight" (flight, local departure date, holder, coverage 0.5), or run:
 ```bash

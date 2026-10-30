@@ -6,7 +6,7 @@ Target 2:20, which leaves 10 s of slack. 1080p screen recording plus voice-over.
 
 - The tamper lab works at any time, from the published dashboard (https://womp-maindev.github.io/aeroguard/ once the repo is public) or `web/index.html`: every attack is an `eth_call` from the browser to the deployed contract, no key. For a policy that is already settled, keep **Reopen a settled policy for the simulation** ticked (a state override for that call only); otherwise the contract answers `NotActive` before any oracle check.
 - Do **not** press "Fetch real evidence" or run `verdict` on camera. Each press is a paid lookup from the AeroDataBox quota that every team shares. Use "Open .json" with `keeper/fixtures/IB1314-status-proof.json` or the demo fixture.
-- Prepare these tabs: the dashboard (published page, or `web/index.html`; no keeper API needed. If you do run `npm run api` locally, use `KEEPER=off` so no second keeper spends quota), Basescan contract page, policy #1 purchase tx, one settlement payout tx (from README "Live evidence"), GitHub Actions keeper run log, and the editor open at `contracts/src/FlightDelayCover.sol` on `requestHashFor`.
+- Prepare these tabs: the dashboard (published page, or `web/index.html`; no keeper API needed. `npm run api` serves it locally without a second keeper unless `KEEPER=on`), Basescan contract page, policy #1 purchase tx, one settlement payout tx (from README "Live evidence"), GitHub Actions keeper run log, and the editor open at `contracts/src/FlightDelayCover.sol` on `requestHashFor`.
 - Terminal: font ≥ 18 pt. Have `anvil --chain-id 84532 &` already running in `keeper/`.
 
 ## Shots

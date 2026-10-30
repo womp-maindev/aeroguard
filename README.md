@@ -137,7 +137,7 @@ cd contracts && forge test              # 52 tests incl. real AirnodeHub capture
 forge script script/Deploy.s.sol --rpc-url $BASE_SEPOLIA_RPC --broadcast --private-key $DEPLOYER_PK
 
 cd ../keeper && npm i
-npm run api                             # dashboard + API + keeper on http://localhost:8787
+npm run api                             # dashboard + API on http://localhost:8787 (KEEPER=on adds the keeper loop)
 npm run cli -- buy --flight LH1816 --date 2026-10-30 --holder 0x… --coverage 0.5
 npm run cli -- policies
 npm run cli -- tick                     # one keeper pass
@@ -153,7 +153,7 @@ Rehearsal responses are signed with a local test key and labelled; the real depl
 ## Repo
 ```
 contracts/  FlightDelayCover.sol + AirnodeHub libraries (api3dao/airnodehub-hackathon-starter), Foundry tests, threat model
-keeper/     x402 AirnodeHub client, AeroDataBox requests, buy/settle, autonomous keeper, tamper CLI, HTTP API
+keeper/     x402 AirnodeHub client, AeroDataBox requests, buy/settle, autonomous keeper, tamper CLI, HTTP API (keeper/README.md)
 web/        dashboard: in-browser Security Inspector, tamper lab, policies, keeper log (single file, works offline)
 ```
 

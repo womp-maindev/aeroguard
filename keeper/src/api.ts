@@ -47,4 +47,5 @@ createServer(async (req, res) => {
   }
 }).listen(Number(process.env.PORT ?? 8787), () => console.log(`AeroGuard API on :${process.env.PORT ?? 8787}`));
 
-if (process.env.KEEPER !== 'off') runKeeper(Number(process.env.KEEPER_EVERY ?? 60));
+// Opt-in: the live policies already have a keeper (GitHub Actions), and a second one would spend the shared quota.
+if (process.env.KEEPER === 'on') runKeeper(Number(process.env.KEEPER_EVERY ?? 60));
