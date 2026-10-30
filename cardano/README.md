@@ -68,7 +68,7 @@ npm run agent                  # claims agent over claims.json: free catalog che
 `npm run buy -- --flight IB1314 --date 2026-10-30` picks the flight. Spend control: tADA only, at most
 `MAX_LOVELACE_PER_REQUEST` (default 5 tADA) per request; the agent also has `AGENT_BUDGET_LOVELACE` (default 10 tADA).
 
-**MCP for LLM agents** (`npm run mcp`, stdio): tools `list_flights` (free) and `get_flight_verdict` (paid).
+**MCP for LLM agents** (`npm run mcp`, stdio): tools `list_flights` (free), `get_flight_verdict` and `buy_flight_cover` (paid in tADA).
 Client config: `{ "command": "node", "args": ["--env-file=cardano/.env", "cardano/src/mcp.ts"] }`.
 
 ## Buy flight cover on Base, pay the premium in tADA
