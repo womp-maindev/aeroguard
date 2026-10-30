@@ -33,7 +33,9 @@ rule as the EVM contract (cancelled or ≥ 180 min: full, ≥ 120 min: half, els
 `ecrecover`, so it checks `verifyEcdsaSecp256k1Signature` against the Airnode's compressed key over
 `keccak_256(prefix ‖ keccak_256(requestHash ‖ timestamp ‖ data))`, rebuilding the signed bytes instead of parsing
 JSON. 23 Aiken tests pass, including the **real** AeroDataBox Airnode signature and four forgeries; payouts are tagged
-with the policy input against double satisfaction. A settlement costs ≈ 0.46M mem / 0.19B cpu.
+with the policy input against double satisfaction. A settlement costs ≈ 0.46M mem / 0.19B cpu. The off-chain side
+(open / settle / reclaim) builds real transactions and executes the validator with Aiken's UPLC evaluator before
+submitting; **the verdict body an agent buys over x402 is exactly the redeemer that settles the cover.**
 
 **Agents.** `npm run agent` is a claims agent with a budget: free catalog check, buys only final proofs, decides by
 the contract rule, logs each Cardano receipt. `npm run mcp` exposes `list_flights` (free) and `get_flight_verdict`

@@ -36,7 +36,13 @@ facilitator runs in the server process (no keys, no funds); set `FACILITATOR_URL
 cd cardano && npm i            # also installs ../keeper, whose verdict code this reuses
 npm run wallets                # creates cardano/.env with a buyer and a seller mnemonic, prints both addresses
 # put your Blockfrost preprod project ID in cardano/.env, fund the buyer address from the faucet
-npm run balance                # buyer should show ~10000 tADA
+npm run qualify                # preflight → start endpoint → pay → EVIDENCE.md + Cardanoscan link (one command)
+```
+
+`npm run preflight` alone checks the key's network, both wallets, the evidence and the buyer's balance, with a fix for
+each failure. The same steps by hand, e.g. for the video:
+
+```bash
 npm run server                 # http://localhost:4021   (ANCHOR=true npm run server to anchor sales)
 npm run buy                    # second terminal: pays, prints verdict, tx hash and Cardanoscan link, appends EVIDENCE.md
 npm run agent                  # claims agent over claims.json: free catalog check, budget, pay only for final proofs
@@ -75,6 +81,19 @@ aiken build                    # plutus.json
 | Preprod script address | `addr_test1wpvdsv4yqqsw08dzf4a5gjz9lunlugkv6jse7k6sjuwl5fchwmjh4` |
 | Real Airnode signature check | ≈ 34k mem / 59M cpu; a full settlement ≈ 0.46M mem / 0.19B cpu (tx limit 14M / 10B) |
 
+**Off-chain** (`src/cover.ts`, `npm run cover`): the insurer (seller wallet, needs a few tADA) opens a cover; anyone
+settles it with the JSON body an agent bought from `/verdict`; the insurer reclaims after the deadline.
+
+```bash
+npm run cover -- open --flight IB1314 --date 2026-10-30 --holder addr_test1... --ada 5 --hours 48
+npm run buy -- --flight IB1314 --date 2026-10-30 > /dev/null   # or save the /verdict body to verdict.json
+npm run cover -- settle --open <openTx> --verdict verdict.json   # refused until the verdict is final
+npm run cover -- reclaim --open <openTx>                         # after the deadline
+```
+
+Every build runs the validator locally with Aiken's UPLC evaluator (`@evolution-sdk/aiken-uplc`), so a transaction the
+script would reject is never submitted.
+
 Settlement redeemer for the live IB1314 pre-departure proof is rejected (`NotFinal`), exactly like `FlightDelayCover`;
 final-outcome tests use a public test key until the real arrival proofs land.
 
@@ -84,6 +103,9 @@ final-outcome tests use a public test key until the real arrival proofs land.
 npm test
 ```
 
-The buyer signs real Cardano transactions with the SDK's reference signer and the server's facilitator verifies and
-submits them; only Blockfrost is a local fixture (as in the official demo's tests). Covers the 402 offer, refusals,
-discovery, a paid verdict, replay, spent inputs, sales log, anchor transaction, claims agent, MCP and the Plutus model.
+34 tests. The buyer signs real Cardano transactions with the SDK's reference signer and the server's facilitator
+verifies and submits them; the Aiken cover's transactions are built and **executed** with Aiken's UPLC evaluator
+(PlutusV3 cost model). Only Blockfrost is a local fixture (as in the official demo's tests). Covers the 402 offer,
+refusals, discovery, paid verdicts, replay, sales log, anchor transaction, claims agent, MCP, preflight, the whole
+`qualify` run as a separate process, the Plutus model, and the cover lifecycle (full/half/none/cancel, edited proof,
+wrong signer, non-final live proof, reclaim before/after deadline).
