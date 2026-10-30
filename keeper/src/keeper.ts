@@ -1,6 +1,6 @@
 // AeroGuard core: resolve → quote → buy → watch → fetch signed evidence → settle.
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { dirname } from 'node:path';
+import { dirname, join } from 'node:path';
 import type { Hex } from 'viem';
 import { allPolicies, buyPolicy, coverAddress, explorerTx, revertReason, settle } from './chain.ts';
 import { fetchSignedFlight, normalizeFlight, readVerdict, type Verdict } from './flight.ts';
@@ -70,6 +70,14 @@ const saveState = (s: Record<string, Attempt>) => {
   writeFileSync(statePath(), JSON.stringify(s, null, 2));
 };
 
+// The signed response that settled a policy, in the contracts/test/fixtures format, so the payout can be replayed in
+// Solidity and checked by anyone. The Actions workflow prints these files and uploads them as an artifact.
+const saveEvidence = (id: bigint, e: Record<string, unknown>) => {
+  const dir = join(dirname(statePath()), 'evidence');
+  mkdirSync(dir, { recursive: true });
+  writeFileSync(join(dir, `${coverAddress().slice(0, 10)}-policy-${id}.json`), JSON.stringify(e, (_, v) => (typeof v === 'bigint' ? String(v) : v), 2));
+};
+
 const hhmm = (t: number) => new Date(t * 1000).toISOString().slice(11, 16);
 
 /** One pass: look up and settle every Active policy whose check is due (see schedule.ts). `force` ignores the rhythm. */
@@ -101,6 +109,7 @@ export const keeperTick = async ({ force = false } = {}) => {
         continue;
       }
       const res = await settle(p.id, v.evidence);
+      saveEvidence(p.id, { policyId: p.id, flight: p.flight, date: p.date, kind: v.kind, ...v.evidence, settleTx: res.txHash, outcome: res.status, payout: res.payout, delayMinutes: res.delayMinutes });
       say('chain', `policy #${p.id} settled ${res.status}: ${a.last}, payout ${Number(res.payout) / 1e6} aUSD`, explorerTx(res.txHash));
     } catch (e) {
       say('warn', `policy #${p.id}: ${revertReason(e)}`);
