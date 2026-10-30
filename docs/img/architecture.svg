@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 560" width="1000" height="560" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" role="img" aria-labelledby="t d">
+  <title id="t">AeroGuard architecture</title>
+  <desc id="d">A traveller buys cover with a fresh AirnodeHub-signed pre-departure status. After landing, a keeper buys a signed arrival over x402 and calls settle. The contract checks signer, request, freshness and finality, then pays the holder.</desc>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#3b4252"/></marker>
+    <marker id="g" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#1f7a4d"/></marker>
+  </defs>
+  <style>
+    .box { fill: #ffffff; stroke: #c9ced6; stroke-width: 1.5; }
+    .api3 { fill: #eef4ff; stroke: #3d6fd6; stroke-width: 1.5; }
+    .sc { fill: #fbfaf5; stroke: #3b4252; stroke-width: 2; }
+    .pay { fill: #edf8f1; stroke: #1f7a4d; stroke-width: 1.5; }
+    .h { font-size: 16px; font-weight: 700; fill: #1d2330; }
+    .s { font-size: 12.5px; fill: #4a5263; }
+    .m { font-size: 12px; fill: #4a5263; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .ok { font-size: 13px; fill: #1d2330; }
+    .rv { font-size: 12px; fill: #b4232c; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .lbl { font-size: 12.5px; fill: #1d2330; font-weight: 600; }
+    .ln { stroke: #3b4252; stroke-width: 1.6; fill: none; }
+    .lg { stroke: #1f7a4d; stroke-width: 1.8; fill: none; }
+    .n { font-size: 12px; font-weight: 700; fill: #fff; }
+  </style>
+  <rect width="1000" height="560" fill="#ffffff"/>
+
+  <!-- AeroDataBox Airnode -->
+  <rect class="api3" x="660" y="30" width="310" height="104" rx="10"/>
+  <text class="h" x="680" y="58">AeroDataBox Airnode</text>
+  <text class="s" x="680" y="78">on API3 AirnodeHub · signs every answer</text>
+  <text class="m" x="680" y="99">signer 0x83FE…f2Ec</text>
+  <text class="s" x="680" y="118">flightStatusOnDate · 0.05 aUSD per call, x402</text>
+
+  <!-- Traveller -->
+  <rect class="box" x="30" y="30" width="250" height="104" rx="10"/>
+  <text class="h" x="50" y="58">Traveller / travel app</text>
+  <text class="s" x="50" y="78">buys cover before departure,</text>
+  <text class="s" x="50" y="96">never files a claim</text>
+
+  <!-- Contract -->
+  <rect class="sc" x="330" y="180" width="340" height="290" rx="12"/>
+  <text class="h" x="350" y="210">FlightDelayCover · Base Sepolia</text>
+  <text class="m" x="350" y="229">0x2570…0a80 · checks every signed response</text>
+  <text class="ok" x="352" y="258">✓ signer is the AeroDataBox Airnode</text>
+  <text class="ok" x="352" y="281">✓ request hash derived on-chain (flight, date)</text>
+  <text class="ok" x="352" y="304">✓ fresh (≤ maxAge), not from the future</text>
+  <text class="ok" x="352" y="327">✓ buy: pre-departure, ≥ 2 h before arrival</text>
+  <text class="ok" x="352" y="350">✓ settle: Arrived / Canceled, signed after</text>
+  <text class="ok" x="368" y="368">landing, same signed schedule</text>
+  <text class="s" x="352" y="398">otherwise it reverts:</text>
+  <text class="rv" x="352" y="418">NotSignedByAirnode · WrongRequest</text>
+  <text class="rv" x="352" y="436">Stale · NotFinal · NotBuyable</text>
+  <text class="rv" x="352" y="454">ScheduleMismatch · ObservedTooEarly</text>
+
+  <!-- Keeper -->
+  <rect class="box" x="720" y="300" width="250" height="118" rx="10"/>
+  <text class="h" x="740" y="328">Keeper</text>
+  <text class="s" x="740" y="348">GitHub Actions or npm run keeper</text>
+  <text class="s" x="740" y="367">decides when a lookup is worth it,</text>
+  <text class="s" x="740" y="386">simulates, then settles</text>
+  <text class="s" x="740" y="405">no special power: anyone can run it</text>
+
+  <!-- Holder -->
+  <rect class="pay" x="30" y="370" width="250" height="100" rx="10"/>
+  <text class="h" x="50" y="398">Policy holder</text>
+  <text class="s" x="50" y="418">≥ 3 h late or cancelled → 100 %</text>
+  <text class="s" x="50" y="437">≥ 2 h late → 50 %</text>
+  <text class="s" x="50" y="456">otherwise premium stays in the pool</text>
+
+  <!-- 1: signed pre-departure status → traveller -->
+  <path class="ln" d="M660 70 H284" marker-end="url(#a)"/>
+  <circle cx="330" cy="55" r="10" fill="#3d6fd6"/><text class="n" x="326" y="59">1</text>
+  <text class="lbl" x="348" y="59">signed status “Expected”, ≤ 15 min old</text>
+
+  <!-- 2: buyPolicy with proof -->
+  <path class="ln" d="M155 134 V160 H420 V176" marker-end="url(#a)"/>
+  <circle cx="176" cy="160" r="10" fill="#3b4252"/><text class="n" x="172" y="164">2</text>
+  <text class="lbl" x="196" y="153">buyPolicy(flight, date, signed proof)</text>
+
+  <!-- 3: after landing, signed arrival → keeper -->
+  <path class="ln" d="M845 134 V296" marker-end="url(#a)"/>
+  <circle cx="845" cy="190" r="10" fill="#3d6fd6"/><text class="n" x="841" y="194">3</text>
+  <text class="lbl" x="862" y="186">after landing:</text>
+  <text class="lbl" x="862" y="203">signed arrival,</text>
+  <text class="lbl" x="862" y="220">paid over x402</text>
+
+  <!-- 4: settle -->
+  <path class="ln" d="M720 360 H674" marker-end="url(#a)"/>
+  <circle cx="697" cy="340" r="10" fill="#3b4252"/><text class="n" x="693" y="344">4</text>
+  <text class="lbl" x="720" y="440">④ settle(signed arrival): anyone may call,</text>
+  <text class="lbl" x="720" y="457">the payout always goes to the holder</text>
+
+  <!-- 5: payout -->
+  <path class="lg" d="M330 420 H284" marker-end="url(#g)"/>
+  <circle cx="307" cy="400" r="10" fill="#1f7a4d"/><text class="n" x="303" y="404">5</text>
+
+  <text class="s" x="30" y="530">Every arrow that carries flight data carries an AirnodeHub signature. The contract never takes a request hash, a schedule or a delay from the caller.</text>
+</svg>

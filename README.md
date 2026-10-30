@@ -31,14 +31,14 @@ Parametric flight-delay cover that settles itself. A smart contract pays out **o
 | signed by any other key | `NotSignedByAirnode` | [`Tamper4_RejectUnexpectedSigner`](contracts/test/FlightDelayCover.t.sol#L162) |
 | cover bought for a flight already delayed / landed | `NotBuyable` | [`Buy_RejectOutcomeAlreadyKnown`](contracts/test/FlightDelayCover.t.sol#L287) |
 | on-chain request hash ≠ AirnodeHub's | — | [`RequestHashMatchesAirnodeHubScheme`](contracts/test/FlightDelayCover.t.sol#L82) · [`Fixture_RealAeroDataBoxCapture`](contracts/test/Fixtures.t.sol#L105) (real Airnode signature) |
-| live policy #1 replayed on its **real** Airnode signatures (real `buyPolicy` + `settle`, no test signer) | `NotFinal(Expected)`, `Stale(1793378516)` as on-chain | [`LiveReplay.t.sol`](contracts/test/LiveReplay.t.sol) |
+| all 4 live policies replayed on their **real** Airnode signatures (real `buyPolicy` + `settle`, no test signer; proofs read back from the purchase calldata) | `NotFinal(Expected)`, `Stale(1793378516)` as on-chain | [`LiveReplay.t.sol`](contracts/test/LiveReplay.t.sol) |
 
 The same forgeries were also run against the **deployed** contract with a real Airnode response: see the [tamper table](#tamper-test-for-judges).
 
 **3 · Run it yourself (90 s, no keys, no funds).**
 ```bash
 git clone --recurse-submodules https://github.com/womp-maindev/aeroguard && cd aeroguard
-cd contracts && forge test                       # 52 tests, incl. policy #1 replayed on its real Airnode signatures
+cd contracts && forge test                       # 55 tests, incl. all 4 live policies replayed on their real Airnode signatures
 cd ../keeper && npm ci && npm test
 anvil --chain-id 84532 & npm run rehearse        # local deploy, 5 signed purchases, 4 attacks + valid, keeper settles all
 ```
@@ -68,6 +68,8 @@ The keeper is scheduled in GitHub Actions ([`.github/workflows/keeper.yml`](http
 Flight delays are common and compensation claims are slow: forms, evidence, weeks of waiting, often a claims-agency fee. Parametric cover removes the claim: if trustworthy data says the flight landed late, money moves. The hard parts are **trusting the data** and **who presses the button**. AeroGuard answers both: AirnodeHub signatures checked by the contract, and a keeper that anyone can replace because it has no special power.
 
 ## How it works
+![AeroGuard architecture: signed status → buyPolicy, signed arrival via x402 → keeper → settle → payout](docs/img/architecture.svg)
+
 ```
 Traveller / travel app
   │ 1  buy: attach a fresh signed AeroDataBox STATUS response (pre-departure)        → buyPolicy
@@ -133,7 +135,7 @@ Node ≥ 22.18 and [Foundry](https://getfoundry.sh).
 git clone --recurse-submodules https://github.com/womp-maindev/aeroguard && cd aeroguard
 cp .env.example .env                    # set KEEPER_PK (Base Sepolia ETH + aUSD)
 
-cd contracts && forge test              # 52 tests incl. real AirnodeHub captures
+cd contracts && forge test              # 55 tests (+4 settlement replays once the live payouts are captured)
 forge script script/Deploy.s.sol --rpc-url $BASE_SEPOLIA_RPC --broadcast --private-key $DEPLOYER_PK
 
 cd ../keeper && npm i

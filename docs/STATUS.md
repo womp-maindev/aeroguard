@@ -13,7 +13,7 @@ Tracks: **one project, two tracks** (confirmed by the organizers): **API3 "Any A
 - On-chain tamper results (policy #1, real Airnode data): edit → NotSignedByAirnode, wrongreq → WrongRequest, wrongsigner → NotSignedByAirnode, stale → Stale(1793378516), genuine pre-departure → NotFinal(Expected).
 
 ## Done
-Contract (purchase proof, private commit-reveal policies, per-policy settlement, 52 tests + live replay, ~98% line coverage) · keeper (x402, cache, autonomous loop, tamper CLI, API, rehearsal) · dashboard with in-browser Security Inspector · README for judges · real captured Airnode response verified in Solidity · CI (forge test, keeper tests, anvil rehearsal with asserted outcomes).
+Contract (purchase proof, private commit-reveal policies, per-policy settlement, 55 tests + live replay of all 4 policies, ~98% line coverage) · keeper (x402, cache, autonomous loop, tamper CLI, API, rehearsal) · dashboard with in-browser Security Inspector · README for judges · real captured Airnode response verified in Solidity · CI (forge test, keeper tests, anvil rehearsal with asserted outcomes).
 
 ## Next (in order)
 1. Tonight (API3 session, automatic): settlements → tx links in README "Live evidence" + DEVFOLIO; IB1314 settlement response → `contracts/test/fixtures/IB1314-settlement.json` (activates `test_Live_IB1314_SettlesLikeOnChain`); fill settlement columns of `docs/EVIDENCE.md` (already lists purchases, proofs, 19:10 lookups with x402 txs).

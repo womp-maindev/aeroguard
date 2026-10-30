@@ -1,0 +1,37 @@
+name: Purchase proofs from chain
+# Reads the AirnodeHub-signed purchase proof of each live policy back out of its buyPolicy calldata and prints it in the
+# contracts/test/fixtures format. Read-only: no key, no AeroDataBox lookup. Anyone can re-run it to check our fixtures.
+
+on:
+  workflow_dispatch:
+    inputs:
+      txs:
+        description: "buyPolicy tx hashes, space-separated"
+        type: string
+        default: >-
+          0xbfd3ae73074ff63a3ef5f7e56b211d1ffb7223e2db944d0cc38ed069d1958b8d
+          0x7e71c55b970b96fb1588ddde1da029060d805c9b87691280ca2504098d4e69d2
+          0x2aeed6010ced165f66c26ea0f34e7068421a327cac0c6375d72ef7b794f41672
+          0x7e675d8f94946db1d02a40c1eff87ac5a0ca29b65730751cf0d902d767d2b0d1
+
+permissions:
+  contents: read
+
+jobs:
+  proofs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    defaults:
+      run:
+        working-directory: keeper
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: npm ci
+      - name: Signed purchase proofs (fixtures format)
+        env:
+          BASE_SEPOLIA_RPC: https://sepolia.base.org
+          TXS: ${{ inputs.txs }}
+        run: node src/cli.ts proof $TXS
