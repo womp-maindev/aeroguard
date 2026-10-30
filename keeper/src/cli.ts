@@ -109,8 +109,8 @@ const main = async () => {
         console.log(`#${p.id} ${p.flight} ${p.date} ${STATUS[p.status]} cover ${usd(p.coverage)} sched ${new Date(Number(p.scheduledArrival) * 1000).toISOString()}`);
       return;
     }
-    case 'tick':
-      await keeperTick();
+    case 'tick': // --force: check every Active policy in its window now, ignoring the 30-min rhythm
+      await keeperTick({ force: rest.includes('--force') || process.env.KEEPER_FORCE === 'true' });
       return;
     case 'keeper':
       await runKeeper(Number(flag('every') ?? 60));

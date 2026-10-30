@@ -4,6 +4,7 @@ import { dirname } from 'node:path';
 import type { Hex } from 'viem';
 import { allPolicies, buyPolicy, coverAddress, explorerTx, revertReason, settle } from './chain.ts';
 import { fetchSignedFlight, normalizeFlight, readVerdict, type Verdict } from './flight.ts';
+import { type Attempt, due, MAX_CHECKS, migrate, nextCheckAt, record } from './schedule.ts';
 import { createPayingFetch } from './x402.ts';
 
 export interface LogLine {
@@ -63,39 +64,44 @@ export const cover = async (a: { flight: string; date: string; holder: Hex; cove
 
 // KEEPER_STATE_FILE lets a throwaway chain (the anvil rehearsal) keep its own state: anvil redeploys at the same address.
 const statePath = () => process.env.KEEPER_STATE_FILE || new URL('../.cache/keeper-state.json', import.meta.url).pathname;
-type Attempt = { tries: number; next: number; last?: string };
-const loadState = (): Record<string, Attempt> => (existsSync(statePath()) ? JSON.parse(readFileSync(statePath(), 'utf8')) : {});
+const loadState = (): Record<string, unknown> => (existsSync(statePath()) ? JSON.parse(readFileSync(statePath(), 'utf8')) : {});
 const saveState = (s: Record<string, Attempt>) => {
   mkdirSync(dirname(statePath()), { recursive: true });
   writeFileSync(statePath(), JSON.stringify(s, null, 2));
 };
 
-const FIRST_CHECK = 30 * 60; // after scheduled arrival
-const RETRY = 45 * 60;
-const MAX_TRIES = 6; // quota discipline: at most 6 paid lookups per policy
+const hhmm = (t: number) => new Date(t * 1000).toISOString().slice(11, 16);
 
-export const keeperTick = async () => {
-  const state = loadState();
+/** One pass: look up and settle every Active policy whose check is due (see schedule.ts). `force` ignores the rhythm. */
+export const keeperTick = async ({ force = false } = {}) => {
+  const raw = loadState();
+  const state: Record<string, Attempt> = {};
+  for (const [k, v] of Object.entries(raw)) state[k] = migrate(v);
   const now = Math.floor(Date.now() / 1000);
   for (const p of await allPolicies()) {
     if (p.status !== 1) continue; // Active only
     const key = `${coverAddress()}:${p.id}`;
-    const s = (state[key] ??= { tries: 0, next: Number(p.scheduledArrival) + FIRST_CHECK });
-    // cancellations can be known early: one cheap look 3h before arrival
-    if (s.tries === 0 && now < s.next && now > Number(p.scheduledArrival) - 3 * 3600) s.next = now;
-    if (now < s.next || s.tries >= MAX_TRIES) continue;
-    s.tries++;
-    s.next = now + RETRY;
+    const a = (state[key] ??= migrate(undefined));
+    const sched = Number(p.scheduledArrival);
+    const kind = due(now, sched, a, force);
+    if (!kind) {
+      const at = nextCheckAt(sched, a);
+      say('info', `policy #${p.id} ${p.flight}: nothing due${at === undefined ? ', keeper done with it' : `, next check ≥ ${hhmm(at)}Z`}`);
+      continue;
+    }
+    record(now, kind, a);
     try {
-      say('info', `policy #${p.id}: checking ${p.flight} ${p.date} (try ${s.tries}/${MAX_TRIES})`);
+      const what = kind === 'early' ? 'early look for a cancellation' : `check ${a.checks}/${MAX_CHECKS}`;
+      say('info', `policy #${p.id}: ${p.flight} ${p.date} sched ${hhmm(sched)}Z, ${what}`);
       const v = await verdict(p.flight, p.date, 600); // one paid lookup serves every policy on that flight
-      s.last = describe(v.verdict);
+      a.last = describe(v.verdict);
       if (!v.verdict.final) {
-        say('info', `policy #${p.id}: ${s.last} — not final, next look in ${RETRY / 60} min`);
+        const at = nextCheckAt(sched, a);
+        say('info', `policy #${p.id}: ${a.last} — not final${at === undefined ? '' : `, next check ≥ ${hhmm(at)}Z`}`);
         continue;
       }
       const res = await settle(p.id, v.evidence);
-      say('chain', `policy #${p.id} settled ${res.status}: ${s.last}, payout ${Number(res.payout) / 1e6} aUSD`, explorerTx(res.txHash));
+      say('chain', `policy #${p.id} settled ${res.status}: ${a.last}, payout ${Number(res.payout) / 1e6} aUSD`, explorerTx(res.txHash));
     } catch (e) {
       say('warn', `policy #${p.id}: ${revertReason(e)}`);
     } finally {
