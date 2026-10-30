@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-10-30T19:56:51.580Z",
+  "updatedAt": "2026-10-30T20:59:35.124Z",
   "contract": "0x257054204c4Cd43846C4553eBe6D709841980a80",
   "runs": [
     {
@@ -27,6 +27,30 @@
           "at": "2026-10-30T19:56:51.104Z",
           "level": "info",
           "msg": "policy #4 BA955: nothing due, next check ≥ 22:20Z"
+        }
+      ]
+    },
+    {
+      "startedAt": "2026-10-30T20:59:32.513Z",
+      "finishedAt": "2026-10-30T20:59:35.124Z",
+      "event": "workflow_dispatch",
+      "url": "https://github.com/womp-maindev/aeroguard/actions/runs/41127510944",
+      "log": [
+        {
+          "at": "2026-10-30T20:59:32.513Z",
+          "level": "info",
+          "msg": "policy #1: IB1314 2026-10-30 sched 21:25Z, early look for a cancellation"
+        },
+        {
+          "at": "2026-10-30T20:59:34.415Z",
+          "level": "pay",
+          "msg": "bought signed arrival for IB1314 via x402",
+          "link": "https://sepolia.basescan.org/tx/0x3780278f40ba654556b4dd5a3452dc996d746ff38e291682a78c771125685473"
+        },
+        {
+          "at": "2026-10-30T20:59:34.415Z",
+          "level": "info",
+          "msg": "policy #1: Approaching, 0 min late — not final, next check ≥ 21:55Z"
         }
       ]
     }
@@ -67,6 +91,15 @@
       "signature": "0x02b48d1923fe4a93eff5ef899c183e342b4ee115ab0f69583eaee196e6675f3f2b704bacfdfa13a21dfb88beb620157ec752b08fbd89c66952f2b2b7886d54211c",
       "fetchedAt": 1793387408,
       "paymentTx": "0xac70e982516617addda1270febe45a7a46a03cede9aac8ca3b36c72aef8add8f"
+    },
+    {
+      "airnode": "0x83FE2E8F24E66520B1902C3507De4F471248f2Ec",
+      "requestHash": "0x4bf6755e32c0231b2f3dd9861b9e30ccf5e701e08e32dfda39137b78095023d0",
+      "timestamp": "1793393973",
+      "data": "{\"actual\":\"2026-10-30 21:03Z\",\"scheduled\":\"2026-10-30 21:25Z\",\"status\":\"Approaching\"}",
+      "signature": "0x5cf9f39380b4e72bfb412320ab80e1174c9703945dbb3510cb4a034058b5326969d09f9617f7ccc5a1d075c9ff29e571d62dc65fbf4c42d4c01bb9621dca86d71b",
+      "fetchedAt": 1793393974,
+      "paymentTx": "0x3780278f40ba654556b4dd5a3452dc996d746ff38e291682a78c771125685473"
     }
   ]
 }
