@@ -8,6 +8,9 @@ on:
     paths: [.github/workflows/record-tamper.yml]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   record:
     runs-on: ubuntu-latest
@@ -42,7 +45,9 @@ jobs:
             await p.selectOption('#tPolicy', '1');
             await p.waitForTimeout(1500);
             await p.click('#runAll');
-            await p.waitForTimeout(25000);
+            await p.waitForTimeout(20000);
+            const g = p.getByRole('button', { name: /Simulate genuine/i });
+            if (await g.count()) { await g.first().scrollIntoViewIfNeeded(); await g.first().click(); await p.waitForTimeout(12000); }
             await p.locator('#lab').screenshot({ path: '/tmp/out/tamper-lab-policy1.png' });
             console.log((await p.locator('#modes').innerText()).slice(0, 2000));
             await p.waitForTimeout(3000);
@@ -51,6 +56,15 @@ jobs:
           })();
           JS
           mkdir -p /tmp/out && cd /tmp/rec && node rec.js
+      - name: Convert to mp4 and commit to this branch
+        run: |
+          sudo apt-get install -y ffmpeg >/dev/null 2>&1 || true
+          f=$(ls /tmp/out/*.webm | head -1)
+          ffmpeg -y -loglevel error -i "$f" -c:v libx264 -pix_fmt yuv420p -movflags +faststart /tmp/out/tamper-lab-policy1.mp4
+          git fetch -q origin claude/bold-ride-xhu8s8 && git checkout -q -B rec origin/claude/bold-ride-xhu8s8
+          mkdir -p media && cp /tmp/out/tamper-lab-policy1.mp4 /tmp/out/tamper-lab-policy1.png media/
+          git config user.name womp-maindev && git config user.email 226526968+womp-maindev@users.noreply.github.com
+          git add media && git commit -qm "media: tamper lab recording on policy #1 (live contract, eth_call)" && git push -q origin rec:claude/bold-ride-xhu8s8
       - uses: actions/upload-artifact@v4
         with:
           name: tamper-lab-recording
