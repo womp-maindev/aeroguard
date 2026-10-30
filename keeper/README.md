@@ -28,7 +28,7 @@ The limit is 20 paid lookups per policy. Private policies are never looked up, b
 
 ```bash
 npm ci && npx tsc --noEmit -p . && npm test       # schedule + request-hash tests
-anvil --chain-id 84532 & npm run rehearse         # local deploy, 5 policies, 4 forgeries, keeper settles; exits 1 on any mismatch
+anvil --chain-id 84532 & npm run rehearse         # local deploy, 5 policies + 1 private, 4 forgeries, keeper settles, 3 days later expires the private one; exits 1 on any mismatch
 npm run cli -- status                             # balances, gas headroom for the active settles, policies
 npm run cli -- tick                               # one keeper pass (--force: ignore the 30-min rhythm, --policy N: only that one)
 npm run keeper                                    # unattended loop
