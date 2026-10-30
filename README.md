@@ -51,6 +51,8 @@ anvil --chain-id 84532 & npm run rehearse        # local deploy, 5 signed purcha
 | Payment token | aUSD `0xbeA34973e5f67F18F656A2C6070C64326C791808` |
 
 ## Live evidence (Base Sepolia, real AeroDataBox data)
+Every policy, signed response and x402 payment in one place: [docs/EVIDENCE.md](docs/EVIDENCE.md).
+
 | Step | Tx |
 |---|---|
 | x402 payment for a signed AeroDataBox response (0.05 aUSD) | [0x76d334da…](https://sepolia.basescan.org/tx/0x76d334da55c86bbf61d37762f8ee843f4920bc874477a82d06852247b4e2054f) |

@@ -16,8 +16,8 @@ Tracks: **one project, two tracks** (confirmed by the organizers): **API3 "Any A
 Contract (purchase proof, private commit-reveal policies, per-policy settlement, 52 tests + live replay, ~98% line coverage) · keeper (x402, cache, autonomous loop, tamper CLI, API, rehearsal) · dashboard with in-browser Security Inspector · README for judges · real captured Airnode response verified in Solidity · CI (forge test, keeper tests, anvil rehearsal with asserted outcomes).
 
 ## Next (in order)
-1. Tonight (API3 session, automatic): settlements → tx links in README "Live evidence" + DEVFOLIO; IB1314 settlement response → `contracts/test/fixtures/IB1314-settlement.json` (activates `test_Live_IB1314_SettlesLikeOnChain`); `docs/EVIDENCE.md`.
-2. Frontend session (owns `web/`): show the network from `GET /health` → `{ network: "Base Sepolia" | "Local anvil", explorer }` instead of the fixed "Base Sepolia"; Evidence view per settled policy. Live policies screenshot for README.
+1. Tonight (API3 session, automatic): settlements → tx links in README "Live evidence" + DEVFOLIO; IB1314 settlement response → `contracts/test/fixtures/IB1314-settlement.json` (activates `test_Live_IB1314_SettlesLikeOnChain`); fill settlement columns of `docs/EVIDENCE.md` (already lists purchases, proofs, 19:10 lookups with x402 txs).
+2. Frontend session (owns `web/`): network label from `GET /health` is done; it reads the keeper log + signed responses from `keeper-data/keeper.json` (published by every keeper run). Live policies screenshot for README.
 3. Devfolio text: drafted in `docs/DEVFOLIO.md`; paste into tum.devfolio.co. Pitch + Q&A: `docs/PITCH.md`.
 4. Video ≤2:30: shot list in `docs/VIDEO.md`. Record the live tamper shot while policy #1 is still Active.
 5. Sat 14:30: repo public, submit on tum.devfolio.co, one project, tracks API3 + Cardano. 15:00 live pitch.

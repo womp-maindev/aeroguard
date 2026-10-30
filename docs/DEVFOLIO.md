@@ -78,7 +78,15 @@ An honest traveller can also be hurt by forged data, for example a fake "on time
 - **Airline compensation and refund records**, to avoid paying twice when the airline already compensated.
 - **Weather and airport disruption feeds** (NOTAMs, ATC strikes), for early warnings and cover for whole airports.
 
+### Feedback for API3 from building on AirnodeHub
+- **Missing JSON pointers.** A projection pointer that is missing makes the Airnode answer 400. A cancelled flight has no revised arrival time, so we need a second projection (`status`) just to prove a cancellation. An option to return `null` for a missing pointer would let one signed response cover both outcomes.
+- **Request hash on-chain.** To check *which* question was answered, the contract re-derives `keccak256(JSON.stringify([operation, sortedParams, sortedProjection]))`. Doing that in Solidity forced us to forbid every character that JSON would escape. An ABI-encoded request-hash variant would be cheaper and safe for any input.
+- **Observation time.** The signature timestamp says when the Airnode signed, not when the source last updated. We added our own `ObservedTooEarly` checks; a signed `observedAt` from the source would make that exact.
+- **Signer rotation.** The signer address is immutable in our contract. An on-chain registry or rotation event for Airnode signers would let live contracts follow a key change instead of expiring.
+- **What worked very well:** x402 per call with no account. The payment tx in the `PAYMENT-RESPONSE` header gives every signed response an auditable on-chain receipt ([docs/EVIDENCE.md](https://github.com/womp-maindev/aeroguard/blob/main/docs/EVIDENCE.md)).
+
 ## Links
+- Evidence for every policy, signed response and x402 payment: https://github.com/womp-maindev/aeroguard/blob/main/docs/EVIDENCE.md
 - Repo: https://github.com/womp-maindev/aeroguard
 - Contract: https://sepolia.basescan.org/address/0x257054204c4Cd43846C4553eBe6D709841980a80
 - x402 payment for signed data: https://sepolia.basescan.org/tx/0x76d334da55c86bbf61d37762f8ee843f4920bc874477a82d06852247b4e2054f
