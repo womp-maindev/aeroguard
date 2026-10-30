@@ -1,0 +1,18 @@
+{
+  "_note": "REAL: the AeroDataBox Airnode response that settled policy #3 on Base Sepolia (settle tx 0x5a5e4fc750464b0f4043aa2318da55705ae0eb94603adf17d417068de4f2ff9a), written by the keeper (artifact settlement-evidence of run 41138239566)",
+  "policyId": 3,
+  "flight": "EI357",
+  "date": "2026-10-30",
+  "kind": "arrival",
+  "airnode": "0x83FE2E8F24E66520B1902C3507De4F471248f2Ec",
+  "requestHash": "0xd3f90b5fe594b9518a3f4448c3c94c786d3ba4c5ec784bf8e54491f45ac077cd",
+  "timestamp": 1793399265,
+  "data": "{\"actual\":\"2026-10-30 21:26Z\",\"scheduled\":\"2026-10-30 21:55Z\",\"status\":\"Arrived\"}",
+  "signature": "0x2f77573c8387c3bb84c7f7313eacd6a3ef19deee4da40f4654f6afa79cdbff3a0e3cc54ce1f969abd67d76294d289bdf4a3a93eb73b45a7c6eb5133bcb44d81f1b",
+  "fetchedAt": 1793399266,
+  "paymentTx": "0x856458f50e565ae958ecc5ec385bd01b954f28daf20be41daa07b342bea24e15",
+  "settleTx": "0x5a5e4fc750464b0f4043aa2318da55705ae0eb94603adf17d417068de4f2ff9a",
+  "outcome": "ClosedNoPayout",
+  "payout": 0,
+  "delayMinutes": 0
+}

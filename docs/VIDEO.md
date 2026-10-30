@@ -21,7 +21,7 @@ Target 2:20, which leaves 10 s of slack. 1080p screen recording plus voice-over.
 | 6 | 1:20–1:50 | Dashboard "Attack the deployed contract": target policy #1 (base = its real Airnode response, shown in the note), keep **Reopen** ticked, **Run the 4 attacks**, each revert reason highlighted. Nothing is paid: all four are `eth_call`s | "Now we attack the live contract with a real Airnode response. Edit one value: not signed by the Airnode. Another flight: wrong request. An attacker's key: rejected. A genuine but old response: stale." |
 | 7 | 1:50–2:05 | Dashboard Security Inspector: load the fixture, click "Add 3 h to the arrival time", and the verdict flips to rejected; click Reset and it is valid again | "The Security Inspector shows the same checks in the browser, so anyone can see exactly why the contract would or wouldn't pay." |
 | 8 | 2:05–2:15 | Terminal: `npm run rehearse` scrolling to "holder balance" | "And the whole flow runs locally in seconds with no funds: five policies, four attacks, every policy settled." |
-| 9 | 2:15–2:25 | End card: repo URL, contract address, "55 tests · 4 live policies replayed · x402" | "AeroGuard. The signed data is the decision. Thanks." |
+| 9 | 2:15–2:25 | End card: repo URL, contract address, "59 tests · 4 live policies settled & replayed · x402" | "AeroGuard. The signed data is the decision. Thanks." |
 
 ## After recording
 
