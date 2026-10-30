@@ -48,8 +48,8 @@ const text = (s: string) => `"${s}"`;
 
 export interface FinalAnswer { flight: string; scheduled: string; v: Vector }
 
-/** The newest final (Arrived / Canceled) answer the real Airnode signed, if the keeper has bought one yet. */
-export const realFinal = async (dir = new URL('../evidence/', import.meta.url)): Promise<FinalAnswer | undefined> => {
+/** Every final (Arrived / Canceled) answer the real Airnode signed, newest first, one per flight. */
+export const realFinals = async (dir = new URL('../evidence/', import.meta.url)): Promise<FinalAnswer[]> => {
   const finals = [];
   for (const f of readdirSync(dir).filter((x) => x.endsWith('.json'))) {
     const r = JSON.parse(readFileSync(new URL(f, dir), 'utf8')) as SignedResponse & { flight?: string };
@@ -60,8 +60,12 @@ export const realFinal = async (dir = new URL('../evidence/', import.meta.url)):
     finals.push({ flight: r.flight ?? '?', scheduled: d.scheduled, v: { name: 'real_final', pubkey, requestHash: r.requestHash,
       timestamp: BigInt(r.timestamp), status: d.status, actual: d.actual, data: r.data, signature: r.signature } });
   }
-  return finals.sort((a, b) => Number(b.v.timestamp - a.v.timestamp))[0];
+  const newest = finals.sort((a, b) => Number(b.v.timestamp - a.v.timestamp));
+  return newest.filter((f, i) => newest.findIndex((g) => g.v.requestHash === f.v.requestHash) === i);
 };
+
+/** The newest final answer, if the keeper has bought one yet. */
+export const realFinal = async (dir?: URL) => (await realFinals(dir))[0];
 
 /** A self-contained Aiken test module: a cover settled by this final answer, by the contract's rule. */
 export const finalTestModule = ({ flight, scheduled, v }: FinalAnswer, origin: string) => {
@@ -174,9 +178,12 @@ if (import.meta.filename === process.argv[1]) {
   ].join('\n');
   writeFileSync(new URL('../onchain/lib/aeroguard/vectors.ak', import.meta.url), out);
   console.log(`wrote ${vs.length} vectors`);
-  const final = await realFinal();
-  if (final) {
-    writeFileSync(new URL('../onchain/lib/aeroguard/real_final_test.ak', import.meta.url), finalTestModule(final, 'cardano/evidence'));
-    console.log(`wrote real_final_test.ak: ${final.flight} ${final.v.status} (${payoutOf(final.v.status, final.scheduled, final.v.actual)})`);
-  } else console.log('no final Airnode answer yet; real_final_test.ak not written');
+  // One self-contained Aiken test module per flight that has a final answer.
+  const finals = await realFinals();
+  for (const final of finals) {
+    const name = `real_final_${final.flight.toLowerCase()}_test.ak`;
+    writeFileSync(new URL(`../onchain/lib/aeroguard/${name}`, import.meta.url), finalTestModule(final, `cardano/evidence (${final.flight})`));
+    console.log(`wrote ${name}: ${final.flight} ${final.v.status} ${final.v.actual ?? ''} (${payoutOf(final.v.status, final.scheduled, final.v.actual)})`);
+  }
+  if (!finals.length) console.log('no final Airnode answer yet; no real_final_*_test.ak written');
 }

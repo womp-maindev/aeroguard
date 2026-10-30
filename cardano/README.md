@@ -7,8 +7,8 @@ Agents pay per request on Cardano for flight outcomes any contract can verify.
 **For judges (3 min, no funds, no keys):**
 
 ```bash
-cd cardano && npm i && npm test     # 50 tests: real signed Cardano txs, x402 round trips, Aiken cover executed via UPLC
-cd onchain && aiken check           # 35 tests, incl. real AeroDataBox Airnode signatures verified with Plutus builtins
+cd cardano && npm i && npm test     # 53 tests: real signed Cardano txs, x402 round trips, Aiken cover executed via UPLC
+cd onchain && aiken check           # 44 tests, incl. real AeroDataBox Airnode signatures verified with Plutus builtins
 ```
 
 Paid preprod transactions: [EVIDENCE.md](EVIDENCE.md). Live run: `npm run qualify` (needs a Blockfrost preprod key and a
@@ -106,7 +106,7 @@ model of that path; its tests verify the **real** Airnode signature with Plutus 
 `0x83FE…F2Ec`. `npm run vectors` regenerates `onchain/lib/aeroguard/vectors.ak` (then `aiken fmt`).
 
 ```bash
-cd onchain && aiken check      # 35 tests: real Airnode signatures (incl. the final IB1314 landing), forgeries, freshness, time, payout rule, validator paths
+cd onchain && aiken check      # 44 tests: real Airnode signatures (incl. the four final landings), forgeries, freshness, time, payout rule, validator paths
 aiken build                    # plutus.json
 ```
 
@@ -130,11 +130,17 @@ npm run cover -- reclaim --open <openTx>                         # after the dea
 Every build runs the validator locally with Aiken's UPLC evaluator (`@evolution-sdk/aiken-uplc`), so a transaction the
 script would reject is never submitted.
 
-**One signed answer, the same verdict on two chains.** IB1314 (policy #1) landed at 21:00Z, 25 min early. The keeper's
-signed `Arrived` answer settled the live EVM policy as `ClosedNoPayout` ([Basescan 0xf0aa5db2…](https://sepolia.basescan.org/tx/0xf0aa5db2e08a9b9aa7298c92853642b39d7ff330fe3e42cd8b441aa136246b44)); the very
-same signature, checked with Plutus builtins, settles an Aiken cover as **no payout, cover back to the insurer**
-(`onchain/lib/aeroguard/real_final_test.ak`, generated from `evidence/`), and a holder payout with it is refused.
-The TS lifecycle test builds and executes that settlement transaction.
+**One signed answer, the same verdict on two chains, for all four live policies.** The keeper's signed `Arrived`
+answers settled every live EVM policy; the very same signatures, checked with Plutus builtins, settle an Aiken cover the
+same way, and paying the holder with them is refused (`onchain/lib/aeroguard/real_final_*_test.ak`, generated from
+`evidence/`; the TS lifecycle tests build and execute each settlement transaction).
+
+| Policy | Flight | Signed landing | Base Sepolia (`FlightDelayCover`) | Cardano (Aiken cover, same signature) |
+|---|---|---|---|---|
+| #1 | IB1314 | 21:00Z, 25 min early | `ClosedNoPayout` [0xf0aa5db2…](https://sepolia.basescan.org/tx/0xf0aa5db2e08a9b9aa7298c92853642b39d7ff330fe3e42cd8b441aa136246b44) | no payout, cover back to insurer |
+| #2 | LH1816 | 22:06Z, 11 min late | `ClosedNoPayout` [0x5270aa58…](https://sepolia.basescan.org/tx/0x5270aa58d63db79af041e74bb40115a801381f28caca028d90c285280594c535) | no payout, cover back to insurer |
+| #3 | EI357 | 21:26Z, 29 min early | `ClosedNoPayout` [0x5a5e4fc7…](https://sepolia.basescan.org/tx/0x5a5e4fc750464b0f4043aa2318da55705ae0eb94603adf17d417068de4f2ff9a) | no payout, cover back to insurer |
+| #4 | BA955 | 21:47Z, 3 min early | `ClosedNoPayout` [0x973e29d8…](https://sepolia.basescan.org/tx/0x973e29d8195ce6bfe7bde0b749b308cfe1e8200e2465c849810a0a01dd01c7ee) | no payout, cover back to insurer |
 
 Real Airnode signatures in the Aiken tests: the IB1314 pre-departure status and a live arrival answer (`EnRoute`, with
 `actual`), both verify on-chain-style and both are refused for settlement (`NotFinal`), exactly like `FlightDelayCover`;
@@ -148,7 +154,7 @@ on the real signature automatically.
 npm test
 ```
 
-50 tests. The buyer signs real Cardano transactions with the SDK's reference signer and the server's facilitator
+53 tests. The buyer signs real Cardano transactions with the SDK's reference signer and the server's facilitator
 verifies and submits them; the Aiken cover's transactions are built and **executed** with Aiken's UPLC evaluator
 (PlutusV3 cost model). Only Blockfrost is a local fixture (as in the official demo's tests). Covers the 402 offer,
 refusals, discovery, paid verdicts, replay, sales log, anchor transaction, claims agent, MCP, preflight, the whole

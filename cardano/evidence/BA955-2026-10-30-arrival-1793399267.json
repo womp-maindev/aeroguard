@@ -1,0 +1,11 @@
+{
+  "flight": "BA955",
+  "date": "2026-10-30",
+  "airnode": "0x83FE2E8F24E66520B1902C3507De4F471248f2Ec",
+  "requestHash": "0x4b702f4f427c554273adfd8878668374e1d01d2063378548d4205a150d49de5b",
+  "timestamp": 1793399267,
+  "data": "{\"actual\":\"2026-10-30 21:47Z\",\"scheduled\":\"2026-10-30 21:50Z\",\"status\":\"Arrived\"}",
+  "signature": "0x8eb4fd8e7b1993fe939cf270bc16fdfa553e45457eae4d040ceaee4bf9d35aed4f4a6bcc9ab994624644d6f7421b2e2608ace5cf1571128c591f9cc2c338ce661c",
+  "fetchedAt": 1793399268,
+  "paymentTx": "0x764671bfb440405891e8190fe99168cded5f51acaede70273ce5b4fa18bbc8c3"
+}

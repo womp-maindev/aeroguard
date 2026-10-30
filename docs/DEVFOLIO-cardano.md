@@ -32,7 +32,7 @@ a UTxO holding the cover is released only by an Airnode proof that the flight is
 rule as the EVM contract (cancelled or ≥ 180 min: full, ≥ 120 min: half, else back to the insurer). Plutus has no
 `ecrecover`, so it checks `verifyEcdsaSecp256k1Signature` against the Airnode's compressed key over
 `keccak_256(prefix ‖ keccak_256(requestHash ‖ timestamp ‖ data))`, rebuilding the signed bytes instead of parsing
-JSON. 35 Aiken tests pass, including **real** AeroDataBox Airnode signatures (a pre-departure status and a live
+JSON. 44 Aiken tests pass, including **real** AeroDataBox Airnode signatures (a pre-departure status and a live
 arrival answer bought by our keeper), forgeries and the same freshness rules as the EVM contract (stale, from the future,
 observed before the landing); payouts are tagged
 with the policy input against double satisfaction. A settlement costs ≈ 0.46M mem / 0.19B cpu. The off-chain side
@@ -48,10 +48,16 @@ failed purchase is recorded as a refund due, and no policy is ever bought withou
 the contract rule, logs each Cardano receipt. `npm run mcp` exposes `list_flights` (free) and `get_flight_verdict`
 (paid) as MCP tools for LLM agents.
 
-**One signed answer, the same verdict on two chains.** Policy #1 (IB1314) landed 25 min early. The keeper's signed
-`Arrived` answer closed the live Base Sepolia policy with no payout ([0xf0aa5db2…](https://sepolia.basescan.org/tx/0xf0aa5db2e08a9b9aa7298c92853642b39d7ff330fe3e42cd8b441aa136246b44)); the very same
-signature, verified with Plutus V3 builtins, settles the Aiken cover the same way (no payout, cover back to the insurer),
-and paying the holder with it is rejected. Tests: `real_final_test.ak` and the TS lifecycle test.
+**One signed answer, the same verdict on two chains.** All four live policies landed within the threshold. The keeper's
+signed `Arrived` answers closed them on Base Sepolia with no payout; the very same signatures, verified with Plutus V3
+builtins, settle the Aiken cover the same way, and paying the holder with them is rejected.
+
+| Policy | Flight | Signed landing | Base Sepolia (`FlightDelayCover`) | Cardano (Aiken cover, same signature) |
+|---|---|---|---|---|
+| #1 | IB1314 | 21:00Z, 25 min early | `ClosedNoPayout` [0xf0aa5db2…](https://sepolia.basescan.org/tx/0xf0aa5db2e08a9b9aa7298c92853642b39d7ff330fe3e42cd8b441aa136246b44) | no payout, cover back to insurer |
+| #2 | LH1816 | 22:06Z, 11 min late | `ClosedNoPayout` [0x5270aa58…](https://sepolia.basescan.org/tx/0x5270aa58d63db79af041e74bb40115a801381f28caca028d90c285280594c535) | no payout, cover back to insurer |
+| #3 | EI357 | 21:26Z, 29 min early | `ClosedNoPayout` [0x5a5e4fc7…](https://sepolia.basescan.org/tx/0x5a5e4fc750464b0f4043aa2318da55705ae0eb94603adf17d417068de4f2ff9a) | no payout, cover back to insurer |
+| #4 | BA955 | 21:47Z, 3 min early | `ClosedNoPayout` [0x973e29d8…](https://sepolia.basescan.org/tx/0x973e29d8195ce6bfe7bde0b749b308cfe1e8200e2465c849810a0a01dd01c7ee) | no payout, cover back to insurer |
 
 **Real data, no extra quota.** The service resells the signed answers our keeper already bought for the four live
 policies (imported from the keeper's published `keeper-data`, each signature re-checked); a live answer costs 1 tADA,
