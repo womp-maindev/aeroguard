@@ -86,6 +86,23 @@ const main = async () => {
       console.log(JSON.stringify(v.evidence, null, 2));
       return;
     }
+    case 'buy-batch': {
+      // Several real policies in one go: `buy-batch LH411@2026-10-30 UA58@2026-10-30 … --holder 0x… --coverage 0.5`.
+      // Each costs one signed status lookup; the contract itself refuses flights already delayed or too close to arrival,
+      // so a rejected one is reported and skipped, never retried (the AeroDataBox quota is shared).
+      const holder = need('holder') as Hex;
+      const coverage = BigInt(Math.round(Number(flag('coverage') ?? '0.5') * 1e6));
+      for (const spec of rest.filter((a) => a.includes('@'))) {
+        const [flight, date] = spec.split('@') as [string, string];
+        try {
+          const r = await cover({ flight, date, holder, coverage });
+          console.log(`BOUGHT #${r.policyId} ${r.flight} ${date} sched ${r.scheduled} (${r.status}) ${explorerTx(r.txHash)}`);
+        } catch (e) {
+          console.log(`SKIPPED ${flight} ${date}: ${revertReason(e).slice(0, 160)}`);
+        }
+      }
+      return;
+    }
     case 'buy':
       console.log(
         await cover({
@@ -145,7 +162,7 @@ const main = async () => {
       return;
     }
     default:
-      console.log('commands: wallet | hash | resolve | verdict | buy | policies | status | proof | tick | keeper | tamper');
+      console.log('commands: wallet | hash | resolve | verdict | buy | buy-batch | policies | status | proof | tick | keeper | tamper');
   }
 };
 

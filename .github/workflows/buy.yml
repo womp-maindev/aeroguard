@@ -1,0 +1,56 @@
+name: Buy policies
+# Buys real policies on the live contract, one per FLIGHT@DATE (local departure date), each with a fresh
+# AirnodeHub-signed pre-departure status as purchase proof. The contract refuses flights that are already delayed or
+# land in less than 2 h; those are reported and skipped. One AeroDataBox lookup per flight: the quota is shared.
+
+on:
+  workflow_dispatch:
+    inputs:
+      flights:
+        description: "Space-separated FLIGHT@YYYY-MM-DD (local departure date), e.g. LH411@2026-10-30"
+        type: string
+        required: true
+      holder:
+        description: "Address that receives the payout"
+        type: string
+        default: "0xd9b446FbC743f2D592b8699fbfC80443af00Be24"
+      coverage:
+        description: "Coverage per policy in aUSD (premium is 8 %)"
+        type: string
+        default: "0.5"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: keeper # never alongside a keeper run: same wallet, same nonces
+  cancel-in-progress: false
+
+jobs:
+  buy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: keeper
+    env:
+      KEEPER_PK: ${{ secrets.KEEPER_PK }}
+      FLIGHT_COVER_ADDRESS: "0x257054204c4Cd43846C4553eBe6D709841980a80"
+      BASE_SEPOLIA_RPC: https://sepolia.base.org
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: npm ci
+      - name: Balances before
+        run: node src/cli.ts status
+      - name: Buy
+        env:
+          FLIGHTS: ${{ inputs.flights }}
+          HOLDER: ${{ inputs.holder }}
+          COVERAGE: ${{ inputs.coverage }}
+        run: node src/cli.ts buy-batch $FLIGHTS --holder "$HOLDER" --coverage "$COVERAGE"
+      - name: Balances after
+        if: always()
+        run: node src/cli.ts status
