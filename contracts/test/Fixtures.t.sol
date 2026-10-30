@@ -13,10 +13,13 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 contract CoverHarness is FlightDelayCover {
     constructor(IERC20 t, address a) FlightDelayCover(t, a, 800, 1 hours, 1_000e6) {}
 
-    function openForTest(string calldata flight, string calldata date, uint64 scheduled, uint128 coverage, address holder)
-        external
-        returns (uint256 id)
-    {
+    function openForTest(
+        string calldata flight,
+        string calldata date,
+        uint64 scheduled,
+        uint128 coverage,
+        address holder
+    ) external returns (uint256 id) {
         Policy storage p;
         (id, p) = _open(scheduled, coverage, holder, bytes32(0));
         p.arrivalRequestHash = requestHashFor(flight, date, true);
@@ -26,17 +29,8 @@ contract CoverHarness is FlightDelayCover {
     }
 }
 
-/// @notice Replays captured signed responses from test/fixtures/*.json against the contract.
-/// Fixture format (what the agent gets back from AirnodeHub, plus the request it asked for):
-/// { "flight": "LH1234", "date": "2026-10-30", "kind": "arrival" | "status",
-///   "airnode": "0x…", "requestHash": "0x…", "timestamp": 1793381400,
-///   "data": "<exact signed JSON string>", "signature": "0x…" }
-/// test/fixtures/aerodatabox-arrival.json (a REAL capture) is optional: the test skips while it is missing.
-contract FixturesTest is Test {
-    address constant AERODATABOX_AIRNODE = 0x83FE2E8F24E66520B1902C3507De4F471248f2Ec;
-    string constant REAL = "test/fixtures/aerodatabox-arrival.json";
-    string constant SAMPLE = "test/fixtures/sample-signed-arrival.json";
-
+/// @notice Reads test/fixtures/*.json: a signed AirnodeHub response plus the request it answers.
+abstract contract FixtureLoader is Test {
     struct Fixture {
         string flight;
         string date;
@@ -59,6 +53,18 @@ contract FixturesTest is Test {
         f.data = bytes(vm.parseJsonString(j, ".data"));
         f.signature = vm.parseJsonBytes(j, ".signature");
     }
+}
+
+/// @notice Replays captured signed responses from test/fixtures/*.json against the contract.
+/// Fixture format (what the agent gets back from AirnodeHub, plus the request it asked for):
+/// { "flight": "LH1234", "date": "2026-10-30", "kind": "arrival" | "status",
+///   "airnode": "0x…", "requestHash": "0x…", "timestamp": 1793381400,
+///   "data": "<exact signed JSON string>", "signature": "0x…" }
+/// test/fixtures/aerodatabox-arrival.json (a REAL capture) is optional: the test skips while it is missing.
+contract FixturesTest is FixtureLoader {
+    address constant AERODATABOX_AIRNODE = 0x83FE2E8F24E66520B1902C3507De4F471248f2Ec;
+    string constant REAL = "test/fixtures/aerodatabox-arrival.json";
+    string constant SAMPLE = "test/fixtures/sample-signed-arrival.json";
 
     /// @dev Checks signer + intended request, then settles a fresh policy with it end to end when the data is final.
     function _replay(Fixture memory f, address expectedSigner) internal returns (MockUSD usd, bool settled) {

@@ -75,7 +75,7 @@ const saveState = (s: Record<string, Attempt>) => {
 const saveEvidence = (id: bigint, e: Record<string, unknown>) => {
   const dir = join(dirname(statePath()), 'evidence');
   mkdirSync(dir, { recursive: true });
-  writeFileSync(join(dir, `${coverAddress().slice(0, 10)}-policy-${id}.json`), JSON.stringify(e, (_, v) => (typeof v === 'bigint' ? String(v) : v), 2));
+  writeFileSync(join(dir, `${coverAddress().slice(0, 10)}-policy-${id}.json`), JSON.stringify(e, (_, v) => (typeof v === 'bigint' ? Number(v) : v), 2));
 };
 
 const hhmm = (t: number) => new Date(t * 1000).toISOString().slice(11, 16);
@@ -109,7 +109,7 @@ export const keeperTick = async ({ force = false } = {}) => {
         continue;
       }
       const res = await settle(p.id, v.evidence);
-      saveEvidence(p.id, { policyId: p.id, flight: p.flight, date: p.date, kind: v.kind, ...v.evidence, settleTx: res.txHash, outcome: res.status, payout: res.payout, delayMinutes: res.delayMinutes });
+      saveEvidence(p.id, { policyId: p.id, flight: p.flight, date: p.date, kind: v.kind, ...v.evidence, timestamp: Number(v.evidence.timestamp), settleTx: res.txHash, outcome: res.status, payout: res.payout, delayMinutes: res.delayMinutes });
       say('chain', `policy #${p.id} settled ${res.status}: ${a.last}, payout ${Number(res.payout) / 1e6} aUSD`, explorerTx(res.txHash));
     } catch (e) {
       say('warn', `policy #${p.id}: ${revertReason(e)}`);

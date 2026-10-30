@@ -11,7 +11,7 @@ Track: **API3 "Any API in your contract"** (€2,000).
 - On-chain tamper results (policy #1, real Airnode data): edit → NotSignedByAirnode, wrongreq → WrongRequest, wrongsigner → NotSignedByAirnode, stale → Stale(1793378516), genuine pre-departure → NotFinal(Expected).
 
 ## Done
-Contract (purchase proof, private commit-reveal policies, per-policy settlement, 50 tests, ~98% line coverage) · keeper (x402, cache, autonomous loop, tamper CLI, API, rehearsal) · dashboard with in-browser Security Inspector · README for judges · real captured Airnode response verified in Solidity.
+Contract (purchase proof, private commit-reveal policies, per-policy settlement, 52 tests + live replay, ~98% line coverage) · keeper (x402, cache, autonomous loop, tamper CLI, API, rehearsal) · dashboard with in-browser Security Inspector · README for judges · real captured Airnode response verified in Solidity.
 
 ## Next (in order)
 1. Sat morning: check Actions log + Basescan for the 4 settlements; add tx links to README "Live evidence".

@@ -1,0 +1,11 @@
+{
+  "_note": "REAL: AeroDataBox Airnode status response that bought policy #1 on Base Sepolia (tx 0xbfd3ae73074ff63a3ef5f7e56b211d1ffb7223e2db944d0cc38ed069d1958b8d); x402 payment tx 0x544a72416958438be7181af6dc96111ea7d0e6544d63e7ac869faac28671dad2",
+  "flight": "IB1314",
+  "date": "2026-10-30",
+  "kind": "status",
+  "airnode": "0x83FE2E8F24E66520B1902C3507De4F471248f2Ec",
+  "requestHash": "0x782dcb07ea17581332987058650693af56cf1150a2734228ac3dc8347840c54c",
+  "timestamp": 1793378516,
+  "data": "{\"scheduled\":\"2026-10-30 21:25Z\",\"status\":\"Expected\"}",
+  "signature": "0x8036e78d05e55ce43b98b2de767462779d901d15f6eb254679e5a33ac19613663972110dd117cd39f98321a9e34dc47ad75a7cee875d8bbe5d2009c17e97038c1b"
+}
