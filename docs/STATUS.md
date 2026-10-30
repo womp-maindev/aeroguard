@@ -1,6 +1,6 @@
 # Status — Fri 30 Oct 2026, 18:00 CET
 
-Track: **API3 "Any API in your contract"** (€2,000). Cardano track parked (would be a thin x402 layer later, only if API3 is fully done).
+Track: **API3 "Any API in your contract"** (€2,000).
 
 ## Live (Base Sepolia, chain 84532)
 - FlightDelayCover `0x257054204c4Cd43846C4553eBe6D709841980a80` (Sourcify-verified). Owner/keeper wallet `0xd9b446FbC743f2D592b8699fbfC80443af00Be24`.
