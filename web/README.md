@@ -6,9 +6,12 @@ checks Airnode signatures locally. No keys, no build step, no server of ours.
 
 ## Open it
 
-**Quickest, no git needed.** On GitHub: **Code → Download ZIP**, unzip, open the `web` folder and double-click
-**`start.command`** (macOS) or **`start.bat`** (Windows). It serves the folder and opens the dashboard in the browser.
-macOS may refuse a downloaded script the first time: right-click `start.command` → **Open** → **Open**.
+**Quickest, no git, nothing to install.** On GitHub: **Code → Download ZIP** → right-click the ZIP → **Extract All**
+(running it from inside the ZIP does not work) → open the `web` folder and double-click:
+
+- **Windows:** `start.bat`. It starts a small server in PowerShell (`serve.ps1`, built into Windows) and opens the
+  browser. If SmartScreen says "Windows protected your PC": **More info → Run anyway**. Close the black window to stop.
+- **macOS:** `start.command` (uses python3). First time: right-click → **Open** → **Open**.
 
 
 **In GitHub, one click (Codespaces).** Needs access to the repo.
