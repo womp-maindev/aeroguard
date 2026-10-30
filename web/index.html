@@ -1297,12 +1297,17 @@ async function refreshKeeper() {
     try { await j('/health'); S.online = true; } catch { S.online = false; }
     if (S.online) { try { const { log } = await j('/log'); S.apiLog = log; } catch {} }
   }
-  try {
-    const r = await fetch(KEEPER_JSON, { cache: 'no-cache' });
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    S.keeper = await r.json();
-    S.evidence = (S.keeper.evidence ?? []).filter((x) => x && x.requestHash && x.signature && typeof x.data === 'string');
-  } catch (e) { S.keeperErr = e.message; }
+  // fresh file from the keeper-data branch first, else the snapshot that ships with the page (private repo / offline)
+  S.keeperSnap = false;
+  for (const [url, snap] of [[KEEPER_JSON, false], ['data/keeper.json', true]]) {
+    try {
+      const r = await fetch(url, { cache: 'no-cache' });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      S.keeper = await r.json(); S.keeperSnap = snap; S.keeperErr = null;
+      break;
+    } catch (e) { S.keeperErr = e.message; }
+  }
+  if (S.keeper) S.evidence = (S.keeper.evidence ?? []).filter((x) => x && x.requestHash && x.signature && typeof x.data === 'string');
   setStatus();
   renderLog();
   if (S.policies.length) renderPolicies(S.policies, S.free);
@@ -1325,7 +1330,7 @@ function renderLog() {
   }
   const last = runs[runs.length - 1];
   $('logCount').textContent = `${runs.length} runs`;
-  $('logSrc').innerHTML = `Last run ${esc(String(last.finishedAt || last.startedAt || '').slice(0, 16).replace('T', ' '))} UTC · published by the workflow`;
+  $('logSrc').innerHTML = `Last run ${esc(String(last.finishedAt || last.startedAt || '').slice(0, 16).replace('T', ' '))} UTC · ${S.keeperSnap ? 'snapshot shipped with the page' : 'live from the keeper runs'}`;
   $('logBody').innerHTML = runs.slice().reverse().slice(0, 30).map((run) => `<div class="run">${esc(String(run.startedAt || '').slice(5, 16).replace('T', ' '))} UTC <span>${esc(run.event === 'schedule' ? 'scheduled' : run.event === 'workflow_dispatch' ? 'manual' : run.event || '')}</span>${run.url ? `<a href="${esc(run.url)}" target="_blank" rel="noopener">run ↗</a>` : ''}</div>`
     + ((run.log ?? []).length ? run.log.map(logLine).join('') : '<div class="ln"><span></span><span></span><span class="ts">nothing logged</span></div>')).join('');
 }
@@ -1381,6 +1386,12 @@ async function runMode(m) {
   const base = labBase(p);
   if ((m === 'stale' || m === 'valid') && !base.genuine && !$('tUseInsp').checked) {
     el.className = 'res sk'; el.innerHTML = `<span class="h">SKIPPED</span><span class="e">This test needs a real signed response for ${esc(p.flight)}, and there is none yet. Pick policy #1.</span>`; return;
+  }
+  if (m === 'stale' && base.genuine) {
+    // for this one we want the oldest real response for the policy, not the newest
+    const hs = [p.arrivalRequestHash, p.statusRequestHash].map((h) => String(h).toLowerCase());
+    const old = allEvidence().filter((x) => hs.includes(String(x.requestHash).toLowerCase())).sort((x, y) => Number(x.timestamp) - Number(y.timestamp))[0];
+    if (old) base.r = old;
   }
   if (m === 'stale') {
     const age = Math.floor(Date.now() / 1000) - Number(base.r.timestamp);
