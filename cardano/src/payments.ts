@@ -80,33 +80,36 @@ export interface Sale {
 }
 
 /** Append-only log keyed by Cardano payment tx: settled sales (GET /sales) and policy orders (GET /orders/:tx). */
+// The file is read once at start; afterwards the in-memory index answers and every change is appended.
 export class TxLog<T extends { tx: string }> {
   private readonly file?: string;
-  constructor(file?: string) { this.file = file; }
-  private readonly memory: T[] = [];
-  has(tx: string) { return this.all().some((s) => s.tx === tx); }
-  get(tx: string) { return this.all().find((s) => s.tx === tx); }
-  add(entry: T) {
-    this.memory.push(entry);
+  private readonly byTx = new Map<string, T>();
+  constructor(file?: string) {
+    this.file = file;
+    if (!file || !existsSync(file)) return;
+    // Later lines for the same tx (an anchor, a bought policy) override earlier ones.
+    for (const line of readFileSync(file, 'utf8').split('\n').filter(Boolean)) {
+      const s = JSON.parse(line) as T;
+      this.byTx.set(s.tx, { ...this.byTx.get(s.tx), ...s });
+    }
+  }
+  private append(entry: unknown) {
     if (!this.file) return;
     mkdirSync(dirname(this.file), { recursive: true });
     appendFileSync(this.file, JSON.stringify(entry) + '\n');
   }
+  has(tx: string) { return this.byTx.has(tx); }
+  get(tx: string) { return this.byTx.get(tx); }
+  add(entry: T) {
+    this.byTx.set(entry.tx, entry);
+    this.append(entry);
+  }
   update(tx: string, patch: Partial<T>) {
-    const entry = this.memory.find((s) => s.tx === tx);
-    if (entry) Object.assign(entry, patch);
-    if (this.file) appendFileSync(this.file, JSON.stringify({ ...entry, ...patch, tx }) + '\n');
+    const entry = { ...this.byTx.get(tx), ...patch, tx } as T;
+    this.byTx.set(tx, entry);
+    this.append(entry);
   }
-  all(): T[] {
-    if (!this.file || !existsSync(this.file)) return this.memory;
-    // Later lines for the same tx (an anchor, a bought policy) override earlier ones.
-    const byTx = new Map<string, T>();
-    for (const line of readFileSync(this.file, 'utf8').split('\n').filter(Boolean)) {
-      const s = JSON.parse(line) as T;
-      byTx.set(s.tx, { ...byTx.get(s.tx), ...s });
-    }
-    return [...byTx.values()];
-  }
+  all(): T[] { return [...this.byTx.values()]; }
 }
 
 export class SalesLog extends TxLog<Sale> {}

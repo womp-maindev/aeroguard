@@ -15,10 +15,10 @@ import { createApp, localFacilitator, orderIdFor, orderRefFor, type PolicyDesk, 
 const HOLDER = '0x000000000000000000000000000000000000bEEF';
 const url = (origin: string, extra = '') => `${origin}/policy?flight=LH1234&date=2026-10-31&holder=${HOLDER}&coverage=500000${extra}`;
 
-const setup = async (t: TestContext, fail = false, settleFails = false) => {
+const setup = async (t: TestContext, fail = false, settleFails = false, extra: { dirs?: string[]; orders?: OrdersLog; premiumBps?: () => bigint; onSettle?: () => void } = {}) => {
   const bought: Parameters<PolicyDesk['buy']>[0][] = [];
   const desk: PolicyDesk = {
-    premium: async (c) => (c * 800n) / 10_000n, // FlightDelayCover premiumBps = 800
+    premium: async (c) => (c * (extra.premiumBps?.() ?? 800n)) / 10_000n, // FlightDelayCover premiumBps = 800
     buy: async (a) => {
       bought.push(a);
       if (fail) throw new Error('LH1234 is Departed; cover can only be bought before departure');
@@ -28,13 +28,13 @@ const setup = async (t: TestContext, fail = false, settleFails = false) => {
     maxCoverage: 2_000_000n,
   };
   const { provider, state } = await fakeBlockfrost(t, [walletFor(BUYER).getAddress()]);
-  const orders = new OrdersLog();
+  const orders = extra.orders ?? new OrdersLog();
   const real = localFacilitator(provider, 50);
   const facilitator = settleFails
     ? { ...real, settle: async (p: never, r: never) => ({ ...(await real.verify(p, r)), success: false, errorReason: 'settlement_failed', transaction: '', network: 'cardano:preprod' }) as never }
-    : real;
+    : { ...real, settle: async (p: never, r: never) => { extra.onSettle?.(); return real.settle(p, r); } };
   const origin = await listen(await createApp({ facilitator, payTo: walletFor(SELLER).getAddress(),
-    evidenceDirs: PINNED_EVIDENCE, desk, orders }), t);
+    evidenceDirs: extra.dirs ?? PINNED_EVIDENCE, desk, orders }), t);
   return { origin, state, bought, orders, provider, pay: payingFetch(walletFor(BUYER, provider)) };
 };
 const settled = async (origin: string, tx: string) => {
@@ -132,4 +132,38 @@ test('npm run buy-policy: pay, then follow the order until the Base policy exist
   const { order } = await buyPolicy({ server: origin, flight: 'LH1234', date: '2026-10-31', holder: HOLDER, coverage: '500000', pay, pollMs: 10, log: () => {} });
   assert.equal(order.status, 'bought');
   assert.equal(order.explorer, 'https://sepolia.basescan.org/tx/0xbase');
+});
+
+test('flights in the past or already past the gate are refused before payment', async (t) => {
+  const { origin } = await setup(t, false, false, { dirs: [new URL('../evidence/', import.meta.url).pathname] });
+  assert.equal((await fetch(`${origin}/policy?flight=LH1234&date=2020-01-01&holder=${HOLDER}&coverage=500000`)).status, 409);
+  // The keeper's latest signed answer for IB1314 is past the gate (en route / approaching / landed).
+  const res = await fetch(`${origin}/policy?flight=IB1314&date=2026-10-30&holder=${HOLDER}&coverage=500000`);
+  assert.equal(res.status, 409);
+  assert.match((await res.json()).error, /only before departure/);
+});
+
+test('if the contract quote rose after the 402, nothing is bought and a refund is due', async (t) => {
+  let bps = 800n;
+  // The quote moves while the payment is being settled, after the buyer accepted the offer.
+  const { origin, state, bought, pay } = await setup(t, false, false, { premiumBps: () => bps, onSettle: () => { bps = 900n; } });
+  assert.equal((await pay(url(origin))).status, 200);
+  const order = await settled(origin, state.submitted[0]!.hash);
+  assert.equal(order.status, 'failed');
+  assert.equal(order.refundDue, true);
+  assert.match(order.error, /quote moved/);
+  assert.equal(bought.length, 0);
+});
+
+test('an order left buying by a restart is flagged for a manual check', async (t) => {
+  const { mkdtempSync, rmSync, writeFileSync } = await import('node:fs');
+  const { tmpdir } = await import('node:os');
+  const dir = mkdtempSync(`${tmpdir()}/aeroguard-orders-`);
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  writeFileSync(`${dir}/orders.jsonl`, JSON.stringify({ tx: 'c'.repeat(64), orderRef: '0xabc', status: 'buying' }) + '\n');
+  const { origin } = await setup(t, false, false, { orders: new OrdersLog(`${dir}/orders.jsonl`) });
+  const order = await (await fetch(`${origin}/orders/${'c'.repeat(64)}`)).json();
+  assert.equal(order.status, 'failed');
+  assert.equal(order.refundDue, true);
+  assert.match(order.error, /cardanoJobRef 0xabc/);
 });

@@ -23,6 +23,8 @@ export const PRICES = {
 const QUERY_KEYS = new Set(['flight', 'date', 'requestId']);
 const POLICY_KEYS = new Set(['flight', 'date', 'holder', 'coverage', 'requestId']);
 const MIN_LOVELACE = 1_000_000n; // a Cardano output below ~1 ADA is not valid
+// FlightDelayCover accepts these signed statuses at purchase.
+const PRE_DEPARTURE = new Set(['Expected', 'Unknown', 'CheckIn', 'Boarding']);
 
 /** Sells FlightDelayCover policies on Base Sepolia for tADA. `buy` runs only after the Cardano payment settled. */
 export interface PolicyDesk {
@@ -87,7 +89,7 @@ export const createApp = async (o: AppOptions) => {
     const request = (context.transportContext as HTTPTransportContext).request;
     const q = queryOf(request.adapter.getUrl());
     const tx = decodeCardanoTransaction(String((context.paymentPayload as { payload: { transaction: string } }).payload.transaction));
-    const what = q.path === '/policy' ? `${q.holder}:${q.coverage}` : '';
+    const what = q.path === '/policy' ? `&holder=${q.holder}&coverage=${q.coverage}` : '';
     const operation = `GET ${q.path}?flight=${q.flight.toUpperCase()}&date=${q.date}${what}:${q.requestId || tx.txHash}`;
     const fingerprint = createHash('sha256').update(JSON.stringify([context.paymentPayload, context.requirements])).digest('hex');
     return { tx, operation, fingerprint, ...q };
@@ -118,7 +120,7 @@ export const createApp = async (o: AppOptions) => {
   server.onAfterSettle(async (context) => {
     if (!context.result.success) return;
     const q = identity(context);
-    if (q.path === '/policy') { await openOrder(context.result.transaction, q, context.requirements); return; }
+    if (q.path === '/policy') { openOrder(context.result.transaction, q, context.requirements); return; }
     // A resumed request settles the same transaction again: log and anchor it only once.
     if (sales.has(context.result.transaction)) return;
     try {
@@ -137,21 +139,33 @@ export const createApp = async (o: AppOptions) => {
     } catch (e) { console.warn(`[sales] ${e instanceof Error ? e.message : e}`); }
   });
   // The Cardano payment is final: only now buy the policy on Base. A failure is recorded as a refund due, never hidden.
-  const openOrder = async (tx: string, q: ReturnType<typeof queryOf>, req: { amount: string; asset: string }) => {
+  // The order is recorded synchronously, before any await, so a second settle of the same payment can never buy again.
+  const openOrder = (tx: string, q: ReturnType<typeof queryOf>, req: { amount: string; asset: string }) => {
     if (orders.has(tx)) return;
     const coverage = BigInt(q.coverage);
-    const order: Order = {
+    orders.add({
       at: new Date().toISOString(), tx, orderRef: orderRefFor(tx), flight: q.flight.toUpperCase(), date: q.date, holder: q.holder,
-      coverage: q.coverage, premium: String(await o.desk!.premium(coverage)), amount: req.amount, asset: req.asset, status: 'buying',
-    };
-    orders.add(order);
-    void o.desk!.buy({ flight: order.flight, date: q.date, holder: q.holder as `0x${string}`, coverage, orderId: orderIdFor(tx) })
-      .then((r) => orders.update(tx, { status: 'bought', policyId: String(r.policyId), policyTx: r.txHash, explorer: r.explorer }))
-      .catch((e) => {
-        console.warn(`[policy] ${tx}: ${e instanceof Error ? e.message : e}`);
-        orders.update(tx, { status: 'failed', error: String(e instanceof Error ? e.message : e).slice(0, 300), refundDue: true });
-      });
+      coverage: q.coverage, premium: '', amount: req.amount, asset: req.asset, status: 'buying',
+    });
+    void (async () => {
+      // The contract quote may have moved since the 402: never pay more aUSD than the tADA received covers.
+      const premium = await o.desk!.premium(coverage);
+      orders.update(tx, { premium: String(premium) });
+      if (req.asset !== 'lovelace' || policyLovelace(premium, o.desk!.lovelacePerUnit) > BigInt(req.amount)) {
+        throw new Error(`quote moved: premium ${premium} aUSD units now costs more than the ${req.amount} ${req.asset} paid`);
+      }
+      const r = await o.desk!.buy({ flight: q.flight.toUpperCase(), date: q.date, holder: q.holder as `0x${string}`, coverage, orderId: orderIdFor(tx) });
+      orders.update(tx, { status: 'bought', policyId: String(r.policyId), policyTx: r.txHash, explorer: r.explorer });
+    })().catch((e) => {
+      console.warn(`[policy] ${tx}: ${e instanceof Error ? e.message : e}`);
+      orders.update(tx, { status: 'failed', error: String(e instanceof Error ? e.message : e).slice(0, 300), refundDue: true });
+    });
   };
+  // (3) A restart while buying leaves the outcome unknown: flag it for a manual check instead of letting it hang.
+  for (const order of orders.all().filter((x) => x.status === 'buying')) {
+    orders.update(order.tx, { status: 'failed', refundDue: true,
+      error: `server restarted during the purchase: check Base for a policy with cardanoJobRef ${order.orderRef} before refunding` });
+  }
 
   server.onVerifyFailure(async ({ error }) => console.warn(`[verify] ${error.message}`));
   server.onSettleFailure(async ({ error }) => console.warn(`[settle] ${error.message}`));
@@ -243,6 +257,13 @@ export const createApp = async (o: AppOptions) => {
       && typeof coverage === 'string' && /^[1-9]\d{0,18}$/.test(coverage) && BigInt(coverage) <= o.desk.maxCoverage
       && (requestId === undefined || (typeof requestId === 'string' && /^[A-Za-z0-9-]{1,100}$/.test(requestId)));
     if (!ok) { res.status(400).json({ error: `Use /policy?flight=LH1234&date=YYYY-MM-DD&holder=0x…&coverage=1..${o.desk.maxCoverage} (aUSD units)` }); return; }
+    // Free checks before charging: a flight dated before yesterday (UTC, any time zone) or one our signed evidence
+    // already shows past the gate cannot be insured. The contract's own checks still apply after payment.
+    const yesterday = new Date(Date.now() - 86_400_000).toISOString().slice(0, 10);
+    if ((date as string) < yesterday) { res.status(409).json({ error: `${flight} on ${date} is in the past` }); return; }
+    const known = findEvidence(flight as string, date as string, dirs);
+    const status = known && (JSON.parse(known.response.data) as { status: string }).status;
+    if (status && !PRE_DEPARTURE.has(status)) { res.status(409).json({ error: `${flight} on ${date} is ${status}; cover is sold only before departure` }); return; }
     next();
   });
   app.use(paymentMiddleware(routes as never, server));
