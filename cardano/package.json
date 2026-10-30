@@ -18,7 +18,9 @@
     "cover": "node --env-file-if-exists=.env src/cover-cli.ts",
     "import-evidence": "node src/import-evidence.ts",
     "balance": "node --env-file-if-exists=.env src/balance.ts",
-    "test": "node --test \"src/**/*.test.ts\""
+    "test": "node --test \"src/**/*.test.ts\"",
+    "buy-policy": "node --env-file-if-exists=.env src/buy-policy.ts",
+    "server:policies": "node --env-file-if-exists=../.env --env-file-if-exists=.env src/server.ts"
   },
   "dependencies": {
     "@evolution-sdk/aiken-uplc": "^2.0.19",

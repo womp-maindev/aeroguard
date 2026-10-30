@@ -38,6 +38,11 @@ with the policy input against double satisfaction. A settlement costs ≈ 0.46M 
 (open / settle / reclaim) builds real transactions and executes the validator with Aiken's UPLC evaluator before
 submitting; **the verdict body an agent buys over x402 is exactly the redeemer that settles the cover.**
 
+**Cardano pays for cover on Base.** `GET /policy` sells a real `FlightDelayCover` policy on Base Sepolia for tADA: the
+price is the contract's own quote, and only after the Cardano payment settles does the server buy the policy, writing
+`keccak256("cardano:<payment tx>")` into the policy's `cardanoJobRef` field. The two chains point to each other; a
+failed purchase is recorded as a refund due, and no policy is ever bought without a settled payment (tested).
+
 **Agents.** `npm run agent` is a claims agent with a budget: free catalog check, buys only final proofs, decides by
 the contract rule, logs each Cardano receipt. `npm run mcp` exposes `list_flights` (free) and `get_flight_verdict`
 (paid) as MCP tools for LLM agents.

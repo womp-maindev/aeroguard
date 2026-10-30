@@ -79,31 +79,56 @@ export interface Sale {
   anchorTx?: string;
 }
 
-/** Append-only log of settled sales; the free GET /sales serves it. */
-export class SalesLog {
+/** Append-only log keyed by Cardano payment tx: settled sales (GET /sales) and policy orders (GET /orders/:tx). */
+export class TxLog<T extends { tx: string }> {
   private readonly file?: string;
   constructor(file?: string) { this.file = file; }
-  private readonly memory: Sale[] = [];
+  private readonly memory: T[] = [];
   has(tx: string) { return this.all().some((s) => s.tx === tx); }
-  add(sale: Sale) {
-    this.memory.push(sale);
+  get(tx: string) { return this.all().find((s) => s.tx === tx); }
+  add(entry: T) {
+    this.memory.push(entry);
     if (!this.file) return;
     mkdirSync(dirname(this.file), { recursive: true });
-    appendFileSync(this.file, JSON.stringify(sale) + '\n');
+    appendFileSync(this.file, JSON.stringify(entry) + '\n');
   }
-  update(tx: string, patch: Partial<Sale>) {
-    const sale = this.memory.find((s) => s.tx === tx);
-    if (sale) Object.assign(sale, patch);
-    if (this.file) appendFileSync(this.file, JSON.stringify({ ...sale, ...patch, tx }) + '\n');
+  update(tx: string, patch: Partial<T>) {
+    const entry = this.memory.find((s) => s.tx === tx);
+    if (entry) Object.assign(entry, patch);
+    if (this.file) appendFileSync(this.file, JSON.stringify({ ...entry, ...patch, tx }) + '\n');
   }
-  all(): Sale[] {
+  all(): T[] {
     if (!this.file || !existsSync(this.file)) return this.memory;
-    // Later lines for the same tx (e.g. an anchor) override earlier ones.
-    const byTx = new Map<string, Sale>();
+    // Later lines for the same tx (an anchor, a bought policy) override earlier ones.
+    const byTx = new Map<string, T>();
     for (const line of readFileSync(this.file, 'utf8').split('\n').filter(Boolean)) {
-      const s = JSON.parse(line) as Sale;
+      const s = JSON.parse(line) as T;
       byTx.set(s.tx, { ...byTx.get(s.tx), ...s });
     }
     return [...byTx.values()];
   }
 }
+
+export class SalesLog extends TxLog<Sale> {}
+
+/** A FlightDelayCover policy on Base Sepolia, paid for in tADA on Cardano. */
+export interface Order {
+  at: string;
+  tx: string; // the Cardano payment
+  orderRef: string; // keccak256("cardano:<tx>"), stored on the policy as cardanoJobRef
+  flight: string;
+  date: string;
+  holder: string;
+  coverage: string; // aUSD units
+  premium: string; // aUSD units
+  amount: string; // what was paid on Cardano
+  asset: string;
+  status: 'buying' | 'bought' | 'failed';
+  policyId?: string;
+  policyTx?: string;
+  explorer?: string;
+  error?: string;
+  refundDue?: boolean;
+}
+
+export class OrdersLog extends TxLog<Order> {}

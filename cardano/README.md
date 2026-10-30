@@ -7,7 +7,7 @@ Agents pay per request on Cardano for flight outcomes any contract can verify.
 **For judges (3 min, no funds, no keys):**
 
 ```bash
-cd cardano && npm i && npm test     # 39 tests: real signed Cardano txs, x402 round trips, Aiken cover executed via UPLC
+cd cardano && npm i && npm test     # 47 tests: real signed Cardano txs, x402 round trips, Aiken cover executed via UPLC
 cd onchain && aiken check           # 26 tests, incl. real AeroDataBox Airnode signatures verified with Plutus builtins
 ```
 
@@ -32,6 +32,8 @@ facilitator runs in the server process (no keys, no funds); set `FACILITATOR_URL
 | Endpoint | Cost | What |
 |---|---|---|
 | `GET /verdict?flight=&date=[&requestId=]` | 1 or 2 tADA | verdict + Airnode proof + payment receipt |
+| `GET /policy?flight=&date=&holder=0x…&coverage=` | premium in tADA | buys a `FlightDelayCover` policy on Base Sepolia after the Cardano payment settles |
+| `GET /orders/:tx` | free | that order: `buying` → `bought` (policy id, Basescan) or `failed` (refund due) |
 | `GET /flights` | free | flights with evidence, kind and price |
 | `GET /sales` | free | settled sales with Cardanoscan links (and anchor tx) |
 | `GET /.well-known/x402` | free | machine-readable offer for agent discovery |
@@ -68,6 +70,20 @@ npm run agent                  # claims agent over claims.json: free catalog che
 
 **MCP for LLM agents** (`npm run mcp`, stdio): tools `list_flights` (free) and `get_flight_verdict` (paid).
 Client config: `{ "command": "node", "args": ["--env-file=cardano/.env", "cardano/src/mcp.ts"] }`.
+
+## Buy flight cover on Base, pay the premium in tADA
+
+With the keeper's keys (`KEEPER_PK`, `FLIGHT_COVER_ADDRESS` in the root `.env`), `npm run server:policies` also sells
+policies: the 402 price is the contract's `quote(coverage)` × `LOVELACE_PER_AUSD_UNIT` (testnet demo rate 1 aUSD = 10
+tADA, at least 1 tADA). **Only after the Cardano payment settles** the server runs the keeper's own purchase path (fresh
+signed status proof, then `buyPolicy`) with `cardanoJobRef = keccak256("cardano:<payment tx>")`, so the Base policy names
+the Cardano payment that bought it. If the purchase fails (e.g. the flight already departed), the order is marked
+`refundDue`; nothing is bought without a settled payment.
+
+```bash
+npm run server:policies
+npm run buy-policy -- --flight LH1234 --date 2026-11-01 --holder 0xYourAddress --coverage 500000
+```
 
 ## On-chain: a Cardano contract that verifies the same proof
 
@@ -121,7 +137,7 @@ on the real signature automatically.
 npm test
 ```
 
-39 tests. The buyer signs real Cardano transactions with the SDK's reference signer and the server's facilitator
+47 tests. The buyer signs real Cardano transactions with the SDK's reference signer and the server's facilitator
 verifies and submits them; the Aiken cover's transactions are built and **executed** with Aiken's UPLC evaluator
 (PlutusV3 cost model). Only Blockfrost is a local fixture (as in the official demo's tests). Covers the 402 offer,
 refusals, discovery, paid verdicts, replay, sales log, anchor transaction, claims agent, MCP, preflight, the whole

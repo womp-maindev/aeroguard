@@ -14,8 +14,11 @@ export const recordEvidence = (body: { flight: string; date: string; verdict: { 
 };
 
 /** The unpaid request: what the server asks for (the 402 offer), for people watching the exchange. */
-export const showOffer = async (server: string, flight: string, date: string, log = console.log) => {
-  const res = await fetch(`${server}/verdict?flight=${encodeURIComponent(flight)}&date=${date}`);
+export const showOffer = async (server: string, flight: string, date: string, log = console.log) =>
+  showOfferAt(`${server}/verdict?flight=${encodeURIComponent(flight)}&date=${date}`, log);
+
+export const showOfferAt = async (url: string, log = console.log) => {
+  const res = await fetch(url);
   const header = res.headers.get('PAYMENT-REQUIRED');
   if (res.status !== 402 || !header) { log(`HTTP ${res.status}: ${await res.text()}`); return undefined; }
   const offer = decodePaymentRequiredHeader(header);
