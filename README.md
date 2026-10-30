@@ -51,7 +51,7 @@ anvil --chain-id 84532 & npm run rehearse        # local deploy, 5 signed purcha
 | Policy #3 EI357 MUC→DUB | [0x2aeed601…](https://sepolia.basescan.org/tx/0x2aeed6010ced165f66c26ea0f34e7068421a327cac0c6375d72ef7b794f41672) |
 | Policy #4 BA955 MUC→LHR | [0x7e675d8f…](https://sepolia.basescan.org/tx/0x7e675d8f94946db1d02a40c1eff87ac5a0ca29b65730751cf0d902d767d2b0d1) |
 
-Tamper test against the deployed contract with a REAL signed Airnode response (policy #1): edited value → `NotSignedByAirnode`, other flight → `WrongRequest`, attacker key → `NotSignedByAirnode`, genuine but pre-departure → `NotFinal(Expected)`. A captured real response (`contracts/test/fixtures/aerodatabox-arrival.json`, LH400) is verified in Solidity by `test_Fixture_RealAeroDataBoxCapture`: the on-chain request-hash derivation matches AirnodeHub byte for byte.
+Tamper test against the deployed contract with a REAL signed Airnode response (policy #1): edited value → `NotSignedByAirnode`, other flight → `WrongRequest`, attacker key → `NotSignedByAirnode`, genuine but older than `maxAge` → `Stale(1793378516)`, genuine but pre-departure → `NotFinal(Expected)`. A captured real response (`contracts/test/fixtures/aerodatabox-arrival.json`, LH400) is verified in Solidity by `test_Fixture_RealAeroDataBoxCapture`: the on-chain request-hash derivation matches AirnodeHub byte for byte.
 The keeper runs on its own as a GitHub Actions cron (`.github/workflows/keeper.yml`, every 15 min) and settles these policies after landing.
 
 ## The problem
@@ -102,15 +102,18 @@ npm run tamper -- --policy 1                          # edit · stale · wrongre
 npm run tamper -- --policy 1 --response my.json       # YOUR OWN signed response
 npm run tamper -- --policy 1 --mode edit --response my.json
 ```
-Each forgery is simulated against the deployed contract and prints the revert reason:
+Each forgery is simulated (`eth_call`, no transaction) against the deployed contract and prints the revert reason. The right column is what the **live** contract answered for policy #1, starting from the real AirnodeHub-signed [`IB1314-status-proof.json`](keeper/fixtures/IB1314-status-proof.json) (signed 30 Oct 2026 16:41:56 UTC):
 
-| Attack | Contract answer |
-|---|---|
-| one value edited | `NotSignedByAirnode(<random signer>)` |
-| response too old | `Stale(timestamp)` |
-| response to a different request | `WrongRequest(hash)` |
-| signed by an unexpected key | `NotSignedByAirnode(attacker)` |
-| valid, fresh, final | ✅ `Settled` → payout |
+| Attack | Contract answer | Live result, policy #1 (30 Oct 2026) |
+|---|---|---|
+| one value edited | `NotSignedByAirnode(<random signer>)` | ✅ rejected: `NotSignedByAirnode` |
+| response too old | `Stale(timestamp)` | ✅ rejected: `Stale(1793378516)` (genuine signature, older than the policy's 1 h `maxAge`) |
+| response to a different request | `WrongRequest(hash)` | ✅ rejected: `WrongRequest` |
+| signed by an unexpected key | `NotSignedByAirnode(attacker)` | ✅ rejected: `NotSignedByAirnode(attacker)` |
+| genuine, fresh, but not final | `NotFinal(status)` | ✅ rejected: `NotFinal(Expected)` |
+| valid, fresh, final | ✅ `Settled` → payout | settlement txs in [Live evidence](#live-evidence-base-sepolia-real-aerodatabox-data) |
+
+Once a policy is settled, every further attempt answers `NotActive` before any oracle check, so re-run these on an `Active` policy.
 
 Also rejected: buying after departure (`NotBuyable`), buying too close to arrival (`TooCloseToArrival`), schedule switched after purchase (`ScheduleMismatch`), settling twice (`NotActive`), future timestamps (`FromTheFuture`), "Arrived" signed before the landing it reports (`ObservedTooEarly`), non‑final status (`NotFinal`), selling cover the pool can't back (`Insolvent`).
 
