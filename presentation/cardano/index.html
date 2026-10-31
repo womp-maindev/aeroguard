@@ -107,12 +107,12 @@ These five evidence fields go unchanged into a contract.">
 <!-- 6 -->
 <section class="slide" data-video data-notes="And it's verified on Cardano itself. Our Aiken contract is a flight-cover UTxO.
 Plutus has no ecrecover, so we rebuild the exact signed bytes and use the secp256k1 builtin.
-Edited data, another signer, a stale answer — all fail. 44 tests pass, including the real landings of our first four policies (30 Oct).">
+So it's an escrow: the money moves only on a signed result. Edited data, another signer, a stale answer — all fail. 44 tests pass, including the real landings of our first four policies (30 Oct).">
   <div class="kicker">Verified on Cardano</div>
   <h2>An Aiken contract checks the Airnode signature</h2>
   <div class="cols v">
     <video muted playsinline loop><source src="../../cardano/video/07-aiken.mp4" type="video/mp4"><source src="media/07-aiken.webm" type="video/webm"></video>
-    <div class="card"><h3>flight_cover · Plutus V3</h3><p><b>keccak_256 + verifyEcdsaSecp256k1Signature</b> on the bytes the Airnode signed<br><br>Pays like FlightDelayCover: <b>≥ 180 min or cancelled → full, ≥ 120 → half</b><br><br>Forgeries, stale answers and double satisfaction fail<br><br><b class="gold">44 / 44 tests</b></p></div>
+    <div class="card"><h3>flight_cover · Plutus V3</h3><p><b>keccak_256 + verifyEcdsaSecp256k1Signature</b> on the bytes the Airnode signed<br><br>Pays like FlightDelayCover: <b>≥ 180 min or cancelled → full, ≥ 120 → half</b><br><br><b>Escrow:</b> pays only on a signed result; forgeries fail<br><br><b class="gold">44 / 44 tests</b></p></div>
   </div>
 </section>
 
@@ -148,11 +148,12 @@ No settled payment, no policy. If the purchase fails, it's recorded as a refund.
 </section>
 
 <!-- 9 -->
-<section class="slide" data-notes="Who pays for this? Claims agents for EU261 delay compensation, travel insurers, corporate travel tools, and agent marketplaces like Masumi.
+<section class="slide" data-notes="This is an agent hiring an agent: the claims agent pays our verdict agent only for a final proof whose signature checks, and an unknown flight is a free 404. Who pays for this? Claims agents for EU261 delay compensation, travel insurers, corporate travel tools, and agent marketplaces like Masumi.
 They pay per answer, only for the flights they need. A final arrival never changes, so we buy the signed lookup once and every later sale is margin.">
   <div class="kicker">Business case</div>
   <h2>Pay per answer, sell the same proof many times</h2>
-  <div class="cols">
+  <div class="cols" style="grid-template-columns:1fr 1fr 1fr;gap:34px">
+    <div class="card"><h3>An agent hires an agent</h3><p>The claims agent hires our verdict agent and pays <b>only for a final proof that passes the signature check</b>. No evidence → free 404: no pay for undone work.</p></div>
     <div class="card"><h3>Who pays</h3><p>EU261 claim agents · travel insurers · corporate travel tools · agent marketplaces (Masumi)</p></div>
     <div class="card"><h3>Why it works</h3><p>No account, ~1 ADA per verdict. A final answer never changes: <b>buy the signed lookup once, every later sale is margin.</b></p></div>
   </div>

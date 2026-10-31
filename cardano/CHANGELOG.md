@@ -5,6 +5,11 @@ Everything in the Cardano track, newest first. Times are UTC, 30–31 Oct 2026. 
 only the short "Cardano" section in the root `README.md`, `docs/DEVFOLIO-cardano.md` and the dashboard file
 `web/data/cardano-run.json`.
 
+## 31 Oct — deck: escrow and "an agent hires an agent"
+- Slide 6 says the Aiken cover is an escrow that pays only on a signed result. Slide 9 has a new card: the claims agent
+  hires our verdict agent, pays only for a final proof whose signature checks, and an unknown flight is a free 404.
+  The speaker notes (EN and RU) say the same.
+
 ## 31 Oct — receipts say early or late
 - `EVIDENCE.md` rows now show the signed offset ("25 min early", "11 min late") instead of a delay clamped to "+0 min".
   The first row is corrected: IB1314 landed 25 min early.
