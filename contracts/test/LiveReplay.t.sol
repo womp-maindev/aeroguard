@@ -160,4 +160,13 @@ contract LiveReplayTest is FixtureLoader {
     function test_Live_LH1810_SettlesLikeOnChain() public {
         _settles("LH1810");
     }
+
+    // ------------------------------------------------------------------ policy #10, LH1868 MUC→FCO (31 Oct)
+    function test_Live_LH1868_BoughtWithRealSignedProof() public {
+        _bought("LH1868");
+    }
+
+    function test_Live_LH1868_SettlesLikeOnChain() public {
+        _settles("LH1868");
+    }
 }

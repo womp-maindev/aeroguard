@@ -8,7 +8,7 @@
 Nobody files a claim and nobody approves one.
 
 ```
-forge test --use /usr/local/bin/solc --offline            # 86 pass: 59 + 27 hardening (Hardening.t.sol), incl. the full live lifecycle of policies #1–#8
+forge test --use /usr/local/bin/solc --offline            # 86 pass: 59 + 27 hardening (Hardening.t.sol), incl. the full live lifecycle of policies #1–#8 and #10
 forge test --use /usr/local/bin/solc --offline --gas-report
 forge coverage --use /usr/local/bin/solc --offline --ir-minimum --report summary
 ```

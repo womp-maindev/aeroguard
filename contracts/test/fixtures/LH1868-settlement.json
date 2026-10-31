@@ -1,0 +1,18 @@
+{
+  "_note": "REAL: the AeroDataBox Airnode response that settled policy #10 on Base Sepolia (settle tx 0x27d73eabca5eb040a0bb771ab3ae7a9f7f21d33724e57f7315ff4898d0599ab6), published by the keeper in keeper-data/keeper.json (run 41202683287)",
+  "policyId": 10,
+  "flight": "LH1868",
+  "date": "2026-10-31",
+  "kind": "arrival",
+  "airnode": "0x83FE2E8F24E66520B1902C3507De4F471248f2Ec",
+  "requestHash": "0xcb1c0a52e4b3b38dce61a62c95b45782a99bfe582160932c044ad1504c9b29f1",
+  "timestamp": 1793450887,
+  "data": "{\"actual\":\"2026-10-31 12:25Z\",\"scheduled\":\"2026-10-31 12:15Z\",\"status\":\"Arrived\"}",
+  "signature": "0x7f4965e7684a95176d77133dbd057cffc0b2148f333e60ac68d3ba00ed9798165b2369e7a6c356c866a21a5f9ead5f50a3f5ef65860b494c8eaf05097b8515001c",
+  "fetchedAt": 1793450888,
+  "paymentTx": "0x9dd9e75ab7782aacb0bf872d946f880e642d58b623e5685a0fb7fc98203e3dc6",
+  "settleTx": "0x27d73eabca5eb040a0bb771ab3ae7a9f7f21d33724e57f7315ff4898d0599ab6",
+  "outcome": "ClosedNoPayout",
+  "payout": 0,
+  "delayMinutes": 10
+}

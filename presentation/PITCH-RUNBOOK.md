@@ -28,7 +28,7 @@
 > "Don't trust us — try to steal. Edited value: not signed by the Airnode. Another flight: wrong request. Attacker key: rejected. Old answer: stale. Four out of four blocked, by the real bytecode on Base Sepolia. Scan the QR and try it on your phone."
 
 **1:40 — Доказательства и финал**
-> "Eleven real policies, eight already settled by the keeper, 94 contract tests replaying the live policies on their real signatures. No signature — no money moves."
+> "Eleven real policies, nine already settled by the keeper, 96 contract tests replaying the live policies on their real signatures. No signature — no money moves."
 
 ---
 

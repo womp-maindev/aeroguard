@@ -26,7 +26,7 @@ This is the difference between "built an oracle consumer" and "understood insura
 | **When signed data is used** | only at payout | **at both ends**: sale and payout ([purchase-proof tests](../contracts/test/FlightDelayCover.t.sol)) |
 | **Request binding** | a hash computed off-chain and stored | **built on-chain** from the policy's flight and date, and checked byte for byte against a real AirnodeHub capture ([`Fixture_RealAeroDataBoxCapture`](../contracts/test/Fixtures.t.sol)) |
 | **Who triggers the payout** | the user clicks "claim" | **no claim**: an autonomous keeper pays for data over x402, decides when a lookup is worth it, and settles. One signed outcome settles every policy on that flight. This is the track's bonus criterion |
-| **Proof** | a demo video | real policies on real flights, x402 receipts, the tamper test on the deployed contract with real responses, all live policies replayed in Solidity, 94 tests, a rehearsal run by CI on every push ([evidence](EVIDENCE.md)) |
+| **Proof** | a demo video | real policies on real flights, x402 receipts, the tamper test on the deployed contract with real responses, all live policies replayed in Solidity, 96 tests, a rehearsal run by CI on every push ([evidence](EVIDENCE.md)) |
 | **Can the judge check it?** | watches our screen | **attacks it**: real transactions from their own wallet, their own pasted response, an in-browser Inspector, a one-click rehearsal of every outcome |
 | **Business reasoning** | "insurance is a big market" | **measured** cost per policy, $0.07 to $0.18 (2 to 5 % of the premium) ([business case](BUSINESS.md)) |
 | **Honesty** | limits unstated | trust assumptions and [known limitations](../README.md#known-limitations) with production fixes |

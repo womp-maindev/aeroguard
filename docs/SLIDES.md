@@ -173,7 +173,7 @@ AeroDataBox ─▶ AeroDataBox Airnode (API3 AirnodeHub) ── signs every resp
 | AXA fizzy 2017–2019, €5 → €100, shut down | https://www.ledgerinsights.com/axa-blockchain-flight-delay-compensation/ · https://atlas-mag.net/en/articles/blockchain-axa-stops-fizzy-0 |
 | $0.05 per signed lookup, x402 | AirnodeHub listing for AeroDataBox: https://airnodehub.api3.org/llms-full.txt |
 | 309k / 126k gas, $0.18 / $0.07 per policy, 4.6 % / 1.8 % | measured on Base Sepolia; see [docs/BUSINESS.md](BUSINESS.md) (ETH at $3,000 assumed) |
-| 11 live policies, 4/4 forgeries rejected, 94 tests | [docs/EVIDENCE.md](EVIDENCE.md), README tamper table, `forge test` |
+| 11 live policies, 4/4 forgeries rejected, 96 tests | [docs/EVIDENCE.md](EVIDENCE.md), README tamper table, `forge test` |
 | OpenSky on AirnodeHub | AirnodeHub catalogue (slug `opensky`) |
 
 **Before presenting:** update "11 real policies" and slide 5's "no live payout yet" if one of today's flights pays out. A payout would be the strongest number in the deck.

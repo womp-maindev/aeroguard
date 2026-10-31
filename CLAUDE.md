@@ -11,7 +11,7 @@ Read first: `README.md`, `contracts/README.md`, then `docs/STATUS.md` (what is d
 
 ## Commands
 ```bash
-cd contracts && forge test                 # 94 tests (incl. the full live lifecycle of policies #1–#8)
+cd contracts && forge test                 # 96 tests (incl. the full live lifecycle of policies #1–#8 and #10)
 cd keeper && npm i && npx tsc --noEmit -p . && npm test
 anvil --chain-id 84532 & cd keeper && npm run rehearse   # full local run, no funds
 cd keeper && npm run cli -- policies       # needs .env (KEEPER_PK, FLIGHT_COVER_ADDRESS)
