@@ -77,12 +77,29 @@ const AIRNODE = '0x83FE2E8F24E66520B1902C3507De4F471248f2Ec';
 const settledN = D.policies.filter((p) => p.outcome).length;
 const paid = D.policies.filter((p) => p.outcome && /Paid/.test(p.outcome.status));
 
-S.title = { dur: 6, render(t) {
-  $(`<div class="center"><div class="kicker" style="${o(t, 0.2)}">AeroGuard · API3 track</div>
-    <div class="h1" style="${o(t, 0.6)}">Your flight is late.<br>You're already paid.</div>
-    <div class="h2" style="${o(t, 1.3)}">Parametric flight-delay cover that settles itself, on AeroDataBox data<br>signed by its Airnode on API3 AirnodeHub. Nobody files a claim.</div>
-    <div style="${o(t, 2.2)}"><span class="pill">API3 AirnodeHub</span><span class="pill">AeroDataBox Airnode</span><span class="pill">x402 · 0.05 aUSD per call</span><span class="pill">Base Sepolia</span></div></div>`);
+// Title: the site's hero sky (dot grid, drifting planes with dashed trails, soft clouds), smooth for the whole clip.
+const PLANES = [ // [img, top %, width px, start x %, speed %/s, reverse, opacity, tilt deg]
+  ['plane-a', 12, 420, -10, 4.2, false, .55, -4], ['plane-b', 46, 330, 85, 3.4, true, .4, 3], ['plane-b', 78, 280, 20, 5.0, false, .35, -2],
+  ['plane-a', 30, 560, 55, 2.4, false, .25, 2], ['plane-a', 66, 230, 110, 4.6, true, .4, -3],
+];
+const CLOUDS = [[18, 22, 520, 0.9], [72, 16, 640, -0.7], [40, 82, 700, 0.6], [88, 70, 460, -1.1], [6, 60, 380, 1.2]];
+S.title = { dur: 6.5, render(t) {
+  const planes = PLANES.map(([img, y, w, x0, v, rev, op, r]) => {
+    const x = rev ? x0 - v * t : x0 + v * t;
+    const trail = `<div style="position:absolute;top:50%;${rev ? 'left:100%' : 'right:100%'};width:${w * 0.9}px;border-top:3px dashed rgba(125,134,150,.35)"></div>`;
+    return `<div style="position:absolute;left:${x}%;top:${y}%;width:${w}px;opacity:${op};transform:rotate(${r}deg)${rev ? ' scaleX(-1)' : ''}">${trail}<img src="../../web/img/${img}.svg" style="width:100%;display:block"></div>`;
+  }).join('');
+  const clouds = CLOUDS.map(([x, y, w, v]) => `<div style="position:absolute;left:${x + v * t}%;top:${y}%;width:${w}px;height:${w * 0.42}px;margin-left:-${w / 2}px;border-radius:50%;background:radial-gradient(closest-side,rgba(255,255,255,.95),rgba(255,255,255,0));filter:blur(8px)"></div>`).join('');
+  const c = (a) => `opacity:${fade(t, a, 0.8)};transform:translateY(${(1 - ease3(fade(t, a, 0.8))) * 18}px)`;
+  $(`<div style="position:absolute;inset:0;background:#eef0f3"></div>
+    <div style="position:absolute;inset:0;background:radial-gradient(1400px 700px at 70% -10%,#fff 0,rgba(255,255,255,0) 70%),radial-gradient(circle,#cdd2da 1.5px,transparent 2px) 0 0/39px 39px"></div>
+    ${clouds}${planes}
+    <div class="center" style="color:#151b26"><div class="kicker" style="color:#c13d0b;${c(0.6)}">AeroGuard · API3 track</div>
+    <div class="h1" style="${c(1.0)}">Your flight is late.<br><span style="color:#e8521c">You're already paid.</span></div>
+    <div class="h2" style="color:#3c4556;${c(1.7)}">Parametric flight-delay cover that settles itself, on AeroDataBox data<br>signed by its Airnode on API3 AirnodeHub. Nobody files a claim.</div>
+    <div style="${c(2.5)}"><span class="pill" style="color:#3c4556;border-color:#c9ced8;background:rgba(255,255,255,.7)">API3 AirnodeHub</span><span class="pill" style="color:#3c4556;border-color:#c9ced8;background:rgba(255,255,255,.7)">AeroDataBox Airnode</span><span class="pill" style="color:#3c4556;border-color:#c9ced8;background:rgba(255,255,255,.7)">x402 · 0.05 aUSD per call</span><span class="pill" style="color:#3c4556;border-color:#c9ced8;background:rgba(255,255,255,.7)">Base Sepolia</span></div></div>`);
 } };
+const ease3 = (x) => 1 - Math.pow(1 - x, 3);
 
 const STEPS = [
   ['Buy', 'with a fresh <b>signed pre-departure status</b> for the exact flight + date'],
@@ -186,7 +203,7 @@ const FORGE = (() => {
 })();
 S.tests = { dur: FORGE.dur, render(t) {
   terminal(t, 'contracts — forge test', FORGE.items, 20,
-    '<b>86 Foundry tests</b>, incl. the full live lifecycle of policies #1–#4 on real signatures', 'real test run');
+    '<b>94 Foundry tests</b>, incl. the full live lifecycle of policies #1–#8 on real signatures', 'real test run');
 } };
 
 const REH = (() => {
@@ -207,7 +224,7 @@ S.rehearsal = { dur: REH.dur, render(t) {
 
 S.outro = { dur: 7, render(t) {
   $(`<div class="center"><div class="h1" style="font-size:100px;${o(t, 0.2)}">The signed data is the decision.</div>
-    <div class="h2" style="${o(t, 1.1)}">86 tests · 11 live policies on real flights · x402-paid AirnodeHub data · attack it from your own wallet</div>
+    <div class="h2" style="${o(t, 1.1)}">94 tests · 11 live policies on real flights · x402-paid AirnodeHub data · attack it from your own wallet</div>
     <div style="${o(t, 2.0)}"><span class="pill">github.com/womp-maindev/aeroguard</span><span class="pill">contract 0x2570…0a80 · Base Sepolia</span></div></div>`);
 } };
 
