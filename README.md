@@ -75,6 +75,8 @@ Flight delays are common and compensation claims are slow: forms, evidence, week
 ## How it works
 ![AeroGuard architecture: signed status → buyPolicy, signed arrival via x402 → keeper → settle → payout](docs/img/architecture.svg)
 
+The detailed map, with the components, the signed payload, the purchase, settlement and verification flows, the money flows and the trust boundaries, is in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+
 ```
 Traveller / travel app
   │ 1  buy: attach a fresh signed AeroDataBox STATUS response (pre-departure)        → buyPolicy
