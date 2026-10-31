@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-10-31T14:42:09.614Z",
+  "updatedAt": "2026-10-31T17:08:16.212Z",
   "contract": "0x257054204c4Cd43846C4553eBe6D709841980a80",
   "runs": [
     {
@@ -537,6 +537,48 @@
           "msg": "policy #11: EnRoute, 12 min late — not final, next check ≥ 16:20Z"
         }
       ]
+    },
+    {
+      "startedAt": "2026-10-31T17:08:07.905Z",
+      "finishedAt": "2026-10-31T17:08:16.212Z",
+      "event": "workflow_dispatch",
+      "url": "https://github.com/womp-maindev/aeroguard/actions/runs/41223002755",
+      "log": [
+        {
+          "at": "2026-10-31T17:08:07.905Z",
+          "level": "info",
+          "msg": "policy #9: LH1814 2026-10-31 sched 16:35Z, check 1/20"
+        },
+        {
+          "at": "2026-10-31T17:08:09.847Z",
+          "level": "pay",
+          "msg": "bought signed arrival for LH1814 via x402",
+          "link": "https://sepolia.basescan.org/tx/0x8888b2d652b2c8f195d5873697939dade41f408ef40b8991ffe361de48b869e8"
+        },
+        {
+          "at": "2026-10-31T17:08:11.109Z",
+          "level": "chain",
+          "msg": "policy #9 settled ClosedNoPayout: Arrived, 0 min late, payout 0 aUSD",
+          "link": "https://sepolia.basescan.org/tx/0xef605870ea48cc50ab4d2297bff278eece329f87a52acc58434d6c1d6c49a9e4"
+        },
+        {
+          "at": "2026-10-31T17:08:11.110Z",
+          "level": "info",
+          "msg": "policy #11: LH2476 2026-10-31 sched 15:50Z, check 1/20"
+        },
+        {
+          "at": "2026-10-31T17:08:12.445Z",
+          "level": "pay",
+          "msg": "bought signed arrival for LH2476 via x402",
+          "link": "https://sepolia.basescan.org/tx/0x3114354837c48fce277fd767e1fb292d031fa739a58fc48e37ba60acec90b447"
+        },
+        {
+          "at": "2026-10-31T17:08:13.419Z",
+          "level": "chain",
+          "msg": "policy #11 settled ClosedNoPayout: Arrived, 12 min late, payout 0 aUSD",
+          "link": "https://sepolia.basescan.org/tx/0x59b1c5920c38554d23aae8998b415f4c2c429e9cf88aa468fc9da5dc794becf3"
+        }
+      ]
     }
   ],
   "evidence": [
@@ -800,6 +842,40 @@
       "signature": "0xde246356650ebd70d498119b7d38d7a58b52ad084bd15767eaa763d06baf14e638add9ec4607517bf4e20bd27e56a9dfe50fe261e2680520dc916fa0d6a43fcb1b",
       "fetchedAt": 1793457727,
       "paymentTx": "0xe83ca88a58f0fe43815d94b90af2d86f06c71e3a78b0b9c7b813389467d7b1ad"
+    },
+    {
+      "airnode": "0x83FE2E8F24E66520B1902C3507De4F471248f2Ec",
+      "requestHash": "0x09c0ee6e206fb6db34593584506e219cd3151fd393530c54b8fcfd6a11722171",
+      "timestamp": 1793466489,
+      "data": "{\"actual\":\"2026-10-31 16:23Z\",\"scheduled\":\"2026-10-31 16:35Z\",\"status\":\"Arrived\"}",
+      "signature": "0x532415a56a4a0d36863eac929d34d03572c2f61b1277ab20495ec9d9eed18bfe073093048dea5777f9f30c6fc52621ae22e985747c77a310383a357775319bc21c",
+      "fetchedAt": 1793466489,
+      "paymentTx": "0x8888b2d652b2c8f195d5873697939dade41f408ef40b8991ffe361de48b869e8",
+      "policyId": 9,
+      "flight": "LH1814",
+      "date": "2026-10-31",
+      "kind": "arrival",
+      "settleTx": "0xef605870ea48cc50ab4d2297bff278eece329f87a52acc58434d6c1d6c49a9e4",
+      "outcome": "ClosedNoPayout",
+      "payout": 0,
+      "delayMinutes": 0
+    },
+    {
+      "airnode": "0x83FE2E8F24E66520B1902C3507De4F471248f2Ec",
+      "requestHash": "0xc6ea3130c5520cab40c196d3f1b36e2039f69edb139aa2bd57226998816114b6",
+      "timestamp": 1793466491,
+      "data": "{\"actual\":\"2026-10-31 16:02Z\",\"scheduled\":\"2026-10-31 15:50Z\",\"status\":\"Arrived\"}",
+      "signature": "0x608bf838719066f42230804cce27c212c209042da558adcf5577a27073b8cfd415b036f143dd84c17fa52f599d025530fd58b59e0c8f3dd26227d609e6ffe1291c",
+      "fetchedAt": 1793466492,
+      "paymentTx": "0x3114354837c48fce277fd767e1fb292d031fa739a58fc48e37ba60acec90b447",
+      "policyId": 11,
+      "flight": "LH2476",
+      "date": "2026-10-31",
+      "kind": "arrival",
+      "settleTx": "0x59b1c5920c38554d23aae8998b415f4c2c429e9cf88aa468fc9da5dc794becf3",
+      "outcome": "ClosedNoPayout",
+      "payout": 0,
+      "delayMinutes": 12
     }
   ]
 }
