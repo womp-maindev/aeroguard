@@ -4,7 +4,7 @@ Agents pay per request on Cardano for flight outcomes any contract can verify.
 
 ![Agent pays over x402 on Cardano preprod; the server returns an Airnode-signed verdict that the Aiken cover and FlightDelayCover both verify](docs/architecture.svg)
 
-**Video:** [`video/aeroguard-cardano-full.mp4`](video/aeroguard-cardano-full.mp4) (1:57, no sound) and ten separate clips, see [`video/SHOTLIST.md`](video/SHOTLIST.md). **All changes:** [`CHANGELOG.md`](CHANGELOG.md).
+**Video:** [`video/aeroguard-cardano-full.mp4`](video/aeroguard-cardano-full.mp4) (1:57, no sound) and ten separate clips, see [`video/SHOTLIST.md`](video/SHOTLIST.md). **All changes:** [`CHANGELOG.md`](CHANGELOG.md). **Slides for the pitch:** [`../presentation/cardano/`](../presentation/cardano/).
 
 **For judges (3 min, no funds, no keys):**
 
