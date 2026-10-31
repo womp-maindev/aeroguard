@@ -1,0 +1,216 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>AeroGuard API3 clips</title>
+<style>
+@font-face { font-family: Jost; src: url(../../web/fonts/Jost-normal.woff2); }
+@font-face { font-family: KellySlab; src: url(../../web/fonts/KellySlab-normal.woff2); }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 1920px; height: 1080px; overflow: hidden; background: #0b1020; color: #e6edf7; font-family: Jost, sans-serif; }
+#stage { position: absolute; inset: 0; background: radial-gradient(1200px 700px at 20% 10%, #16234a 0%, #0b1020 60%); }
+.mono { font-family: 'DejaVu Sans Mono', monospace; }
+.center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+.kicker { font-size: 30px; letter-spacing: 6px; text-transform: uppercase; color: #7fb3ff; }
+.h1 { font-family: KellySlab, serif; font-size: 112px; line-height: 1.05; margin: 18px 0; }
+.h2 { font-size: 46px; color: #c9d6ea; max-width: 1500px; line-height: 1.3; }
+.pill { display: inline-block; margin: 36px 10px 0; padding: 12px 26px; border-radius: 999px; border: 2px solid #2d3d66; font-size: 30px; color: #a9bbd9; }
+.cap { position: absolute; left: 80px; right: 80px; bottom: 56px; display: flex; justify-content: space-between; align-items: center; font-size: 30px; color: #a9bbd9; }
+.cap b { color: #e6edf7; font-weight: 600; }
+.tag { padding: 8px 18px; border-radius: 10px; background: #13213f; border: 1px solid #2d3d66; font-size: 26px; }
+.term { position: absolute; left: 80px; right: 80px; top: 70px; bottom: 140px; background: #0d1117; border-radius: 18px; border: 1px solid #263354; box-shadow: 0 30px 80px rgba(0,0,0,.5); overflow: hidden; }
+.bar { height: 54px; background: #161b27; display: flex; align-items: center; padding: 0 22px; gap: 12px; font-size: 24px; color: #8b98b1; }
+.dot { width: 16px; height: 16px; border-radius: 50%; }
+.screen { position: absolute; top: 54px; left: 0; right: 0; bottom: 0; padding: 24px 32px; font-family: 'DejaVu Sans Mono', monospace; font-size: 26px; line-height: 1.5; white-space: pre-wrap; word-break: break-all; }
+.prompt { color: #7ee787; } .cmd { color: #e6edf7; } .dim { color: #7d8aa3; } .ok { color: #3fb950; } .warn { color: #d29922; }
+.hl { color: #ffd166; } .blue { color: #79c0ff; } .pink { color: #ff7ab6; } .bold { font-weight: bold; }
+.cursor { display: inline-block; width: 14px; height: 30px; background: #e6edf7; vertical-align: -6px; }
+.card { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 1500px; background: #0f1830; border: 1px solid #2d3d66; border-radius: 28px; padding: 60px 70px; box-shadow: 0 30px 80px rgba(0,0,0,.5); }
+.row { display: grid; grid-template-columns: 220px 1fr; gap: 20px; font-size: 34px; margin: 18px 0; align-items: baseline; }
+.row .k { color: #7fb3ff; font-size: 26px; text-transform: uppercase; letter-spacing: 3px; }
+table { width: 1640px; border-collapse: collapse; font-size: 30px; position: absolute; left: 140px; top: 270px; }
+th { text-align: left; color: #7fb3ff; font-size: 24px; letter-spacing: 3px; text-transform: uppercase; padding: 0 18px 18px; border-bottom: 2px solid #2d3d66; }
+td { padding: 22px 18px; border-bottom: 1px solid #1e2a49; }
+.title-top { position: absolute; left: 140px; top: 90px; font-family: KellySlab, serif; font-size: 64px; }
+.sub-top { position: absolute; left: 140px; top: 180px; font-size: 32px; color: #a9bbd9; }
+.arch { position: absolute; left: 120px; top: 90px; width: 1680px; }
+.box { position: absolute; border: 6px solid #ffd166; border-radius: 22px; box-shadow: 0 0 0 9999px rgba(11,16,32,.55); transition: none; }
+.json .k { color: #79c0ff; } .json .s { color: #a5d6ff; } .json .n { color: #ffa657; }
+</style></head>
+<body><div id="stage"></div>
+<script src="data.js"></script>
+<script>
+const $ = (h) => { document.getElementById('stage').innerHTML = h; };
+const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+const fade = (t, a, d = 0.5) => clamp((t - a) / d);
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const D = window.D;
+
+// --------------------------------------------------------------- terminal replay
+// items: {at, cmd} typed at CPS, or {at, out, cls}; returns visible lines (scrolls when full)
+const CPS = 32;
+function terminal(t, title, items, maxLines, caption, tag) {
+  const lines = [];
+  let typing = false;
+  for (const it of items) {
+    if (t < it.at) break;
+    if (it.cmd !== undefined) {
+      const n = Math.floor((t - it.at) * CPS);
+      const done = n >= it.cmd.length;
+      typing = !done;
+      lines.push(`<span class="prompt">❯ </span><span class="cmd">${esc(it.cmd.slice(0, n))}</span>${done ? '' : '<span class="cursor"></span>'}`);
+    } else lines.push(it.html ?? `<span class="${it.cls || ''}">${esc(it.out)}</span>`);
+  }
+  const blink = Math.floor(t * 2) % 2 === 0;
+  if (!typing) lines.push(`<span class="prompt">❯ </span>${blink ? '<span class="cursor"></span>' : ''}`);
+  // Items may span several lines: scroll by rendered lines, not by items.
+  const shown = lines.join('\n').split('\n').slice(-maxLines);
+  $(`<div class="term"><div class="bar"><span class="dot" style="background:#ff5f57"></span><span class="dot" style="background:#febc2e"></span><span class="dot" style="background:#28c840"></span><span style="margin-left:18px">${esc(title)}</span></div>
+     <div class="screen">${shown.join('\n')}</div></div>
+     <div class="cap"><span>${caption}</span><span class="tag">${tag}</span></div>`);
+}
+
+// --------------------------------------------------------------- scenes
+const S = {};
+const o = (t, a, d = 0.6) => `opacity:${fade(t, a, d)};transform:translateY(${(1 - fade(t, a, d)) * 20}px)`;
+const short = (h, n = 10) => h ? h.slice(0, n) + '…' : '';
+const AIRNODE = '0x83FE2E8F24E66520B1902C3507De4F471248f2Ec';
+const settledN = D.policies.filter((p) => p.outcome).length;
+const paid = D.policies.filter((p) => p.outcome && /Paid/.test(p.outcome.status));
+
+S.title = { dur: 6, render(t) {
+  $(`<div class="center"><div class="kicker" style="${o(t, 0.2)}">AeroGuard · API3 track</div>
+    <div class="h1" style="${o(t, 0.6)}">Your flight is late.<br>You're already paid.</div>
+    <div class="h2" style="${o(t, 1.3)}">Parametric flight-delay cover that settles itself, on AeroDataBox data<br>signed by its Airnode on API3 AirnodeHub. Nobody files a claim.</div>
+    <div style="${o(t, 2.2)}"><span class="pill">API3 AirnodeHub</span><span class="pill">AeroDataBox Airnode</span><span class="pill">x402 · 0.05 aUSD per call</span><span class="pill">Base Sepolia</span></div></div>`);
+} };
+
+const STEPS = [
+  ['Buy', 'with a fresh <b>signed pre-departure status</b> for the exact flight + date'],
+  ['Wait', 'the keeper decides <b>when</b> a lookup is worth paying for'],
+  ['Pay', 'it buys the <b>signed arrival</b> over <b>x402</b> — 0.05 aUSD'],
+  ['Verify', 'the contract checks <b>signer · request hash · age · final status</b>'],
+  ['Settle', 'payout from signed fields only, <b>always to the stored holder</b>'],
+];
+S.flow = { dur: 14, render(t) {
+  const cur = Math.min(4, Math.floor(clamp((t - 1) / 2.4, 0, 4.99)));
+  const cards = STEPS.map((s, i) => `<div style="opacity:${fade(t, 0.4 + i * 0.25)};flex:1;background:${i === cur && t > 1 ? "#1a2a52" : "#0f1830"};border:1px solid ${i === cur && t > 1 ? "#ffd166" : "#2d3d66"};box-shadow:${i === cur && t > 1 ? "0 0 0 3px #ffd166" : "none"};border-radius:22px;padding:30px 26px;min-height:300px">
+     <div class="kicker" style="font-size:22px">${i + 1} · ${s[0]}</div><div style="font-size:30px;margin-top:16px;line-height:1.35">${s[1]}</div></div>`).join('<div style="align-self:center;font-size:48px;color:#ffd166">→</div>');
+  $(`<div class="title-top" style="opacity:${fade(t, 0.1)}">The signed data is the decision</div>
+    <div class="sub-top" style="opacity:${fade(t, 0.4)}">FlightDelayCover.sol trusts exactly one key: the AeroDataBox Airnode <span class="mono hl">0x83FE…F2Ec</span></div>
+    <div style="position:absolute;left:100px;right:100px;top:360px;display:flex;gap:18px">${cards}</div>
+    <div class="cap"><span style="opacity:${fade(t, 12)}">Anyone can run the keeper: <b>settle</b> gives the caller no power.</span><span class="tag">how it works</span></div>`);
+} };
+
+function jsonHtml(o2, hl = []) {
+  return '{\n' + Object.entries(o2).map(([k, v]) => {
+    const val = typeof v === 'string' ? `<span class="s">"${esc(v.length > 74 ? v.slice(0, 70) + '…' : v)}"</span>` : `<span class="n">${esc(v)}</span>`;
+    return `  <span class="k">"${k}"</span>: ${hl.includes(k) ? `<span style="background:#3a2f0b">${val}</span>` : val}`;
+  }).join(',\n') + '\n}';
+}
+S.buy = { dur: 13, render(t) {
+  const p = D.proof;
+  const body = { airnode: p.airnode, requestHash: p.requestHash, timestamp: p.timestamp, data: p.data, signature: p.signature, paymentTx: p.paymentTx };
+  const phase = t < 3 ? 0 : t < 5.5 ? 1 : t < 8 ? 2 : t < 10.5 ? 3 : 4;
+  const hl = [[], ['airnode', 'signature'], ['requestHash'], ['timestamp'], ['data']][phase];
+  const cap = ['<b>Policy #1, IB1314 MUC → MAD</b> — bought with this signed AeroDataBox status',
+    '<b>Signer</b>: the EIP-191 signature must recover to the AeroDataBox Airnode',
+    '<b>Request</b>: the contract rebuilds AirnodeHub\'s request hash from the policy\'s flight + date',
+    '<b>Fresh</b>: signed ≤ 15 min before purchase (16:41:56 UTC, 30 Oct)',
+    '<b>Pre-departure</b>: status <b>Expected</b>; the scheduled arrival is read from the signature'][phase];
+  $(`<div class="term" style="opacity:${fade(t, 0, 0.4)}"><div class="bar"><span class="dot" style="background:#ff5f57"></span><span class="dot" style="background:#febc2e"></span><span class="dot" style="background:#28c840"></span><span style="margin-left:18px">IB1314-status-proof.json · AirnodeHub flightStatusOnDate · paid over x402</span></div>
+     <div class="screen json" style="font-size:27px;line-height:1.6;padding-top:60px">${jsonHtml(body, hl)}</div></div>
+     <div class="cap"><span>${cap}</span><span class="tag">real signed response</span></div>`);
+} };
+
+const KEEP = (() => {
+  const items = [{ at: 0.4, cmd: 'npm run keeper   # GitHub Actions · keeper.yml' }];
+  let at = 1.4;
+  const runs = D.keeper.slice(-4);
+  for (const r of runs) {
+    items.push({ at, html: `\n<span class="blue">── ${esc(r.run)} ──</span>` }); at += 0.5;
+    for (const l of r.lines) {
+      const settled = /settled|expired/.test(l.msg);
+      const cls = settled ? (/Paid/.test(l.msg) ? 'ok bold' : 'hl') : /bought/.test(l.msg) ? 'pink' : '';
+      items.push({ at, html: `<span class="dim">[${l.at}]</span> <span class="${cls}">${esc(l.msg)}</span>${l.tx ? ` <span class="dim">tx ${short(l.tx, 12)}</span>` : ''}` });
+      at += settled ? 0.7 : 0.45;
+    }
+    at += 0.4;
+  }
+  return { items, dur: Math.max(14, at + 3) };
+})();
+S.keeper = { dur: KEEP.dur, render(t) {
+  terminal(t, 'keeper — the published log (keeper-data/keeper.json)', KEEP.items, 19,
+    '<b>The keeper</b> pays for the signed arrival over x402, simulates <b>settle</b>, then sends it', 'real runs');
+} };
+
+S.ledger = { dur: 12, render(t) {
+  const row = (p, i) => {
+    const oc = p.outcome;
+    const st = !oc ? '<span class="dim">Active · settles today</span>'
+      : /Paid/.test(oc.status) ? `<span class="ok bold">${oc.status}</span>` : `<span class="hl">${oc.status}</span>`;
+    return `<tr style="opacity:${fade(t, 0.8 + i * 0.25, 0.4)}"><td style="padding:9px 16px"><b>#${p.id} ${p.flight}</b> <span class="dim" style="font-size:22px">${p.route}</span></td>
+      <td style="padding:9px 16px">${p.date.slice(5)} · ${p.sched}</td><td style="padding:9px 16px">${st}</td>
+      <td style="padding:9px 16px;font-size:22px" class="dim">${oc ? esc(oc.detail) : ''}</td><td style="padding:9px 16px" class="mono dim">${oc && oc.link ? short(oc.link.split('/tx/')[1], 12) : ''}</td></tr>`;
+  };
+  $(`<div class="title-top" style="opacity:${fade(t, 0.1)}">11 real policies on Base Sepolia</div>
+    <div class="sub-top" style="opacity:${fade(t, 0.4)}">Each bought with a real signed proof · ${settledN} settled by the keeper on the Airnode's signed arrival</div>
+    <table style="top:250px;font-size:27px"><tr style="opacity:${fade(t, 0.6)}"><th>Policy</th><th>Sched. arrival</th><th>On-chain</th><th>Signed outcome</th><th>Settle tx</th></tr>${D.policies.map(row).join('')}</table>
+    <div class="cap"><span style="opacity:${fade(t, 4.5)}">${paid.length ? `<b>${paid.length} paid out on-chain</b> — a real delay, signed by the Airnode` : '<b>Pays only on a signed delay ≥ 2 h or a cancellation</b>: 50 % from 120 min, 100 % from 180 min'}</span><span class="tag">contract 0x2570…0a80</span></div>`);
+} };
+
+const ATT = [
+  ['A real response, one value edited', 'NotSignedByAirnode', 'the signature no longer recovers to the Airnode'],
+  ['A real response for another flight', 'WrongRequest', 'request hash ≠ this policy\'s flight + date'],
+  ['Signed by an attacker\'s key', 'NotSignedByAirnode(attacker)', 'only one signer is trusted'],
+  ['A genuine but hour-old response', 'Stale(1793378516)', 'older than the policy\'s 1 h maxAge'],
+  ['Genuine, fresh, not final yet', 'NotFinal(Expected)', 'no payout before the flight is over'],
+];
+S.tamper = { dur: 12, render(t) {
+  const rows = ATT.map((a, i) => `<tr style="opacity:${fade(t, 1 + i * 0.9, 0.4)}"><td>${a[0]}</td><td><span class="ok">✔ rejected</span> <span class="mono pink" style="font-size:26px">${a[1]}</span></td><td class="dim" style="font-size:26px">${a[2]}</td></tr>`).join('');
+  $(`<div class="title-top" style="opacity:${fade(t, 0.1)}">Try to cheat the deployed contract</div>
+    <div class="sub-top" style="opacity:${fade(t, 0.4)}">Policy #1, starting from its real AirnodeHub-signed response — answers from the live contract on Base Sepolia</div>
+    <table><tr style="opacity:${fade(t, 0.7)}"><th>Attack</th><th>Live answer</th><th>Why</th></tr>${rows}</table>
+    <div class="cap"><span style="opacity:${fade(t, 6.5)}">Judges can send these <b>from their own wallet</b>: each is a failed tx on Basescan, the policy stays Active</span><span class="tag">live results</span></div>`);
+} };
+
+const FORGE = (() => {
+  const items = [{ at: 0.4, cmd: 'cd contracts && forge test' }, { at: 1.3, out: 'Compiler run successful!\n', cls: 'dim' }];
+  let at = 1.8;
+  for (const f of D.forge) {
+    if (f.k === 'suite') { items.push({ at, html: `\n<span class="${/LiveReplay/.test(f.s) ? 'hl' : 'blue'}">${esc(f.s)}${/LiveReplay/.test(f.s) ? '   ← policies #1–#4 replayed on their real Airnode signatures' : /Hardening/.test(f.s) ? '   ← edge cases pinned without a redeploy' : ''}</span>` }); at += 0.35; }
+    else if (f.k === 'pass') { items.push({ at, html: `<span class="ok bold">[PASS]</span> ${esc(f.s)}` }); at += 0.17; }
+    else if (f.k === 'res') { items.push({ at, html: `<span class="dim">${esc(f.s)}</span>` }); at += 0.3; }
+    else { items.push({ at: at + 0.3, html: `\n<span class="ok bold">${esc(f.s)}</span>` }); at += 0.3; }
+  }
+  return { items, dur: at + 3.5 };
+})();
+S.tests = { dur: FORGE.dur, render(t) {
+  terminal(t, 'contracts — forge test', FORGE.items, 20,
+    '<b>86 Foundry tests</b>, incl. the full live lifecycle of policies #1–#4 on real signatures', 'real test run');
+} };
+
+const REH = (() => {
+  const items = [{ at: 0.4, cmd: 'anvil --chain-id 84532 & npm run rehearse' }];
+  let at = 1.4;
+  for (const l of D.rehearse) {
+    const cls = /REHEARSAL OK/.test(l) ? 'ok bold' : /PaidFull|PaidHalf/.test(l) ? 'ok' : /tamper|rejected/.test(l) ? 'pink' : /ClosedNoPayout|expired/.test(l) ? 'hl' : 'dim';
+    items.push({ at, html: `<span class="${cls}">${esc(l.length > 118 ? l.slice(0, 115) + '…' : l)}</span>` });
+    at += /settled|tamper|REHEARSAL/.test(l) ? 0.45 : 0.16;
+  }
+  return { items, dur: at + 3 };
+})();
+S.rehearsal = { dur: REH.dur, render(t) {
+  const cap = t < REH.dur * 0.45 ? '<b>Every payout rule</b>, on a local chain with a test signer and a fast clock'
+    : '195 min late → <b>100 %</b> · 135 min → <b>50 %</b> · 10 min → 0 · cancelled → <b>100 %</b>';
+  terminal(t, 'keeper — npm run rehearse (local, no funds)', REH.items, 21, cap, 'real run · anvil');
+} };
+
+S.outro = { dur: 7, render(t) {
+  $(`<div class="center"><div class="h1" style="font-size:100px;${o(t, 0.2)}">The signed data is the decision.</div>
+    <div class="h2" style="${o(t, 1.1)}">86 tests · 11 live policies on real flights · x402-paid AirnodeHub data · attack it from your own wallet</div>
+    <div style="${o(t, 2.0)}"><span class="pill">github.com/womp-maindev/aeroguard</span><span class="pill">contract 0x2570…0a80 · Base Sepolia</span></div></div>`);
+} };
+
+const clip = new URLSearchParams(location.search).get('clip');
+window.DUR = S[clip].dur;
+window.seek = (t) => S[clip].render(t);
+seek(0);
+</script></body></html>

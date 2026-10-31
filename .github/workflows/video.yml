@@ -1,0 +1,58 @@
+name: Render API3 video
+
+# Re-renders video/ (the API3-track clips + aeroguard-api3-full.mp4) from real data only:
+# a fresh `forge test`, a fresh anvil rehearsal, the keeper's published log (keeper-data) and the LIVE dashboard
+# reading Base Sepolia with eth_calls. No keys, no AeroDataBox calls. Commits the clips to main.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: video
+  cancel-in-progress: false
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          submodules: recursive
+          fetch-depth: 0
+      - uses: foundry-rs/foundry-toolchain@v1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: keeper/package-lock.json
+      - name: Real test run + real rehearsal (outputs go into the video)
+        run: |
+          (cd contracts && forge test) > video/src/forge-test.txt 2>&1
+          tail -1 video/src/forge-test.txt
+          cd keeper && npm ci --silent
+          anvil --chain-id 84532 > /dev/null 2>&1 &
+          sleep 2
+          npm run rehearse > ../video/src/rehearse.txt 2>&1
+          tail -1 ../video/src/rehearse.txt
+      - name: Keeper log
+        run: git fetch -q origin keeper-data && git show origin/keeper-data:keeper.json > video/src/keeper.json
+      - name: Playwright + ffmpeg
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg fonts-dejavu-core > /dev/null
+          cd video/src && npm init -y > /dev/null && npm i --silent playwright@1.48.2 && npx playwright install --with-deps chromium > /dev/null
+      - name: Render (live dashboard included)
+        run: LIVE=1 sh video/src/render.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: aeroguard-api3-video
+          path: video/*.mp4
+      - name: Commit to main
+        run: |
+          git config user.name womp-maindev && git config user.email 226526968+womp-maindev@users.noreply.github.com
+          git add video/*.mp4 video/src/forge-test.txt video/src/rehearse.txt
+          git commit -qm "video: re-rendered API3 clips from live data ($(date -u +%H:%MZ))" || exit 0
+          for i in 1 2 3; do git pull -q --rebase origin main && git push -q origin HEAD:main && break; sleep 5; done

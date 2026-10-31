@@ -1,0 +1,34 @@
+
+> rehearse
+> node src/rehearse.ts
+
+deployed MockUSD 0x5fbdb2315678afecb367f032d93f642f64180aa3 cover 0xe7f1725e7734ce288f8367e1bb143e90bb3f0512
+scenario day 2026-11-01 (2026-10-31 is already past on this chain)
+[08:30:35] chain policy #1 for LH1234 2026-11-01 (sched 2026-11-01 14:05Z) local tx 0xcab49dac1c0332d78cd195df272e493ff42b5cdef8a65ebdab0960e3e6c18f40
+bought LH1234 policy 1n scheduled 2026-11-01 14:05Z
+[08:30:35] chain policy #2 for LH2002 2026-11-01 (sched 2026-11-01 09:30Z) local tx 0x5a4779982a8708242d65688b4fcccc727f09d0e2cbec8c07667217452927886a
+bought LH2002 policy 2n scheduled 2026-11-01 09:30Z
+[08:30:35] chain policy #3 for BA117 2026-11-01 (sched 2026-11-01 12:00Z) local tx 0x1f864b65100850cbc461fb9c74cc0ce294207fa5f4a8be331933e6cf4cdf14db
+bought BA117 policy 3n scheduled 2026-11-01 12:00Z
+[08:30:35] chain policy #4 for KL1395 2026-11-01 (sched 2026-11-01 18:00Z) local tx 0x38035dc456c252cbf21d32ed5bad61eed1cad28a954bc9bc0977e854393c7235
+bought KL1395 policy 4n scheduled 2026-11-01 18:00Z
+[08:30:35] chain policy #5 for LH1234 2026-11-01 (sched 2026-11-01 14:05Z) local tx 0x422d3febe9fb9a40446879bc97fee8d05d600bac101b11d2ed4990404f89d6ab
+bought LH1234 policy 5n scheduled 2026-11-01 14:05Z
+bought private policy 6n
+late purchase rejected: LH1234 is Arrived; cover can only be bought before departure (the contract checks the sign
+tamper edit        {"accepted":false,"reason":"NotSignedByAirnode(0xbCD8A5835f6f2e8C3897E1B7b56C6E7Cb1963776)"}
+tamper wrongreq    {"accepted":false,"reason":"WrongRequest(0x7a8bc8b217e3ecd6e219b770b019015fa1e4990a4f64884d4e948719d8745ea2)"}
+tamper wrongsigner {"accepted":false,"reason":"NotSignedByAirnode(0xA017b0F114Af551e34ac80a000cF939FA367E34C)"}
+tamper stale       {"accepted":false,"reason":"Stale(1793563230)"}
+tamper valid       {"accepted":true,"txHash":"0x030fb6cc4989fde600a0f600c136c16d298d359dc07b7832348c955995803dda","payout":"2000000","status":"PaidFull","delayMinutes":"195","link":"local tx 0x030fb6cc4989fde600a0f600c136c16d298d359dc07b7832348c955995803dda"}
+[08:30:35] info  policy #1: LH1234 2026-11-01 sched 14:05Z, check 1/20
+[08:30:35] chain policy #1 settled PaidFull: Arrived, 195 min late, payout 2 aUSD local tx 0x16d250aa299605bd4d89a08c62e3afa154dabbb8392f238decbb2a84dfbd72d9
+[08:30:35] info  policy #2: LH2002 2026-11-01 sched 09:30Z, check 1/20
+[08:30:35] chain policy #2 settled PaidHalf: Arrived, 135 min late, payout 1 aUSD local tx 0x2a584e6c38e4fac4ddb4ae9c7dc773c3de97787ffb75ebd44aad15764e0e136b
+[08:30:35] info  policy #3: BA117 2026-11-01 sched 12:00Z, check 1/20
+[08:30:35] chain policy #3 settled ClosedNoPayout: Arrived, 10 min late, payout 0 aUSD local tx 0x5306c457b21a6928ed477ef4bc3bab36933af46f2da271c91fb97bf6b38f4720
+[08:30:35] info  policy #4: KL1395 2026-11-01 sched 18:00Z, check 1/20
+[08:30:35] chain policy #4 settled PaidFull: cancelled, payout 2 aUSD local tx 0xd78dc0b077c6214498d49a49b36af08d8203004b1c01ffa553f740227ba63070
+holder balance 7 aUSD
+[08:30:35] chain policy #6 expired after the settlement window, coverage released local tx 0xbd1dd81ffeac54d5c8b0db9db1ef38b0140f3d4e5efa8467b0f10ad9a4607585
+REHEARSAL OK: 4 forgeries rejected, 5 policies settled as expected, private policy untouched then expired
