@@ -1,5 +1,7 @@
 # AeroGuard — stage runbook (15:00)
 
+🎤 **Full 3-min speech: [`PITCH-3MIN.md`](PITCH-3MIN.md)** (this page is the 2-min version and the stage checklist).
+
 Говоришь по-английски (текст ниже), русский — подсказка, что имеешь в виду. Каждый блок ≈ 20–30 с.
 
 ## До выхода (14:30–14:55)
