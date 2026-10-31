@@ -169,4 +169,22 @@ contract LiveReplayTest is FixtureLoader {
     function test_Live_LH1868_SettlesLikeOnChain() public {
         _settles("LH1868");
     }
+
+    // ------------------------------------------------------------------ policy #9, LH1814 MUC→BCN (31 Oct)
+    function test_Live_LH1814_BoughtWithRealSignedProof() public {
+        _bought("LH1814");
+    }
+
+    function test_Live_LH1814_SettlesLikeOnChain() public {
+        _settles("LH1814");
+    }
+
+    // ------------------------------------------------------------------ policy #11, LH2476 MUC→LHR (31 Oct)
+    function test_Live_LH2476_BoughtWithRealSignedProof() public {
+        _bought("LH2476");
+    }
+
+    function test_Live_LH2476_SettlesLikeOnChain() public {
+        _settles("LH2476");
+    }
 }

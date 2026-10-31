@@ -1,0 +1,12 @@
+{
+  "_note": "REAL: AeroDataBox Airnode status response that bought this policy on Base Sepolia, read back from its buyPolicy calldata (tx 0xd6c0b35d0fa11f9bc84b7f0cb5b333836a5c9c100355bfe5a08cb9ed892b6130) with `keeper cli proof` (workflow proofs.yml, run 41223005933)",
+  "flight": "LH1814",
+  "date": "2026-10-31",
+  "kind": "status",
+  "airnode": "0x83FE2E8F24E66520B1902C3507De4F471248f2Ec",
+  "requestHash": "0x7118390a654cf0c1bef2f640a9c568f7b83aa05abb964b7b3ed81e88e9dbf4ba",
+  "timestamp": 1793403503,
+  "data": "{\"scheduled\":\"2026-10-31 16:35Z\",\"status\":\"Expected\"}",
+  "signature": "0x3cbf37244fcc99c9716d9aa18c51847bac0925694f43b2fe5927d32cf3c1f4957eb2211944e1a3c887508ef788e0e464c26c8d8f700e2e5592408af3da25fefa1b",
+  "purchaseTx": "0xd6c0b35d0fa11f9bc84b7f0cb5b333836a5c9c100355bfe5a08cb9ed892b6130"
+}

@@ -117,7 +117,7 @@ Dashboard ── eth_call settle() with a forgery ─▶ deployed contract ─�
              on Basescan; or the judge's own pasted response
           ── Inspector: recovers the signer and recomputes the request hash, in the browser
 CLI       ── npm run tamper · npm run cli -- proof <buy tx> (the purchase proof, from calldata)
-Foundry   ── 96 tests: tamper cases, boundaries, a real capture, all live policies replayed
+Foundry   ── 100 tests: tamper cases, boundaries, a real capture, all live policies replayed
 Rehearsal ── the same contract and keeper on a local anvil, with a test signer and a fast clock
 ```
 

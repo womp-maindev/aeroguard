@@ -21,7 +21,7 @@ Parametric flight-delay cover that settles itself. A smart contract pays out **o
 | Contract deployed on Base Sepolia, source verified | [`0x2570…0a80` on Basescan](https://sepolia.basescan.org/address/0x257054204c4Cd43846C4553eBe6D709841980a80) |
 | The keeper pays for signed AeroDataBox data over x402 (0.05 aUSD per call) | [payment tx 0x76d334da…](https://sepolia.basescan.org/tx/0x76d334da55c86bbf61d37762f8ee843f4920bc874477a82d06852247b4e2054f) |
 | Cover can only be bought with a fresh signed pre-departure status | [policy #1 purchase tx](https://sepolia.basescan.org/tx/0xbfd3ae73074ff63a3ef5f7e56b211d1ffb7223e2db944d0cc38ed069d1958b8d), with [its signed proof](keeper/fixtures/IB1314-status-proof.json) paid in [tx 0x544a7241…](https://sepolia.basescan.org/tx/0x544a72416958438be7181af6dc96111ea7d0e6544d63e7ac869faac28671dad2) |
-| 11 real policies: #1–#8 and #10 settled by the keeper (30–31 Oct, all < 2 h late → no payout), #11 and #9 settle after judging (see [EVIDENCE](docs/EVIDENCE.md)) | [#1](https://sepolia.basescan.org/tx/0xbfd3ae73074ff63a3ef5f7e56b211d1ffb7223e2db944d0cc38ed069d1958b8d) · [#2](https://sepolia.basescan.org/tx/0x7e71c55b970b96fb1588ddde1da029060d805c9b87691280ca2504098d4e69d2) · [#3](https://sepolia.basescan.org/tx/0x2aeed6010ced165f66c26ea0f34e7068421a327cac0c6375d72ef7b794f41672) · [#4](https://sepolia.basescan.org/tx/0x7e675d8f94946db1d02a40c1eff87ac5a0ca29b65730751cf0d902d767d2b0d1) |
+| 11 real policies: all 11 settled by the keeper (30–31 Oct, all < 2 h late → no payout) (see [EVIDENCE](docs/EVIDENCE.md)) | [#1](https://sepolia.basescan.org/tx/0xbfd3ae73074ff63a3ef5f7e56b211d1ffb7223e2db944d0cc38ed069d1958b8d) · [#2](https://sepolia.basescan.org/tx/0x7e71c55b970b96fb1588ddde1da029060d805c9b87691280ca2504098d4e69d2) · [#3](https://sepolia.basescan.org/tx/0x2aeed6010ced165f66c26ea0f34e7068421a327cac0c6375d72ef7b794f41672) · [#4](https://sepolia.basescan.org/tx/0x7e675d8f94946db1d02a40c1eff87ac5a0ca29b65730751cf0d902d767d2b0d1) |
 | Nobody files a claim: a keeper buys the outcome and settles them | [keeper runs in GitHub Actions](https://github.com/womp-maindev/aeroguard/actions/workflows/keeper.yml) · settlement txs: see [Live evidence](#live-evidence-base-sepolia-real-aerodatabox-data) |
 
 **2 · Why the oracle data is load-bearing (60 s).** The contract decides the payout from signed fields only, so each forgery has its own revert. All of these are Foundry tests:
@@ -34,14 +34,14 @@ Parametric flight-delay cover that settles itself. A smart contract pays out **o
 | signed by any other key | `NotSignedByAirnode` | [`Tamper4_RejectUnexpectedSigner`](contracts/test/FlightDelayCover.t.sol#L162) |
 | cover bought for a flight already delayed / landed | `NotBuyable` | [`Buy_RejectOutcomeAlreadyKnown`](contracts/test/FlightDelayCover.t.sol#L287) |
 | on-chain request hash ≠ AirnodeHub's | — | [`RequestHashMatchesAirnodeHubScheme`](contracts/test/FlightDelayCover.t.sol#L82) · [`Fixture_RealAeroDataBoxCapture`](contracts/test/Fixtures.t.sol#L111) (real Airnode signature) |
-| policies #1–#8 and #10 replayed on their **real** Airnode signatures (real `buyPolicy` + `settle`, no test signer; proofs read back from the purchase calldata) | `NotFinal(Expected)`, `Stale(1793378516)` as on-chain | [`LiveReplay.t.sol`](contracts/test/LiveReplay.t.sol) |
+| all 11 live policies replayed on their **real** Airnode signatures (real `buyPolicy` + `settle`, no test signer; proofs read back from the purchase calldata) | `NotFinal(Expected)`, `Stale(1793378516)` as on-chain | [`LiveReplay.t.sol`](contracts/test/LiveReplay.t.sol) |
 
 The same forgeries were also run against the **deployed** contract with a real Airnode response: see the [tamper table](#tamper-test-for-judges).
 
 **3 · Run it yourself (90 s, no keys, no funds).**
 ```bash
 git clone --recurse-submodules https://github.com/womp-maindev/aeroguard && cd aeroguard
-cd contracts && forge test                       # 96 tests, incl. policies #1–#8 and #10 replayed, purchase to settlement, on their real Airnode signatures
+cd contracts && forge test                       # 100 tests, incl. all 11 live policies replayed, purchase to settlement, on their real Airnode signatures
 cd ../keeper && npm ci && npm test
 anvil --chain-id 84532 & npm run rehearse        # local deploy, 5 signed purchases, 4 attacks + valid, keeper settles all
 ```
@@ -82,6 +82,8 @@ Pitch day: policies #5–#11 on Saturday flights (LH1866, LH2472, EI352, LH1810 
 | **Settled by the keeper (31 Oct):** #5 LH1866 landed 10:18Z, 2 min early → `ClosedNoPayout` ([x402 0x07bb6b6e…](https://sepolia.basescan.org/tx/0x07bb6b6ec23b133c266a2cdfdebdc7e4e5db2a10bd66d66bbd410a7ba5d18ee2)); replayed in [`test_Live_LH1866_SettlesLikeOnChain`](contracts/test/LiveReplay.t.sol) | [0x5892c851…](https://sepolia.basescan.org/tx/0x5892c851847a5bb8340862ff10ce548837f52ffeb7443c0c3fe28daf7dfc9a6d) |
 | **Settled by the keeper (31 Oct):** #6 LH2472 landed 10:14Z, 11 min early → `ClosedNoPayout` ([x402 0x42a824e9…](https://sepolia.basescan.org/tx/0x42a824e95eb5c9f8dd553bcb660e5728163ea6bcfc9eebf78fed99393a9dc91d)); replayed in [`test_Live_LH2472_SettlesLikeOnChain`](contracts/test/LiveReplay.t.sol) | [0x226abfdc…](https://sepolia.basescan.org/tx/0x226abfdc44a13644145103ff7f2322883eaf3722bee1e6dc78500b8d168798b2) |
 | **Settled by the keeper (31 Oct):** #10 LH1868 landed 12:25Z, 10 min late → `ClosedNoPayout` ([x402 0x9dd9e75a…](https://sepolia.basescan.org/tx/0x9dd9e75ab7782aacb0bf872d946f880e642d58b623e5685a0fb7fc98203e3dc6)); replayed in [`test_Live_LH1868_SettlesLikeOnChain`](contracts/test/LiveReplay.t.sol) | [0x27d73eab…](https://sepolia.basescan.org/tx/0x27d73eabca5eb040a0bb771ab3ae7a9f7f21d33724e57f7315ff4898d0599ab6) |
+| **Settled by the keeper (31 Oct):** #11 LH2476 landed 16:02Z, 12 min late → `ClosedNoPayout` ([x402 0x31143548…](https://sepolia.basescan.org/tx/0x3114354837c48fce277fd767e1fb292d031fa739a58fc48e37ba60acec90b447)); replayed in [`test_Live_LH2476_SettlesLikeOnChain`](contracts/test/LiveReplay.t.sol) | [0x59b1c592…](https://sepolia.basescan.org/tx/0x59b1c5920c38554d23aae8998b415f4c2c429e9cf88aa468fc9da5dc794becf3) |
+| **Settled by the keeper (31 Oct):** #9 LH1814 landed 16:23Z, 12 min early → `ClosedNoPayout` ([x402 0x8888b2d6…](https://sepolia.basescan.org/tx/0x8888b2d652b2c8f195d5873697939dade41f408ef40b8991ffe361de48b869e8)); replayed in [`test_Live_LH1814_SettlesLikeOnChain`](contracts/test/LiveReplay.t.sol) | [0xef605870…](https://sepolia.basescan.org/tx/0xef605870ea48cc50ab4d2297bff278eece329f87a52acc58434d6c1d6c49a9e4) |
 
 Tamper test against the deployed contract with a REAL signed Airnode response (policy #1): edited value → `NotSignedByAirnode`, other flight → `WrongRequest`, attacker key → `NotSignedByAirnode`, genuine but older than `maxAge` → `Stale(1793378516)`, genuine but pre-departure → `NotFinal(Expected)`. A captured real response (`contracts/test/fixtures/aerodatabox-arrival.json`, LH400) is verified in Solidity by `test_Fixture_RealAeroDataBoxCapture`: the on-chain request-hash derivation matches AirnodeHub byte for byte.
 The keeper is scheduled in GitHub Actions ([`.github/workflows/keeper.yml`](https://github.com/womp-maindev/aeroguard/actions/workflows/keeper.yml), every ~15 min) to settle these policies after landing. On 30 Oct the schedule did not fire at first, so the first runs were started by hand (`workflow_dispatch`); since then it first fired on its own at 22:55Z on 30 Oct, and again at 02:14Z on 31 Oct (both runs successful), though far less often than the 15-minute cron asks for; every run, scheduled or manual, is listed [here](https://github.com/womp-maindev/aeroguard/actions/workflows/keeper.yml). GitHub runs schedules on a best-effort basis: they can be late or skipped, and the keeper does not depend on them, since anyone can run `npm run keeper` or call `settle`.
@@ -163,7 +165,7 @@ Node ≥ 22.18 and [Foundry](https://getfoundry.sh).
 git clone --recurse-submodules https://github.com/womp-maindev/aeroguard && cd aeroguard
 cp .env.example .env                    # set KEEPER_PK (Base Sepolia ETH + aUSD)
 
-cd contracts && forge test              # 96 tests incl. the full live lifecycle of policies #1–#8 and #10
+cd contracts && forge test              # 100 tests incl. the full live lifecycle of all 11 live policies
 forge script script/Deploy.s.sol --rpc-url $BASE_SEPOLIA_RPC --broadcast --private-key $DEPLOYER_PK
 
 cd ../keeper && npm i
@@ -221,7 +223,7 @@ Presentation: [`presentation/cardano/`](presentation/cardano/) · video clips: [
 
 ## Repo
 ```
-contracts/          FlightDelayCover.sol + AirnodeHub libraries, 96 Foundry tests (live replays, hardening), real fixtures, threat model
+contracts/          FlightDelayCover.sol + AirnodeHub libraries, 100 Foundry tests (live replays, hardening), real fixtures, threat model
 keeper/             x402 AirnodeHub client, buy/settle, autonomous keeper + schedule, tamper CLI, rehearsal, HTTP API (keeper/README.md)
 cardano/            x402 on Cardano preprod (/verdict, /policy, claims agent, MCP tool); onchain/ Aiken cover; video/ clips; evidence/
 web/                dashboard (Inspector, tamper lab, wallet sends, policies, keeper log); media/ = api3.mp4, cardano.mp4, demo.mp4 (overview); data/ snapshot
@@ -246,7 +248,7 @@ What the deployed contract does not handle yet, with the production fix. Each fi
 | **The airline changes the schedule** | The signed schedule at settlement must equal the one at purchase (`ScheduleMismatch`), so the policy expires and the premium stays in the pool | Refund the premium on expiry, or allow a bounded schedule change |
 | **No signed evidence within 3 days** (keeper down, quota used up, Airnode offline) | The policy expires even if the flight really was late; the traveller carries the data-availability risk. GitHub's schedule for the keeper fires only sporadically (2 runs overnight), so passes are also started by hand | Refund the premium when a policy expires without evidence; run the keeper on a reliable scheduler (anyone can, `settle` is permissionless) |
 | **Many policies on one flight** | No cap per flight, so one cancelled flight can take a large share of the pool's capacity (solvency still holds: every sale checks free capital) | An exposure cap per flight and date |
-| **No live payout yet** | Policies #1–#8 and #10 landed early or less than 2 h late, so each closed with no payout; #11 and #9 settle after judging. The signed arrival still decided the on-chain outcome; the payout tiers are shown by the Foundry tests and the rehearsal. The live contract trusts only the real Airnode, so a payout cannot be staged | Done: 7 more live policies on 31 Oct flights; a 2 h delay or a cancellation pays on its own |
+| **No live payout yet** | All 11 live policies landed early or less than 2 h late, so each closed with no payout. The signed arrival still decided the on-chain outcome; the payout tiers are shown by the Foundry tests and the rehearsal. The live contract trusts only the real Airnode, so a payout cannot be staged | Done: 7 more live policies on 31 Oct flights; a 2 h delay or a cancellation pays on its own |
 
 ## Security notes
 - Checks‑effects‑interactions + `ReentrancyGuard`, `SafeERC20`; reserved capital tracked so the owner can only withdraw capital **not** backing active policies.

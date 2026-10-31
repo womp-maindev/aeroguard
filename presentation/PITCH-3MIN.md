@@ -7,7 +7,7 @@
 # API3 track — 3:00
 
 **[0:00 · `?pitch=1` on the projector]**
-Since yesterday we have insured eleven real flights. Nine have landed. Nobody filed a claim. Nobody pressed a button. Our contract settled every one of them by itself — on flight data signed by the AeroDataBox Airnode on API3 AirnodeHub. Your flight is late? You're already paid. And nobody can fake it.
+Since yesterday we have insured eleven real flights. All eleven have landed. Nobody filed a claim. Nobody pressed a button. Our contract settled every one of them by itself — on flight data signed by the AeroDataBox Airnode on API3 AirnodeHub. Your flight is late? You're already paid. And nobody can fake it.
 
 **[0:20 · slide Problem]**
 Here's why this matters. One in six European flights is delayed. Under EU261 you can get up to six hundred euros — but only after a claim, only from three hours, and claim agencies keep around a third of the payout. Most eligible passengers never claim at all. Parametric insurance fixes this: if trusted data says the flight was late, the money moves. But it has always failed on three questions. Can the contract trust the data? Who presses "pay"? And how do you stop people insuring a flight that is already late?
@@ -23,7 +23,7 @@ Who presses pay? Nobody special. Our keeper is an autonomous agent: after landin
 Now, don't trust us. Try to steal. I'll attack the live contract on Base Sepolia right now. An edited value: not signed by the Airnode. A real answer for another flight: wrong request. An attacker's key: rejected. A genuine but old answer: stale. Four out of four blocked — by the real bytecode, live. You can scan this QR code and try it on your own phone.
 
 **[2:30 · slide Edge cases / evidence]**
-This isn't a mock-up. Eleven real policies on real flights. Nine already settled by the keeper. Ninety-six contract tests, including the full lifecycle of our live policies replayed on their real Airnode signatures. And because one signed answer settles every policy on the same flight, the data costs about seven cents per policy.
+This isn't a mock-up. Eleven real policies on real flights. All eleven already settled by the keeper. A hundred contract tests, including the full lifecycle of our live policies replayed on their real Airnode signatures. And because one signed answer settles every policy on the same flight, the data costs about seven cents per policy.
 
 **[2:50 · closing]**
 One contract shape, any event an Airnode can sign. No signature — no money moves. Thank you.
