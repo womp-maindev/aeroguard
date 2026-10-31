@@ -211,6 +211,11 @@
   .tech dl { margin: 0; padding: 0 18px 16px; display: grid; grid-template-columns: 150px 1fr; gap: 6px 12px; font: 12px var(--mono); }
   .tech dt { color: var(--mute); } .tech dd { margin: 0; word-break: break-all; }
 
+  .next-up { margin: 12px 2px 0; font-size: 14px; color: var(--mute); line-height: 1.5; }
+  .next-up b { color: var(--text); }
+  .pulse { display: inline-block; width: 8px; height: 8px; margin: 0 8px 1px 0; border-radius: 50%; background: var(--ok); box-shadow: 0 0 0 0 rgba(23,120,77,.5); animation: pulse 2s infinite; }
+  @keyframes pulse { 70% { box-shadow: 0 0 0 8px rgba(23,120,77,0); } 100% { box-shadow: 0 0 0 0 rgba(23,120,77,0); } }
+  @media (prefers-reduced-motion: reduce) { .pulse { animation: none; } }
   /* try to cheat (pitch) */
   .cheat { display: flex; gap: 20px; align-items: center; justify-content: space-between; padding: 20px; margin-bottom: 16px; }
   .cheat-main { display: grid; gap: 10px; flex: 1; min-width: 0; }
@@ -448,6 +453,7 @@
       <div class="stat"><b id="sPaid">–</b><span>aUSD paid out</span></div>
       <div class="stat"><b id="sFree">–</b><span>aUSD free in the pool</span></div>
     </div>
+    <p class="next-up" id="nextUp" hidden></p>
 
     <!-- inspector -->
     <section class="block" id="inspector">
@@ -1337,7 +1343,20 @@ const settleTx = () => {
   for (const l of S.apiLog) { const x = /^policy #(\d+) settled/.exec(l.msg); if (x && l.link) m[x[1]] = l.link; }
   return m;
 };
+// "what happens next": the earliest active policy, in the viewer's own time zone
+function renderNext(ps) {
+  const now = Date.now() / 1000;
+  const act = ps.filter((p) => Number(p.status) === 1 && Number(p.scheduledArrival)).sort((a, b) => Number(a.scheduledArrival) - Number(b.scheduledArrival));
+  const el = $('nextUp');
+  if (!act.length) { el.hidden = true; return; }
+  const p = act[0], t = Number(p.scheduledArrival), mins = Math.round((t - now) / 60);
+  const local = new Date(t * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+  const when = mins > 0 ? `lands ${local} (in ${mins >= 60 ? `${Math.floor(mins / 60)} h ${mins % 60} min` : `${mins} min`})` : `landed ${local}, the keeper is checking for the signed arrival`;
+  el.hidden = false;
+  el.innerHTML = `<span class="pulse"></span>Next to settle: <b>#${esc(p.id)} ${esc(p.flight)}</b> ${when}. ${act.length > 1 ? `${act.length - 1} more after it. ` : ''}A delay of 2 h+ pays 50%, 3 h+ or a cancellation 100%, straight to the holder.`;
+}
 function renderPolicies(ps, free) {
+  renderNext(ps);
   S.policies = ps;
   if (S.policy) S.policy = ps.find((p) => String(p.id) === String(S.policy.id)) || null;
   const paid = ps.reduce((a, p) => a + (p.statusName === 'PaidFull' ? Number(p.coverage) : p.statusName === 'PaidHalf' ? Number(p.coverage) / 2 : 0), 0) / 1e6;
