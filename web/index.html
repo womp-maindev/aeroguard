@@ -438,7 +438,7 @@
       AeroGuard
     </a>
     <div class="navlinks">
-      <a href="#inspector">Inspector</a><a href="#lab">Tamper lab</a><a href="#policies">Policies</a><a href="#log">Keeper log</a><a href="#cardano">Cardano x402</a>
+      <a href="#inspector">Inspector</a><a href="#lab">Tamper lab</a><a href="#policies">Policies</a><a href="#log">Keeper log</a><a href="#cardano">Cardano x402</a><a href="#videos">Videos</a>
     </div>
     <div class="navright">
       <span class="tag api3">API3 · AirnodeHub</span>
@@ -694,6 +694,32 @@
           <div><textarea id="cdPaste" spellcheck="false" placeholder='{"flight":"IB1314","date":"2026-10-30","kind":"status","verdict":{…},"evidence":{…},"paidWith":{"txHash":"…"}}'></textarea>
           <span id="cdPasteMsg" class="hint" style="color:var(--mute)"></span></div>
         </details>
+      </div>
+    </section>
+
+    <section class="block" id="videos">
+      <div class="sh">
+        <div>
+          <span class="num">06 · VIDEOS</span>
+          <h2>Watch it in two minutes</h2>
+          <p>One video per track, both from real runs. Play them here, open them full screen for the pitch, or copy the link to paste anywhere.</p>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,520px),1fr));gap:24px">
+        <div class="card" style="padding:18px">
+          <h3 style="margin:0 0 10px">API3 track: signed data the contract depends on <span style="color:var(--mute);font-weight:400">· 2:08, voiced</span></h3>
+          <video controls playsinline preload="metadata" width="1920" height="1080" style="width:100%;height:auto;border-radius:10px;background:#000"><source src="media/api3.mp4" type="video/mp4" /></video>
+          <p style="margin:10px 0 6px">The keeper buys AeroDataBox data signed by the Airnode over x402, buys and settles policies on Base Sepolia, and every forgery is rejected.</p>
+          <p style="margin:0;display:flex;gap:10px;flex-wrap:wrap;align-items:center"><a href="media/api3.mp4" target="_blank" rel="noopener">Open full screen ↗</a> <a href="media/api3.mp4" download>Download</a>
+            <code style="user-select:all;word-break:break-all">https://womp-maindev.github.io/aeroguard/media/api3.mp4</code> <button type="button" class="btn btn-ghost" onclick="navigator.clipboard.writeText('https://womp-maindev.github.io/aeroguard/media/api3.mp4').then(()=>this.textContent='Copied ✓')">Copy link</button></p>
+        </div>
+        <div class="card" style="padding:18px">
+          <h3 style="margin:0 0 10px">Cardano track: agents pay per request <span style="color:var(--mute);font-weight:400">· 1:57, voiced</span></h3>
+          <video controls playsinline preload="metadata" width="1920" height="1080" style="width:100%;height:auto;border-radius:10px;background:#000"><source src="media/cardano.mp4" type="video/mp4" /></video>
+          <p style="margin:10px 0 6px">An agent pays 2 tADA over x402 on Cardano preprod and gets the Airnode-signed verdict. An Aiken contract checks the same signature.</p>
+          <p style="margin:0;display:flex;gap:10px;flex-wrap:wrap;align-items:center"><a href="media/cardano.mp4" target="_blank" rel="noopener">Open full screen ↗</a> <a href="media/cardano.mp4" download>Download</a>
+            <code style="user-select:all;word-break:break-all">https://womp-maindev.github.io/aeroguard/media/cardano.mp4</code> <button type="button" class="btn btn-ghost" onclick="navigator.clipboard.writeText('https://womp-maindev.github.io/aeroguard/media/cardano.mp4').then(()=>this.textContent='Copied ✓')">Copy link</button></p>
+        </div>
       </div>
     </section>
   </div>
