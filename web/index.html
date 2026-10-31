@@ -1527,7 +1527,7 @@ function renderCardano() {
   const acc = (Array.isArray(ch?.accepts) ? ch.accepts : ch?.accepts ? [ch.accepts] : []).find((a) => String(a.network).startsWith('cardano')) || null;
   const offer = acc ? { scheme: acc.scheme, network: acc.network, amount: acc.amount ?? acc.maxAmountRequired, asset: acc.asset, payTo: acc.payTo, maxTimeoutSeconds: acc.maxTimeoutSeconds } : CARDANO;
   const url = `GET /verdict?flight=${esc(flight)}&date=${esc(date)}`;
-  $('cdSrc').innerHTML = run ? (run.source === 'pasted' ? 'Source: pasted answer' : `Source: recorded run${run.recordedAt ? ' · ' + esc(String(run.recordedAt).slice(0, 16).replace('T', ' ')) + ' UTC' : ''}`)
+  $('cdSrc').innerHTML = run ? (run.source === 'pasted' ? 'Source: pasted answer' : `Source: recorded run${run.recordedAt || run.at ? ' · ' + esc(String(run.recordedAt || run.at).slice(0, 16).replace('T', ' ')) + ' UTC' : ''}`)
     : 'Source: <a href="https://github.com/womp-maindev/aeroguard/tree/main/cardano" target="_blank" rel="noopener">cardano/</a> server config';
 
   $('cd1').innerHTML = `<div class="sn"><b>01 · ASK</b><span class="badge ${acc ? 'live' : 'none'}">${S.cardano.live ? 'live' : acc ? 'recorded' : 'server config'}</span></div>
