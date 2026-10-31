@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-10-31T02:14:33.528Z",
+  "updatedAt": "2026-10-31T08:31:01.342Z",
   "contract": "0x257054204c4Cd43846C4553eBe6D709841980a80",
   "runs": [
     {
@@ -202,6 +202,93 @@
           "msg": "policy #11 LH2476: nothing due, next check ≥ 12:50Z"
         }
       ]
+    },
+    {
+      "startedAt": "2026-10-31T08:30:53.698Z",
+      "finishedAt": "2026-10-31T08:31:01.342Z",
+      "event": "schedule",
+      "url": "https://github.com/womp-maindev/aeroguard/actions/runs/41184883652",
+      "log": [
+        {
+          "at": "2026-10-31T08:30:53.698Z",
+          "level": "info",
+          "msg": "policy #5: LH1866 2026-10-31 sched 10:20Z, early look for a cancellation"
+        },
+        {
+          "at": "2026-10-31T08:30:55.610Z",
+          "level": "pay",
+          "msg": "bought signed arrival for LH1866 via x402",
+          "link": "https://sepolia.basescan.org/tx/0xd76e8d02ce9216331b24f6d7d64227458d625e88421496ddfb2a413883ff7304"
+        },
+        {
+          "at": "2026-10-31T08:30:55.610Z",
+          "level": "info",
+          "msg": "policy #5: Boarding, 0 min late — not final, next check ≥ 10:50Z"
+        },
+        {
+          "at": "2026-10-31T08:30:55.611Z",
+          "level": "info",
+          "msg": "policy #6: LH2472 2026-10-31 sched 10:25Z, early look for a cancellation"
+        },
+        {
+          "at": "2026-10-31T08:30:56.969Z",
+          "level": "pay",
+          "msg": "bought signed arrival for LH2472 via x402",
+          "link": "https://sepolia.basescan.org/tx/0x3a9df867cee40c8faf00996488356d65e6c01c785fbd2c5a39f3544b827c8374"
+        },
+        {
+          "at": "2026-10-31T08:30:56.969Z",
+          "level": "info",
+          "msg": "policy #6: Boarding, 0 min late — not final, next check ≥ 10:55Z"
+        },
+        {
+          "at": "2026-10-31T08:30:56.970Z",
+          "level": "info",
+          "msg": "policy #7: EI352 2026-10-31 sched 09:10Z, early look for a cancellation"
+        },
+        {
+          "at": "2026-10-31T08:30:58.141Z",
+          "level": "pay",
+          "msg": "bought signed arrival for EI352 via x402",
+          "link": "https://sepolia.basescan.org/tx/0x7612260fb6e2d926b91f55130662611635fddf80b919229cb764aacd705e5804"
+        },
+        {
+          "at": "2026-10-31T08:30:58.141Z",
+          "level": "info",
+          "msg": "policy #7: EnRoute, 0 min late — not final, next check ≥ 09:40Z"
+        },
+        {
+          "at": "2026-10-31T08:30:58.142Z",
+          "level": "info",
+          "msg": "policy #8: LH1810 2026-10-31 sched 10:00Z, early look for a cancellation"
+        },
+        {
+          "at": "2026-10-31T08:30:59.402Z",
+          "level": "pay",
+          "msg": "bought signed arrival for LH1810 via x402",
+          "link": "https://sepolia.basescan.org/tx/0x7f978b01db4728b9ff9aa6ec2a7d69466271ddb49530af9d3bf564bf32935796"
+        },
+        {
+          "at": "2026-10-31T08:30:59.402Z",
+          "level": "info",
+          "msg": "policy #8: EnRoute, 0 min late — not final, next check ≥ 10:30Z"
+        },
+        {
+          "at": "2026-10-31T08:30:59.402Z",
+          "level": "info",
+          "msg": "policy #9 LH1814: nothing due, next check ≥ 13:35Z"
+        },
+        {
+          "at": "2026-10-31T08:30:59.402Z",
+          "level": "info",
+          "msg": "policy #10 LH1868: nothing due, next check ≥ 09:15Z"
+        },
+        {
+          "at": "2026-10-31T08:30:59.402Z",
+          "level": "info",
+          "msg": "policy #11 LH2476: nothing due, next check ≥ 12:50Z"
+        }
+      ]
     }
   ],
   "evidence": [
@@ -317,6 +404,42 @@
       "outcome": "ClosedNoPayout",
       "payout": 0,
       "delayMinutes": 0
+    },
+    {
+      "airnode": "0x83FE2E8F24E66520B1902C3507De4F471248f2Ec",
+      "requestHash": "0x468fb123a937df8234a403f78869db212b7319657efb1b68f6d3fb3616b5c202",
+      "timestamp": "1793435454",
+      "data": "{\"actual\":\"2026-10-31 10:20Z\",\"scheduled\":\"2026-10-31 10:20Z\",\"status\":\"Boarding\"}",
+      "signature": "0x9dbeb308294c4f3400835d3a945a908ee4d48f534a6ebf2cfdaa40d1f12d704e12b31bf4dc92a2741a8208f67f863ecdfabd5a115353d63d5a3a7b0ed26704fd1c",
+      "fetchedAt": 1793435455,
+      "paymentTx": "0xd76e8d02ce9216331b24f6d7d64227458d625e88421496ddfb2a413883ff7304"
+    },
+    {
+      "airnode": "0x83FE2E8F24E66520B1902C3507De4F471248f2Ec",
+      "requestHash": "0xa98579bf27316841f45893380fa804a087fbf1a544dd8a008e3736d929aa4e14",
+      "timestamp": "1793435456",
+      "data": "{\"actual\":\"2026-10-31 10:25Z\",\"scheduled\":\"2026-10-31 10:25Z\",\"status\":\"Boarding\"}",
+      "signature": "0xbec645670dffafee7a1c3559a81aab06ed632a80a49dfeabf1caa6bcae36929c1d2bd1cf39dd8228fddec55190e3528210e5dc0f42e68ab7d39111380fe1031a1b",
+      "fetchedAt": 1793435456,
+      "paymentTx": "0x3a9df867cee40c8faf00996488356d65e6c01c785fbd2c5a39f3544b827c8374"
+    },
+    {
+      "airnode": "0x83FE2E8F24E66520B1902C3507De4F471248f2Ec",
+      "requestHash": "0x71d52b067e3ece9ac983c0e1493618b4795ac466bcbfe52a7dcfac9327c9c6c9",
+      "timestamp": "1793435457",
+      "data": "{\"actual\":\"2026-10-31 08:45Z\",\"scheduled\":\"2026-10-31 09:10Z\",\"status\":\"EnRoute\"}",
+      "signature": "0xfde33a02a17a5383f64caa427649e0af31b359f7392dfa6c96727a5fdeb3d7fc41b4d84aff09115335419a8a995ff8a64334b477dccb9be0fa0c5ea6823cfb271c",
+      "fetchedAt": 1793435458,
+      "paymentTx": "0x7612260fb6e2d926b91f55130662611635fddf80b919229cb764aacd705e5804"
+    },
+    {
+      "airnode": "0x83FE2E8F24E66520B1902C3507De4F471248f2Ec",
+      "requestHash": "0x0bc9290bd32a88c0e0b3c79f8b8d0cd5cf75e8bd915546c4264f3fa8710a6614",
+      "timestamp": "1793435458",
+      "data": "{\"actual\":\"2026-10-31 09:50Z\",\"scheduled\":\"2026-10-31 10:00Z\",\"status\":\"EnRoute\"}",
+      "signature": "0x4e98c4d692e19ea4652ed0f3038f6894ad320ec3ec72c8812c4a70a6407297c3212df0788b772389ca8936bebc92bf54f8ff461fe2e785856e1235a0790ce2891b",
+      "fetchedAt": 1793435459,
+      "paymentTx": "0x7f978b01db4728b9ff9aa6ec2a7d69466271ddb49530af9d3bf564bf32935796"
     }
   ]
 }
