@@ -2,7 +2,7 @@
 
 Contract [`0x2570…0a80`](https://sepolia.basescan.org/address/0x257054204c4Cd43846C4553eBe6D709841980a80) on Base Sepolia. Signer: AeroDataBox Airnode `0x83FE2E8F24E66520B1902C3507De4F471248f2Ec`. Each AeroDataBox call was paid over x402 (0.05 aUSD).
 
-Every signed response below can be re-verified offline without trusting us. Recover the EIP-191 signer of `keccak256(requestHash ‖ timestamp ‖ data)`, then compare `requestHash` with `requestHashFor(flight, date, arrival)` on the contract. The dashboard's Security Inspector does both in the browser. Walkthrough: the [1:47 demo video](../web/media/demo.mp4). All responses the keeper has bought are published in [`keeper-data/keeper.json`](https://github.com/womp-maindev/aeroguard/blob/keeper-data/keeper.json).
+Every signed response below can be re-verified offline without trusting us. Recover the EIP-191 signer of `keccak256(requestHash ‖ timestamp ‖ data)`, then compare `requestHash` with `requestHashFor(flight, date, arrival)` on the contract. The dashboard's Security Inspector does both in the browser. Walkthrough: the [2:25 demo video](../web/media/demo.mp4). All responses the keeper has bought are published in [`keeper-data/keeper.json`](https://github.com/womp-maindev/aeroguard/blob/keeper-data/keeper.json).
 
 ## Policies (30 Oct 2026, from Munich, 0.5 aUSD cover each)
 

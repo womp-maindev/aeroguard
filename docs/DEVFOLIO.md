@@ -141,7 +141,7 @@ Full analysis, with assumptions, the worst case and sources: [docs/BUSINESS.md](
 - Keeper runs: https://github.com/womp-maindev/aeroguard/actions/workflows/keeper.yml
 - Threat model: [`contracts/README.md`](https://github.com/womp-maindev/aeroguard/blob/main/contracts/README.md#threat-model)
 - **Video (API3 track, 2:29, voiced):** https://github.com/womp-maindev/aeroguard/blob/main/web/media/api3.mp4 (also https://womp-maindev.github.io/aeroguard/media/api3.mp4)
-- Overview of both tracks (1:47): https://github.com/womp-maindev/aeroguard/blob/main/web/media/demo.mp4
+- Overview of both tracks (2:25): https://github.com/womp-maindev/aeroguard/blob/main/web/media/demo.mp4
 
 ## Team
 - **Mihail** <sub>(WompSolutions · [womp.solutions](https://womp.solutions))</sub> — product, API3 contract & keeper, pitch
