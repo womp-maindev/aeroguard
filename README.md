@@ -116,43 +116,29 @@ Buying cover also needs AirnodeHub-signed evidence. `buyPolicy` takes a fresh (�
 `npm run keeper` runs unattended (the GitHub Actions schedule in `.github/workflows/keeper.yml` runs one pass every ~15 min, best-effort). It reads active policies from chain, decides **when** data is worth buying ([`schedule.ts`](keeper/src/schedule.ts), tested in [`schedule.test.ts`](keeper/src/schedule.test.ts): one early look 3 h before arrival for cancellations, then every 30 min from 30 min after the scheduled arrival until +6 h, then every 3 h until +24 h, at most 20 paid lookups per policy because the AeroDataBox quota is shared; any run, cron or manual, decides from chain + saved state), pays through x402, simulates `settle`, and only then sends the transaction. One signed outcome settles every policy on the same flight. State = chain + cache, so it survives restarts. Every Actions run publishes its log and every AirnodeHub-signed response it holds to [`keeper-data/keeper.json`](https://github.com/womp-maindev/aeroguard/blob/keeper-data/keeper.json): anyone can re-verify them, and the dashboard's tamper lab uses them as genuine bases.
 
 ## Tamper test for judges
-```bash
-cp .env.example .env            # set KEEPER_PK (Base Sepolia ETH) and FLIGHT_COVER_ADDRESS
-cd keeper && npm i
-npm run tamper -- --policy 1                          # edit · stale · wrongreq · wrongsigner · valid
-npm run tamper -- --policy 1 --response my.json       # YOUR OWN signed response
-npm run tamper -- --policy 1 --mode edit --response my.json
-```
-Each forgery is simulated (`eth_call`, no transaction) against the deployed contract and prints the revert reason. The right column is what the **live** contract answered for policy #1, starting from the real AirnodeHub-signed [`IB1314-status-proof.json`](keeper/fixtures/IB1314-status-proof.json) (signed 30 Oct 2026 16:41:56 UTC):
+Three ways to attack the deployed contract, fastest first. All start from a real AirnodeHub-signed response (the dashboard and `npm run tamper` default to policy #1's [`IB1314-status-proof.json`](keeper/fixtures/IB1314-status-proof.json), signed 30 Oct 2026 16:41:56 UTC).
 
-| Attack | Contract answer | Live result, policy #1 (30 Oct 2026) |
+1. **In the browser, no wallet (30 s).** Dashboard → **02 · Tamper lab → Run the 4 attacks**. Each attack is an `eth_call` to the live contract. A settled policy answers `NotActive` before any oracle check, so keep **Reopen a settled policy for the simulation** ticked: a state override for that one call, nothing is written.
+2. **As real transactions from your wallet.** Same lab → **Send it for real** ([`web/wallet.js`](web/wallet.js)). Connect MetaMask, Rabby or Coinbase Wallet; the button switches to Base Sepolia, and a few cents of [faucet ETH](https://docs.base.org/get-started/get-funds) pays for gas. Pick an **Active** policy (the panel refuses settled ones), press **Send** and confirm the wallet's "will likely fail" warning: the rejection is mined as a failed transaction on Basescan, and the policy stays Active. You can also paste your own response, edit it, **Check** it (`eth_call`) or send it; if the contract would accept it, the panel asks first, because a valid final response settles the policy for good and pays the stored holder.
+3. **From the CLI.**
+   ```bash
+   cp .env.example .env            # set KEEPER_PK (Base Sepolia ETH) and FLIGHT_COVER_ADDRESS
+   cd keeper && npm i
+   npm run tamper -- --policy 1                          # edit · stale · wrongreq · wrongsigner · valid
+   npm run tamper -- --policy 1 --response my.json       # YOUR OWN signed response
+   ```
+   Simulated with `eth_call`; needs an `Active` policy.
+
+**Real base for any policy:** its signed purchase proof sits in its `buyPolicy` calldata. `cd keeper && npm run cli -- proof <buyPolicy tx>` prints it (no key, no paid lookup). Load it in the Inspector and tick **Use the inspector's response as the base**; once it is more than an hour old, sent unmodified it shows `Stale`.
+
+| Attack | Contract answer | Live result, policy #1 (30 Oct 2026, `eth_call`) |
 |---|---|---|
-| one value edited | `NotSignedByAirnode(<random signer>)` | ✅ rejected: `NotSignedByAirnode` |
-| response too old | `Stale(timestamp)` | ✅ rejected: `Stale(1793378516)` (genuine signature, older than the policy's 1 h `maxAge`) |
-| response to a different request | `WrongRequest(hash)` | ✅ rejected: `WrongRequest` |
-| signed by an unexpected key | `NotSignedByAirnode(attacker)` | ✅ rejected: `NotSignedByAirnode(attacker)` |
+| a real response with one value edited | `NotSignedByAirnode(<random signer>)` | ✅ rejected: `NotSignedByAirnode` |
+| a real response older than the policy's 1 h `maxAge` | `Stale(timestamp)` | ✅ rejected: `Stale(1793378516)` |
+| a real response for another flight's request | `WrongRequest(hash)` | ✅ rejected: `WrongRequest` |
+| signed by a key that is not the Airnode's | `NotSignedByAirnode(attacker)` | ✅ rejected: `NotSignedByAirnode(attacker)` |
 | genuine, fresh, but not final | `NotFinal(status)` | ✅ rejected: `NotFinal(Expected)` |
-| valid, fresh, final | ✅ `Settled` → payout | settlement txs in [Live evidence](#live-evidence-base-sepolia-real-aerodatabox-data) |
-
-Once a policy is settled, the contract answers `NotActive` before any oracle check. The dashboard's tamper lab can still run the four forgeries on it (browser `eth_call` with a state override that reopens the policy for that call only, no key); `npm run tamper` needs an `Active` policy.
-
-### In the browser, as real transactions from your wallet
-The dashboard's tamper lab ends with **Send it for real** ([`web/wallet.js`](web/wallet.js)). It sends the same forgeries, or your own response, as real `settle()` transactions to the deployed contract. A rejected one is mined as a failed transaction, so the revert is on Basescan, not just in a simulation.
-
-1. Open the dashboard and scroll to **02 · Tamper lab → Send it for real**. **Connect wallet** (MetaMask, Rabby or Coinbase Wallet). The button switches you to Base Sepolia, and adds it to the wallet if needed. A few cents of Base Sepolia ETH pays for gas; the panel links to the [Base faucets](https://docs.base.org/get-started/get-funds) if the wallet has too little.
-2. Pick an **Active** policy as the target. A settled policy would stop every transaction at `NotActive`, so the panel refuses it and points to the `eth_call` lab above, which can reopen it.
-3. Press **Send** on an attack. The wallet may warn that the transaction will fail: for an attack that is the point, so confirm it. The panel shows the decoded revert, the plain-English reason and the Basescan link.
-4. **Your own response:** paste any AirnodeHub response, keeper fixture or `npm run cli -- proof <buyPolicy tx>` output, edit it, then **Check** (an `eth_call`, no wallet needed) or **Send for real**. If the check says the contract would accept it, sending asks first, because it settles the policy for good. Anyone may settle; the payout always goes to the stored holder.
-
-| What you send | On-chain answer |
-|---|---|
-| a real response with one value edited | `NotSignedByAirnode(<random signer>)` |
-| a real response for another flight's request | `WrongRequest(hash)` |
-| a response signed by a key that is not the Airnode's | `NotSignedByAirnode(attacker)` |
-| a real response older than the policy's `maxAge` | `Stale(timestamp)` |
-| a real, fresh, final response | `Settled` → payout to the holder |
-
-**Tip for a real base:** a new policy's own signed purchase proof is in its `buyPolicy` calldata. `cd keeper && npm run cli -- proof <buyPolicy tx>` prints it, with no key and no paid lookup. Load it in the Inspector and tick **Use the inspector's response as the base**, so the edit, wrong-request and wrong-signer attacks start from a real Airnode signature. Once it is more than an hour old, sent unmodified it shows `Stale`.
+| valid, fresh, final | `Settled` → payout to the holder | settlement txs in [Live evidence](#live-evidence-base-sepolia-real-aerodatabox-data) |
 
 Also rejected: buying after departure (`NotBuyable`), buying too close to arrival (`TooCloseToArrival`), schedule switched after purchase (`ScheduleMismatch`), settling twice (`NotActive`), future timestamps (`FromTheFuture`), "Arrived" signed before the landing it reports (`ObservedTooEarly`), non‑final status (`NotFinal`), selling cover the pool can't back (`Insolvent`).
 
