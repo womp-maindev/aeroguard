@@ -1,0 +1,50 @@
+name: Voice the demo video
+
+# Adds a Piper TTS voice-over (media/voiced/lines.tsv: start, slot seconds, text) to media/voiced/aeroguard-demo-draft.mp4
+# and commits media/voiced/aeroguard-demo-voiced.mp4 to this branch.
+on:
+  push:
+    branches: [claude/bold-ride-xhu8s8]
+    paths: [media/voiced/lines.tsv, .github/workflows/voice-video.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  voice:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Piper + ffmpeg
+        run: |
+          sudo apt-get install -y ffmpeg >/dev/null 2>&1 || true
+          pip install -q piper-tts
+          mkdir -p /tmp/v && cd /tmp/v
+          base=https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/ryan/high
+          curl -sSL -o voice.onnx $base/en_US-ryan-high.onnx
+          curl -sSL -o voice.onnx.json $base/en_US-ryan-high.onnx.json
+      - name: Synthesize and mix
+        run: |
+          set -e
+          cd media/voiced
+          i=0; inputs=""; filters=""; mix=""
+          while IFS=$'\t' read -r start slot text; do
+            [ -z "$start" ] && continue
+            echo "$text" | piper --model /tmp/v/voice.onnx --length_scale 0.95 --output_file /tmp/v/l$i.wav
+            d=$(ffprobe -v error -show_entries format=duration -of csv=p=0 /tmp/v/l$i.wav)
+            t=$(python3 -c "d=$d;s=$slot-0.25;print(max(1.0,min(1.3,d/s)))")
+            ms=$(python3 -c "print(int(($start+0.15)*1000))")
+            inputs="$inputs -i /tmp/v/l$i.wav"
+            filters="$filters[$((i+1)):a]atempo=$t,adelay=${ms}|${ms}[a$i];"
+            mix="$mix[a$i]"
+            echo "line $i: ${d}s in ${slot}s slot, tempo $t"
+            i=$((i+1))
+          done < lines.tsv
+          ffmpeg -y -loglevel error -i aeroguard-demo-draft.mp4 $inputs -filter_complex "${filters}${mix}amix=inputs=$i:normalize=0,volume=1.6[aout]" -map 0:v -map "[aout]" -c:v copy -c:a aac -b:a 160k -shortest aeroguard-demo-voiced.mp4
+          ls -la aeroguard-demo-voiced.mp4
+      - name: Commit
+        run: |
+          git config user.name womp-maindev && git config user.email 226526968+womp-maindev@users.noreply.github.com
+          git add media/voiced/aeroguard-demo-voiced.mp4 && git commit -qm "media: voiced demo video" && git push -q origin HEAD:claude/bold-ride-xhu8s8

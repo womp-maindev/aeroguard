@@ -1,0 +1,12 @@
+0	4	AeroGuard. Your flight is late. You're already paid.
+4	8	Our contract pays only on flight data signed by the AeroDataBox Airnode on API3 AirnodeHub. No claim forms.
+12	10	Eleven real policies on real flights from Munich. The first four were settled by our keeper, on the signed arrival.
+22	9	The keeper pays five cents over x402 for a signed answer, checks it, and settles. No human in the loop.
+31	3	Don't trust us. Attack it.
+34	22	Four forgeries against the live contract. An edited value: not signed by the Airnode. A real answer for another flight: wrong request. An attacker's key: rejected. An old answer: stale. The genuine answer is accepted.
+56	9	The Security Inspector re-runs every contract check, right in your browser.
+65	3	Now, Cardano.
+68	10	An AI agent asks our verdict service. It answers four oh two: pay two test ADA over x402 on Cardano.
+78	14	The agent pays on preprod, and gets the verdict plus the same Airnode signature. It pays only for a result a contract can check.
+92	10	Our Aiken escrow verifies that same signature on Cardano, and pays by the rule.
+102	5	No signature, no money moves. AeroGuard.
