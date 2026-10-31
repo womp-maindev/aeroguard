@@ -1,6 +1,7 @@
 // AeroDataBox via its AirnodeHub Airnode: request shapes, hashes and signed fetches.
 import { mkdirSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import type { Hex } from 'viem';
 import { type AirnodeV2Request, deriveRequestHash, fetchSignedResponse, type SignedResponse, verifySignedResponse } from './airnode-v2.ts';
 import { readPaymentSettlement } from './x402.ts';
@@ -30,7 +31,7 @@ export const requestHashFor = (flight: string, date: string, kind: Kind): Hex =>
   deriveRequestHash(buildRequest(flight, date, kind));
 
 // --- disk cache: the AeroDataBox quota (~2,000 lookups) is shared by every team, so never ask twice.
-const CACHE_DIR = new URL('../.cache/', import.meta.url).pathname;
+const CACHE_DIR = fileURLToPath(new URL('../.cache/', import.meta.url));
 const cachePath = (h: string) => join(CACHE_DIR, `${h}.json`);
 export const readCache = (h: string): CachedResponse | undefined =>
   existsSync(cachePath(h)) ? JSON.parse(readFileSync(cachePath(h), 'utf8')) : undefined;
@@ -62,7 +63,7 @@ export const spendLog: PaidCall[] = [];
 // the contract rejects them with NotSignedByAirnode — which is itself a live demonstration of the signer check.
 type FixtureFlight = { status: string; scheduled: string; actual?: string; before?: string };
 const fixtureFlights = (): Record<string, FixtureFlight> => {
-  const f = new URL('../fixtures/flights.json', import.meta.url).pathname;
+  const f = fileURLToPath(new URL('../fixtures/flights.json', import.meta.url));
   return existsSync(f) ? JSON.parse(readFileSync(f, 'utf8')) : {};
 };
 const signFixture = async (flight: string, date: string, kind: Kind): Promise<CachedResponse | undefined> => {
