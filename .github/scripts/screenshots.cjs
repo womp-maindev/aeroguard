@@ -39,5 +39,17 @@ const shot = async (pg, sel, file) => {
   await pg.close();
   pg = await open(b, 390, 844);
   await pg.screenshot({ path: `${OUT}/mobile-390.png` });
+  await pg.close();
+  // live checks: pitch view, demo video, link preview tags
+  pg = await open(b, 1920, 1080, '?pitch=1');
+  await pg.screenshot({ path: `${OUT}/pitch-1920.png` });
+  console.log('pitch:', await pg.evaluate(() => ['pPol', 'pSet', 'pBlk'].map((i) => document.getElementById(i).textContent).join(' / ')));
+  await pg.close();
+  pg = await open(b, 1440, 900);
+  const media = await pg.evaluate(async () => { const r = await fetch('media/demo.mp4', { method: 'HEAD' }); return `${r.status} ${r.headers.get('content-type')} ${r.headers.get('content-length')}`; });
+  const og = await pg.evaluate(() => [...document.querySelectorAll('meta[property^="og:"]')].map((m) => `${m.getAttribute('property')}=${m.content}`).join(' | '));
+  const ogUrl = await pg.evaluate(() => document.querySelector('meta[property="og:image"]').content);
+  const ogImg = await pg.evaluate(async (u) => { try { return (await fetch(u, { method: 'HEAD' })).status; } catch (e) { return String(e); } }, ogUrl);
+  console.log('video:', media); console.log('og:', og); console.log('og:image fetch:', ogImg);
   await b.close();
 })().catch((e) => { console.error(e); process.exit(1); });
