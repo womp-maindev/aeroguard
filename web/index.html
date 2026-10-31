@@ -211,6 +211,17 @@
   .tech dl { margin: 0; padding: 0 18px 16px; display: grid; grid-template-columns: 150px 1fr; gap: 6px 12px; font: 12px var(--mono); }
   .tech dt { color: var(--mute); } .tech dd { margin: 0; word-break: break-all; }
 
+  /* try to cheat (pitch) */
+  .cheat { display: flex; gap: 20px; align-items: center; justify-content: space-between; padding: 20px; margin-bottom: 16px; }
+  .cheat-main { display: grid; gap: 10px; flex: 1; min-width: 0; }
+  .cheat-btn { font-size: 18px; padding: 16px 22px; justify-self: start; border-radius: 12px; }
+  .cheat-sub { margin: 0; color: var(--mute); font-size: 14px; }
+  .cheat-out { padding: 14px 16px; border-radius: 12px; background: var(--card2); font-size: 14px; }
+  .cheat-out.all { background: var(--ok-soft); border: 1px solid rgba(23,120,77,.35); }
+  .cheat-out .score { font: 400 34px/1.1 var(--display); color: var(--ok); margin-bottom: 4px; }
+  .cheat-out .why { color: var(--text); } .cheat-out .pol { color: var(--dim); font-size: 12.5px; margin-top: 4px; }
+  .cheat-qr { display: grid; justify-items: center; gap: 6px; font-size: 12px; color: var(--mute); }
+  .cheat-qr img { border-radius: 8px; border: 1px solid var(--line); }
   /* tamper lab */
   .lab-top { display: flex; gap: 10px; align-items: end; padding: 16px 18px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
   .lab-top label.f { min-width: 220px; }
@@ -349,6 +360,9 @@
     .ctas { flex-direction: column; align-items: stretch; }
     .ctas .btn { width: 100%; justify-content: center; padding: 14px 15px; }
     .finder-row { grid-template-columns: 1fr 1fr; } .finder-row .btn { grid-column: 1 / -1; justify-content: center; }
+    .cheat { flex-direction: column; align-items: stretch; } .cheat-qr { display: none; }
+    .cheat-btn { justify-self: stretch; justify-content: center; font-size: 19px; padding: 20px; }
+    .cheat-out .score { font-size: 30px; }
     .lab-top { align-items: stretch; flex-direction: column; } .lab-top label.f { min-width: 0; }
     .lab-top button { justify-content: center; }
     .srcrow button { flex: 1 1 auto; justify-content: center; }
@@ -535,6 +549,14 @@
           <h2>Attack the deployed contract</h2>
           <p>Try to cheat the real contract on Base Sepolia. Each attack is sent to <code>settle()</code> as a simulation (<code>eth_call</code>): the deployed code really runs, nothing is written, no wallet needed. <b>Green = the contract blocked it.</b></p>
         </div>
+      </div>
+      <div class="card cheat">
+        <div class="cheat-main">
+          <button class="btn-primary cheat-btn" id="cheatBtn" onclick="cheat()">Try to steal from this contract</button>
+          <p class="cheat-sub">Four forgeries against the live contract, on a real policy. No wallet, nothing written.</p>
+          <div class="cheat-out" id="cheatOut" aria-live="polite" hidden></div>
+        </div>
+        <div class="cheat-qr"><img src="img/qr-lab.svg" alt="QR code to this tamper lab: womp-maindev.github.io/aeroguard/#lab" width="128" height="128" /><span>Try it on your phone</span></div>
       </div>
       <div class="card">
         <div class="lab-top">
@@ -883,7 +905,7 @@ function evaluate({ resp, flight, date, maxAge, now, policy }) {
 }
 
 // --- inspector state + render
-const S = { policies: [], policy: null, original: null, source: null, online: false, chain: null, clock: 0, free: null, keeper: null, evidence: [], apiLog: [], cardano: { run: null, pasted: null, live: null } };
+const S = { proofs: {}, policies: [], policy: null, original: null, source: null, online: false, chain: null, clock: 0, free: null, keeper: null, evidence: [], apiLog: [], cardano: { run: null, pasted: null, live: null } };
 const F = { airnode: $('fAirnode'), requestHash: $('fRequestHash'), timestamp: $('fTimestamp'), data: $('fData'), signature: $('fSignature') };
 const readResp = () => Object.fromEntries(Object.entries(F).map(([k, el]) => [k, el.value.trim() === '' && k !== 'data' ? '' : (k === 'data' ? el.value : el.value.trim())]));
 const writeResp = (r) => { for (const k in F) F[k].value = r[k] ?? ''; syncRaw(); };
@@ -1080,6 +1102,11 @@ const ACTIONS_URL = 'https://github.com/womp-maindev/aeroguard/actions/workflows
 const LIVE_BOUGHT_TX = {
   1: '0xbfd3ae73074ff63a3ef5f7e56b211d1ffb7223e2db944d0cc38ed069d1958b8d', 2: '0x7e71c55b970b96fb1588ddde1da029060d805c9b87691280ca2504098d4e69d2',
   3: '0x2aeed6010ced165f66c26ea0f34e7068421a327cac0c6375d72ef7b794f41672', 4: '0x7e675d8f94946db1d02a40c1eff87ac5a0ca29b65730751cf0d902d767d2b0d1',
+  // pitch-day batch (docs/EVIDENCE.md)
+  5: '0x823fd0d28a58f1bd57b061502f00ebe66ab969ebce577a9bc05d3b47abb329a3', 6: '0xe82e30cd9c6b1b8f9442bb4ea48d618d793d389ef2b96c06f0f39e211d50a55e',
+  7: '0xebee91819106c8e56bc8ef9b76b56dee96cd2638e4060ead67fc62a50b5909e5', 8: '0x8f5eb0b9efa6f63fa7bfba1b895efc9c4ea1e4ff424088dcde4c7be064feeb57',
+  9: '0xd6c0b35d0fa11f9bc84b7f0cb5b333836a5c9c100355bfe5a08cb9ed892b6130', 10: '0x668017d68099092c8614508a94cff53ff9f2f9b3ac296f3cfbdf5fdd3153f1bd',
+  11: '0xe0ee4b2a69b447e09d927d202c9fe8e34f2be34f0ed14a7791b4bb9c6e87d011',
 };
 const STATUS = ['None', 'Active', 'PaidHalf', 'PaidFull', 'ClosedNoPayout', 'Expired'];
 const POLICIES_SLOT = 4n, RESERVED_SLOT = 2n; // from forge inspect ... storageLayout
@@ -1206,7 +1233,31 @@ const REAL_PROOFS = [{
     paymentTx: '0x544a72416958438be7181af6dc96111ea7d0e6544d63e7ac869faac28671dad2',
   },
 }];
-const allEvidence = () => [...S.evidence, ...REAL_PROOFS.map((x) => x.response)];
+const allEvidence = () => [...S.evidence, ...Object.values(S.proofs), ...REAL_PROOFS.map((x) => x.response)];
+
+// every policy was bought with a signed status: timestamp, data and signature are the last 3 args of its buyPolicy call,
+// so the page can pull a real airnode response for any policy straight from its purchase tx
+async function loadPurchaseProofs() {
+  const bought = IS_LIVE ? LIVE_BOUGHT_TX : {};
+  const sel = selector('buyPolicy(string,string,uint128,address,bytes32,uint256,bytes,bytes)').slice(2);
+  let added = 0;
+  for (const p of S.policies) {
+    const h = bought[p.id];
+    if (!h || S.proofs[p.id] !== undefined) continue;
+    S.proofs[p.id] = null;
+    try {
+      const tx = await rpc('eth_getTransactionByHash', [h]);
+      const input = strip(tx?.input);
+      if (input.slice(0, 8) !== sel) continue;
+      const d = input.slice(8), W = (i) => d.slice(i * 64, i * 64 + 64);
+      const bytesAt = (off) => { const len = Number(wU(d.slice(off * 2, off * 2 + 64))); return d.slice(off * 2 + 64, off * 2 + 64 + len * 2); };
+      const r = { airnode: AIRNODE, requestHash: p.statusRequestHash, timestamp: String(wU(W(5))),
+        data: new TextDecoder().decode(fromHex(bytesAt(Number(wU(W(6)))))), signature: '0x' + bytesAt(Number(wU(W(7)))), purchaseTx: h };
+      if (recoverSigner(r).signer?.toLowerCase() === AIRNODE.toLowerCase()) { S.proofs[p.id] = r; added++; }
+    } catch { S.proofs[p.id] = undefined; }
+  }
+  if (added) labNote();
+}
 const isFinal = (r) => { try { const s = JSON.parse(r.data).status; return s === 'Arrived' || s === 'Canceled'; } catch { return false; } };
 // pick the best response for a policy: final > not final, arrival > status, newer > older
 function evidenceFor(p) {
@@ -1320,6 +1371,7 @@ async function refreshChain() {
     diffPolicies(S.chain ? S.policies : null, policies);
     S.chain = true; S.free = free; S.readAt = Date.now();
     renderPolicies(policies, free);
+    loadPurchaseProofs();
   } catch (e) {
     S.chain = false;
     if (S.online) { try { renderPolicies(await j('/policies'), null); } catch {} }
@@ -1482,6 +1534,24 @@ async function runMode(m) {
     el.className = 'res no';
     el.innerHTML = `<span class="h">ERROR</span><span class="e">${esc(e.message)}</span>`;
   }
+}
+// one button for the pitch: pick a live policy with real evidence, run the 4 forgeries, show the score big
+async function cheat() {
+  const b = $('cheatBtn'), out = $('cheatOut');
+  if (!S.policies.length) { out.hidden = false; out.className = 'cheat-out'; out.innerHTML = '<b>Can\'t reach Base Sepolia right now.</b> Try again in a moment.'; return; }
+  await loadPurchaseProofs();
+  const hasReal = (p) => allEvidence().some((x) => [p.arrivalRequestHash, p.statusRequestHash].map((h) => String(h).toLowerCase()).includes(String(x.requestHash).toLowerCase()));
+  const active = S.policies.filter((p) => Number(p.status) === 1);
+  const p = active.filter(hasReal).pop() || active.pop() || S.policies.filter(hasReal)[0] || S.policies[0];
+  $('tPolicy').value = p.id; $('tUseInsp').checked = false; $('tReopen').checked = true; labNote();
+  b.disabled = true; b.textContent = 'Attacking…';
+  out.hidden = false; out.className = 'cheat-out'; out.innerHTML = `Attacking policy <b>#${esc(p.id)} ${esc(p.flight)}</b>…`;
+  try { await runAttacks(); } finally { b.disabled = false; b.textContent = 'Try again'; }
+  const modes = ['edit', 'wrongreq', 'wrongsigner', 'stale'];
+  const blocked = modes.filter((m) => $(`res-${m}`).classList.contains('blk'));
+  const why = modes.map((m) => $(`res-${m}`).querySelector('.t')?.textContent || 'skipped');
+  out.className = 'cheat-out ' + (blocked.length === modes.length ? 'all' : '');
+  out.innerHTML = `<div class="score">🛡 ${blocked.length} / ${modes.length} BLOCKED</div><div class="why">${why.map(esc).join(' · ')}</div><div class="pol">policy #${esc(p.id)} ${esc(p.flight)} · ${esc(p.statusName)} · details below</div>`;
 }
 async function runAttacks() {
   const b = $('runAll'); b.disabled = true;

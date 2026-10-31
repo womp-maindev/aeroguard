@@ -559,7 +559,7 @@
   }
 
   function mount() {
-    const lab = document.querySelector('#lab .card');
+    const lab = document.querySelector('#lab .card:not(.cheat)');
     if (!lab || el('wPanel')) return;
     const style = document.createElement('style');
     style.textContent = `
