@@ -9,11 +9,11 @@ About 280 words, so it fits at a calm pace. Have the screen ready as in [Run of 
 **0:00 — Problem (20 s)**
 > *(One line first: "AeroGuard is in the API3 and Cardano tracks; this is the API3 part.")* Your flight lands three hours late. To get money, you fill in forms, upload boarding passes, wait weeks, and a claims agency keeps a third. AeroGuard removes the claim: if signed flight data says you landed late, you are already paid.
 
-**0:20 — What it is (25 s)**
-> AeroGuard is flight-delay cover on Base Sepolia. The contract pays out only on AeroDataBox responses signed by its Airnode on API3 AirnodeHub. A keeper buys that signed data over x402 for five cents a call, and settles. Nobody files a claim and nobody approves one.
+**0:20 — What it is, and why it is different (30 s)**
+> AeroGuard is flight-delay cover on Base Sepolia. Everyone can pay out on signed data. We also sell on it: cover can only be bought with an AeroDataBox status, signed by its Airnode on API3 AirnodeHub, that says the flight hasn't left. So nobody can insure a flight that's already late. A keeper buys the signed arrival over x402 for five cents and settles. Nobody files a claim, and you can check all of it yourself, from your own wallet.
 
-**0:45 — The API3 part (35 s)** *(show the contract's request-hash code, then the policy #1 purchase tx)*
-> The signed data is the whole decision. The contract rebuilds the AirnodeHub request hash itself from the policy's flight and date, so a genuine response about a different flight does not count. We use signed data at both ends. To buy cover, you attach a fresh signed status saying the flight hasn't left yet, and the scheduled arrival is read from that signature. So nobody insures a flight that is already late, and nobody lies about the schedule.
+**0:50 — The API3 part (30 s)** *(show the contract's request-hash code, then the policy #1 purchase tx)*
+> In AeroGuard, signed data isn't something to look at. It decides whether cover can be sold, and whether and how much gets paid. No signature, no money moves. The contract rebuilds the AirnodeHub request hash itself from the policy's flight and date, so a response about another flight doesn't count. Here is a real purchase: the scheduled arrival comes from the Airnode's signature, not from the buyer.
 
 **1:20 — Proof (35 s)** *(README "Live evidence" → a settlement tx, then the dashboard's tamper lab; end on the dashboard's **Local rehearsal** section, already run)*
 > Four real policies on last night's flights from Munich, bought with signed proofs and settled by our keeper. Nobody filed a claim. This one landed early, so the signed arrival closed it with no payout. Now we attack the deployed contract with a real Airnode response. Edit one value: NotSignedByAirnode. Another flight: WrongRequest. An attacker's key: rejected. Too old: Stale. None of last night's flights was two hours late, so here is the same contract on a local chain with a test signer and a fast clock: three hours late pays all, two hours pays half, a cancellation pays all.
@@ -38,6 +38,9 @@ The rehearsal is a flight simulator next to the real flight: same controls, scen
 
 **"Isn't the local rehearsal just signing its own data?"**
 Yes, on purpose, and only there. It runs the same contract and keeper on a throwaway chain whose trusted signer is a local test key, so we can produce every outcome and fast-forward the clock. The live contract trusts only the AeroDataBox Airnode and rejects every rehearsal response with `NotSignedByAirnode`. Authenticity is shown on the live chain, completeness in the rehearsal, edge cases in the Foundry tests.
+
+**"What's the business case? Does the data cost kill the margin?"**
+Embedded cover that travel apps sell at checkout, paid without a claim. It complements EU261, which needs a claim, starts at 3 h and excludes weather and strikes. Measured on Base Sepolia, a policy costs about $0.18 in signed data and gas when it is alone on its flight, and $0.07 when ten share it: one signed outcome settles every policy on that flight. For $50 cover at an 8 % premium, that is 4.6 % or 1.8 % of the premium, for fraud-resistant settlement within minutes. Today a claim agency keeps about a third of an EU261 payout. Details and assumptions: [docs/BUSINESS.md](BUSINESS.md).
 
 **"Why trust AeroDataBox / the Airnode?"**
 The signature proves the AeroDataBox Airnode returned exactly this data for exactly this request at this time. It does not prove AeroDataBox is right about the world, and we say so. We reduce the risk in three ways: we only pay on a final status (`Arrived` or `Canceled`), the response must be signed after the landing it reports, and it must be fresh. The next step is 2-of-2 agreement with a second Airnode, but we could not find a second flight source on AirnodeHub.
@@ -95,8 +98,8 @@ The page reads the live contract on Base Sepolia, **Cover me** buys live with th
 
 | Time | Screen | Proof |
 |---|---|---|
-| 0:00–0:45 | Title, then the dashboard header | problem and product |
-| 0:45–1:20 | Editor: `requestHashFor` → Basescan policy #1 purchase tx | signed data at both ends |
+| 0:00–0:50 | Title, then the dashboard header | problem, product and the USP: signed data at both ends |
+| 0:50–1:20 | Editor: `requestHashFor` → Basescan policy #1 purchase tx | the request binding and a real purchase proof |
 | 1:20–1:35 | README Live evidence → one settlement tx | the valid case, live |
 | 1:35–1:45 | Tamper lab: **Run the 4 attacks** (or **Send it for real** on B) | the qualifier, with real responses |
 | 1:45–1:55 | Local rehearsal results: the payout table | every payout rule |
