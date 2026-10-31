@@ -703,10 +703,16 @@
         <div>
           <span class="num">06 · VIDEOS</span>
           <h2>Watch it in two minutes</h2>
-          <p>One video per track, both from real runs. Play them here, open them full screen for the pitch, or copy the link to paste anywhere.</p>
+          <p>The submission video, then one per track, all from real runs. Play them here, open them full screen for the pitch, or copy the link to paste anywhere.</p>
         </div>
       </div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,520px),1fr));gap:24px">
+        <div class="card" style="padding:18px;grid-column:1/-1">
+          <h3 style="margin:0 0 10px;font:400 21px/1.2 var(--display)">Overview · both tracks <span style="color:var(--mute);font-weight:400">· 2:25, submission video</span></h3>
+          <video controls playsinline preload="none" poster="media/demo-poster.jpg" width="1920" height="1080" style="width:100%;height:auto;border-radius:10px;background:#000"><source src="media/demo.mp4" type="video/mp4" /></video>
+          <p style="margin:0;display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px"><a href="media/demo.mp4" target="_blank" rel="noopener">Open full screen ↗</a> <a href="media/demo.mp4" download>Download</a>
+            <code style="user-select:all;word-break:break-all">https://womp-maindev.github.io/aeroguard/media/demo.mp4</code> <button type="button" class="btn btn-ghost" onclick="navigator.clipboard.writeText('https://womp-maindev.github.io/aeroguard/media/demo.mp4').then(()=>this.textContent='Copied ✓')">Copy link</button></p>
+        </div>
         <div class="card" style="padding:18px">
           <h3 style="margin:0 0 10px;font:400 21px/1.2 var(--display)">API3 track: signed data the contract depends on <span style="color:var(--mute);font-weight:400">· 2:15, voiced</span></h3>
           <video controls playsinline preload="none" poster="media/api3-poster.jpg" width="1920" height="1080" style="width:100%;height:auto;border-radius:10px;background:#000"><source src="media/api3.mp4" type="video/mp4" /></video>
