@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-10-31T09:43:02.403Z",
+  "updatedAt": "2026-10-31T10:57:49.668Z",
   "contract": "0x257054204c4Cd43846C4553eBe6D709841980a80",
   "runs": [
     {
@@ -355,6 +355,113 @@
           "msg": "policy #11 LH2476: nothing due, next check ≥ 12:50Z"
         }
       ]
+    },
+    {
+      "startedAt": "2026-10-31T10:33:32.376Z",
+      "finishedAt": "2026-10-31T10:33:37.756Z",
+      "event": "workflow_dispatch",
+      "url": "https://github.com/womp-maindev/aeroguard/actions/runs/41193217793",
+      "log": [
+        {
+          "at": "2026-10-31T10:33:32.376Z",
+          "level": "info",
+          "msg": "policy #5 LH1866: nothing due, next check ≥ 10:50Z"
+        },
+        {
+          "at": "2026-10-31T10:33:32.376Z",
+          "level": "info",
+          "msg": "policy #6 LH2472: nothing due, next check ≥ 10:55Z"
+        },
+        {
+          "at": "2026-10-31T10:33:32.377Z",
+          "level": "info",
+          "msg": "policy #8: LH1810 2026-10-31 sched 10:00Z, check 1/20"
+        },
+        {
+          "at": "2026-10-31T10:33:33.920Z",
+          "level": "pay",
+          "msg": "bought signed arrival for LH1810 via x402",
+          "link": "https://sepolia.basescan.org/tx/0xd484d1c3d3496a4045152c29fcf557eaeea7e6b7d817fe77acf61a71d0aca1b7"
+        },
+        {
+          "at": "2026-10-31T10:33:35.123Z",
+          "level": "chain",
+          "msg": "policy #8 settled ClosedNoPayout: Arrived, 0 min late, payout 0 aUSD",
+          "link": "https://sepolia.basescan.org/tx/0xa98c28cc6987978ae3dba3c1c9c5083e1819a680c18559c02bdd604389741c39"
+        },
+        {
+          "at": "2026-10-31T10:33:35.124Z",
+          "level": "info",
+          "msg": "policy #9 LH1814: nothing due, next check ≥ 13:35Z"
+        },
+        {
+          "at": "2026-10-31T10:33:35.124Z",
+          "level": "info",
+          "msg": "policy #10 LH1868: nothing due, next check ≥ 12:45Z"
+        },
+        {
+          "at": "2026-10-31T10:33:35.124Z",
+          "level": "info",
+          "msg": "policy #11 LH2476: nothing due, next check ≥ 12:50Z"
+        }
+      ]
+    },
+    {
+      "startedAt": "2026-10-31T10:57:41.760Z",
+      "finishedAt": "2026-10-31T10:57:49.668Z",
+      "event": "workflow_dispatch",
+      "url": "https://github.com/womp-maindev/aeroguard/actions/runs/41194833830",
+      "log": [
+        {
+          "at": "2026-10-31T10:57:41.760Z",
+          "level": "info",
+          "msg": "policy #5: LH1866 2026-10-31 sched 10:20Z, check 1/20"
+        },
+        {
+          "at": "2026-10-31T10:57:43.610Z",
+          "level": "pay",
+          "msg": "bought signed arrival for LH1866 via x402",
+          "link": "https://sepolia.basescan.org/tx/0x07bb6b6ec23b133c266a2cdfdebdc7e4e5db2a10bd66d66bbd410a7ba5d18ee2"
+        },
+        {
+          "at": "2026-10-31T10:57:44.398Z",
+          "level": "chain",
+          "msg": "policy #5 settled ClosedNoPayout: Arrived, 0 min late, payout 0 aUSD",
+          "link": "https://sepolia.basescan.org/tx/0x5892c851847a5bb8340862ff10ce548837f52ffeb7443c0c3fe28daf7dfc9a6d"
+        },
+        {
+          "at": "2026-10-31T10:57:44.398Z",
+          "level": "info",
+          "msg": "policy #6: LH2472 2026-10-31 sched 10:25Z, check 1/20"
+        },
+        {
+          "at": "2026-10-31T10:57:45.574Z",
+          "level": "pay",
+          "msg": "bought signed arrival for LH2472 via x402",
+          "link": "https://sepolia.basescan.org/tx/0x42a824e95eb5c9f8dd553bcb660e5728163ea6bcfc9eebf78fed99393a9dc91d"
+        },
+        {
+          "at": "2026-10-31T10:57:47.115Z",
+          "level": "chain",
+          "msg": "policy #6 settled ClosedNoPayout: Arrived, 0 min late, payout 0 aUSD",
+          "link": "https://sepolia.basescan.org/tx/0x226abfdc44a13644145103ff7f2322883eaf3722bee1e6dc78500b8d168798b2"
+        },
+        {
+          "at": "2026-10-31T10:57:47.115Z",
+          "level": "info",
+          "msg": "policy #9 LH1814: nothing due, next check ≥ 13:35Z"
+        },
+        {
+          "at": "2026-10-31T10:57:47.115Z",
+          "level": "info",
+          "msg": "policy #10 LH1868: nothing due, next check ≥ 12:45Z"
+        },
+        {
+          "at": "2026-10-31T10:57:47.115Z",
+          "level": "info",
+          "msg": "policy #11 LH2476: nothing due, next check ≥ 12:50Z"
+        }
+      ]
     }
   ],
   "evidence": [
@@ -532,6 +639,57 @@
       "signature": "0xd5a0c3bbb038ca24df900e0c670ae0f7683134efc2cc0b27123771f57deec7d94a1a2de6480a6d039e706a6a952f5172db108ccdb1e428ccc93b3f90eb82ffd91c",
       "fetchedAt": 1793439780,
       "paymentTx": "0x364e2368b6ed75e47edd3aa41cfa906b421e90a2b3772bc34c270905e65625fc"
+    },
+    {
+      "airnode": "0x83FE2E8F24E66520B1902C3507De4F471248f2Ec",
+      "requestHash": "0x0bc9290bd32a88c0e0b3c79f8b8d0cd5cf75e8bd915546c4264f3fa8710a6614",
+      "timestamp": 1793442813,
+      "data": "{\"actual\":\"2026-10-31 09:45Z\",\"scheduled\":\"2026-10-31 10:00Z\",\"status\":\"Arrived\"}",
+      "signature": "0xc5a57ab3546e34a7edb46e86c4344d1bc40fcd858def21e50ecdfc037a4329e401dad9d9e0c522a224b580916b20c9f4fcac4a61fdd6506cc1b6c4d9634c11351b",
+      "fetchedAt": 1793442813,
+      "paymentTx": "0xd484d1c3d3496a4045152c29fcf557eaeea7e6b7d817fe77acf61a71d0aca1b7",
+      "policyId": 8,
+      "flight": "LH1810",
+      "date": "2026-10-31",
+      "kind": "arrival",
+      "settleTx": "0xa98c28cc6987978ae3dba3c1c9c5083e1819a680c18559c02bdd604389741c39",
+      "outcome": "ClosedNoPayout",
+      "payout": 0,
+      "delayMinutes": 0
+    },
+    {
+      "airnode": "0x83FE2E8F24E66520B1902C3507De4F471248f2Ec",
+      "requestHash": "0x468fb123a937df8234a403f78869db212b7319657efb1b68f6d3fb3616b5c202",
+      "timestamp": 1793444262,
+      "data": "{\"actual\":\"2026-10-31 10:18Z\",\"scheduled\":\"2026-10-31 10:20Z\",\"status\":\"Arrived\"}",
+      "signature": "0x9eb401b90eef69246b68b8d0e76498b3a9695b2b4a417b7dd56236fc3f7655585fa3132652eac4416c2c7fbc39576c70270a19131cd56980d4ab2b35b367f5ed1b",
+      "fetchedAt": 1793444263,
+      "paymentTx": "0x07bb6b6ec23b133c266a2cdfdebdc7e4e5db2a10bd66d66bbd410a7ba5d18ee2",
+      "policyId": 5,
+      "flight": "LH1866",
+      "date": "2026-10-31",
+      "kind": "arrival",
+      "settleTx": "0x5892c851847a5bb8340862ff10ce548837f52ffeb7443c0c3fe28daf7dfc9a6d",
+      "outcome": "ClosedNoPayout",
+      "payout": 0,
+      "delayMinutes": 0
+    },
+    {
+      "airnode": "0x83FE2E8F24E66520B1902C3507De4F471248f2Ec",
+      "requestHash": "0xa98579bf27316841f45893380fa804a087fbf1a544dd8a008e3736d929aa4e14",
+      "timestamp": 1793444264,
+      "data": "{\"actual\":\"2026-10-31 10:14Z\",\"scheduled\":\"2026-10-31 10:25Z\",\"status\":\"Arrived\"}",
+      "signature": "0x778b3865b841eb5b04daa9c16c38d9be76dc347a90aec001ac253b7c63d5fb0b765dc2c85cf8cde7af2df25509f60a4eafaa48a429f4104ebf1fd27574ae54dc1b",
+      "fetchedAt": 1793444265,
+      "paymentTx": "0x42a824e95eb5c9f8dd553bcb660e5728163ea6bcfc9eebf78fed99393a9dc91d",
+      "policyId": 6,
+      "flight": "LH2472",
+      "date": "2026-10-31",
+      "kind": "arrival",
+      "settleTx": "0x226abfdc44a13644145103ff7f2322883eaf3722bee1e6dc78500b8d168798b2",
+      "outcome": "ClosedNoPayout",
+      "payout": 0,
+      "delayMinutes": 0
     }
   ]
 }
