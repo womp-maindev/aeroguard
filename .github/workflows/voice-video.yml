@@ -38,8 +38,8 @@ jobs:
         run: |
           set -e
           git fetch -q origin main
-          git show origin/main:video/aeroguard-api3-full.mp4 > /tmp/v/api3.mp4
-          git show origin/main:presentation/cardano/aeroguard-cardano-full.mp4 > /tmp/v/cardano.mp4
+          git show origin/main:video/aeroguard-api3-full.mp4 > /tmp/v/api3.mp4 2>/dev/null || rm -f /tmp/v/api3.mp4
+          git show origin/main:cardano/video/aeroguard-cardano-full.mp4 > /tmp/v/cardano.mp4 2>/dev/null || rm -f /tmp/v/cardano.mp4
           cp media/voiced/aeroguard-demo-draft.mp4 /tmp/v/demo.mp4
           voice() { # video lines out
             local vid=$1 tsv=$2 out=$3 i=0 inputs="" filters="" mix=""
@@ -67,9 +67,8 @@ jobs:
             ffmpeg -y -loglevel error -i "$vid" -i /tmp/v/$out.wav -map 0:v -map 1:a -c:v copy -c:a aac -b:a 160k -movflags +faststart media/voiced/$out.mp4
             ls -la media/voiced/$out.mp4
           }
-          voice /tmp/v/demo.mp4 media/voiced/lines.tsv aeroguard-demo-voiced
-          voice /tmp/v/api3.mp4 media/voiced/api3-lines.tsv aeroguard-api3-voiced
-          voice /tmp/v/cardano.mp4 media/voiced/cardano-lines.tsv aeroguard-cardano-voiced
+          [ -s /tmp/v/api3.mp4 ] && voice /tmp/v/api3.mp4 media/voiced/api3-lines.tsv aeroguard-api3-voiced || echo "no API3 source on main"
+          [ -s /tmp/v/cardano.mp4 ] && voice /tmp/v/cardano.mp4 media/voiced/cardano-lines.tsv aeroguard-cardano-voiced || echo "no Cardano source on main"
       - name: Commit
         run: |
           git config user.name womp-maindev && git config user.email 226526968+womp-maindev@users.noreply.github.com
