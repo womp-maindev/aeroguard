@@ -2,5 +2,12 @@
   { "flight": "IB1314", "date": "2026-10-30", "ref": "policy-1" },
   { "flight": "LH1816", "date": "2026-10-30", "ref": "policy-2" },
   { "flight": "EI357", "date": "2026-10-30", "ref": "policy-3" },
-  { "flight": "BA955", "date": "2026-10-30", "ref": "policy-4" }
+  { "flight": "BA955", "date": "2026-10-30", "ref": "policy-4" },
+  { "flight": "LH1866", "date": "2026-10-31", "ref": "policy-5" },
+  { "flight": "LH2472", "date": "2026-10-31", "ref": "policy-6" },
+  { "flight": "EI352", "date": "2026-10-31", "ref": "policy-7" },
+  { "flight": "LH1810", "date": "2026-10-31", "ref": "policy-8" },
+  { "flight": "LH1814", "date": "2026-10-31", "ref": "policy-9" },
+  { "flight": "LH1868", "date": "2026-10-31", "ref": "policy-10" },
+  { "flight": "LH2476", "date": "2026-10-31", "ref": "policy-11" }
 ]

@@ -5,6 +5,8 @@ live; the deck (`index.html`) and the videos are the fallback.
 
 ## Main demo: Claude Desktop pays tADA for a signed verdict (MCP)
 
+Paths below use `~/aeroguard-run`. On any machine, any clone of the repo works: `cd cardano` in it.
+
 **Set up once (Mac), all in one block.** It writes the MCP entry into Claude Desktop's config and keeps any servers
 already there:
 ```bash
@@ -49,8 +51,17 @@ Claude's PATH.
 - Logs to check: `~/Library/Logs/Claude/mcp-server-aeroguard-cardano.log`. Typical causes are an old `node`, a missing
   `.env` (it needs `BUYER_MNEMONIC` and `BLOCKFROST_PROJECT_ID`), or the server not running.
 
-**Budget:** each demo costs about 2.2 tADA. The buyer had 10,000 tADA, minus one payment so far. `npm run preflight`
-shows the current balance.
+**Budget:** each demo costs about 2.2 tADA. Run `npm run preflight` for the current balance.
+
+## Aiken cover live on preprod (before the pitch, ~3 min)
+Run this in `~/aeroguard-run/cardano` (it starts its own endpoint on a free port):
+```bash
+sh live-cover.sh now
+```
+It pays 2 tADA for the final LH1816 verdict and locks a 5 tADA cover at the Aiken script. Then it settles the cover
+with that verdict: the script checks the Airnode signature on chain, and the cover goes back to the insurer (11 min late
+pays nothing). It prints three Cardanoscan links and writes them to `COVER-EVIDENCE.md`. Commit `EVIDENCE.md`,
+`COVER-EVIDENCE.md` and `evidence/`.
 
 ## The evening before / 30 min before
 1. In `~/aeroguard-run` update to `main`, then:

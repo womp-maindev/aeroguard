@@ -48,6 +48,11 @@ failed purchase is recorded as a refund due, and no policy is ever bought withou
 the contract rule, logs each Cardano receipt. `npm run mcp` exposes `list_flights` (free) and `get_flight_verdict`
 (paid) as MCP tools for LLM agents.
 
+**An agent hires an agent, and pays only for checked work.** The claims agent (the buyer) hires the verdict agent (our
+x402 service) and pays only for a final proof that passes the signature check. The Aiken escrow ties the money to the
+result: the cover moves only on that signed answer. No evidence means a free 404, so nobody pays for work that was not
+done.
+
 **One signed answer, the same verdict on two chains.** The four policies of 30 Oct all landed within the threshold. The keeper's
 signed `Arrived` answers closed them on Base Sepolia with no payout; the very same signatures, verified with Plutus V3
 builtins, settle the Aiken cover the same way, and paying the holder with them is rejected.
@@ -70,7 +75,7 @@ a final one 2 tADA.
 |---|---|
 | x402 paid `GET /verdict` on Cardano preprod | **live**: tx `e2ef922b…` (2 tADA, final IB1314 verdict), recorded in `cardano/EVIDENCE.md` |
 | Signed evidence | **real**: AeroDataBox Airnode answers bought by our keeper; four final landings settled the live Base policies |
-| Aiken flight cover | **tested**: 44 `aiken check` tests incl. the real signatures; off-chain transactions executed locally with Aiken's UPLC evaluator; not deployed on preprod |
+| Aiken flight cover | **tested**: 44 `aiken check` tests incl. the real signatures; off-chain transactions executed locally with Aiken's UPLC evaluator. Live on preprod with one command, `sh cardano/live-cover.sh now`: pay for a verdict over x402, open a cover, settle it with that verdict. Its txs go to `cardano/COVER-EVIDENCE.md` |
 | `GET /policy` (tADA buys a Base policy) | **tested offline** (8 tests); not run live |
 | Metadata anchor (`ANCHOR=true`) | **tested offline**; not run live |
 | MCP tools for LLM agents | **tested** in-process and over stdio; for a live demo with Claude Desktop see `presentation/cardano/DEMO.md` |
