@@ -20,7 +20,8 @@
     "balance": "node --env-file-if-exists=.env src/balance.ts",
     "test": "node --test \"src/**/*.test.ts\"",
     "buy-policy": "node --env-file-if-exists=.env src/buy-policy.ts",
-    "server:policies": "node --env-file-if-exists=../.env --env-file-if-exists=.env src/server.ts"
+    "server:policies": "node --env-file-if-exists=../.env --env-file-if-exists=.env src/server.ts",
+    "video": "sh video/src/render.sh"
   },
   "dependencies": {
     "@evolution-sdk/aiken-uplc": "^2.0.19",

@@ -89,6 +89,9 @@ a final one 2 tADA.
 4. Deploy the Aiken flight cover on preprod/mainnet with an off-chain builder for buy/settle/reclaim, a pool of
    covers per insurer, and an LP vault; the same validator pays out on the same proof the agents buy.
 
+## Video
+Ready-made clips (1080p, no sound) in [`cardano/video/`](../cardano/video/); timings and voice-over ideas in [`SHOTLIST.md`](../cardano/video/SHOTLIST.md).
+
 ## Video segment (≈30 s)
 > **[screen: terminal, `npm run server` left, `npm run buy` right]**
 > "Flight data today means API keys and monthly plans: agents can't sign up, and contracts can't trust the JSON.
