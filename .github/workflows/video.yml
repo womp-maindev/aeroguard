@@ -51,6 +51,7 @@ jobs:
           d=$(ffprobe -v error -show_entries format=duration -of csv=p=0 video/aeroguard-api3-full.mp4); echo "new cut: $d s"
           ffmpeg -loglevel error -y -i video/aeroguard-api3-full.mp4 -i web/media/api3.mp4 -map 0:v -map 1:a -c:v copy -c:a copy -shortest -movflags +faststart /tmp/api3.mp4
           mv /tmp/api3.mp4 web/media/api3.mp4
+          cp web/media/api3.mp4 presentation/api3/AeroGuard-API3-video.mp4
       - uses: actions/upload-artifact@v4
         with:
           name: aeroguard-api3-video
@@ -61,6 +62,6 @@ jobs:
         run: |
           rm -f video/aeroguard-api3-full.mp4   # the voiced cut in web/media/api3.mp4 is the one to watch
           git config user.name womp-maindev && git config user.email 226526968+womp-maindev@users.noreply.github.com
-          git add video/[0-9]*.mp4 web/media/api3.mp4 video/src/forge-test.txt video/src/rehearse.txt
+          git add video/[0-9]*.mp4 web/media/api3.mp4 presentation/api3/AeroGuard-API3-video.mp4 video/src/forge-test.txt video/src/rehearse.txt
           git commit -qm "video: re-rendered API3 clips from live data ($(date -u +%H:%MZ))" || exit 0
           for i in 1 2 3; do git pull -q --rebase origin main && git push -q origin HEAD:main && break; sleep 5; done
