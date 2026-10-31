@@ -1,0 +1,71 @@
+name: Record demo clips
+
+# Records short dashboard clips from main (served statically, like Pages) for the demo video,
+# converts them to mp4 and commits them to media/ on this branch. Read-only: eth_calls only.
+on:
+  push:
+    branches: [claude/bold-ride-xhu8s8]
+    paths: [.github/workflows/record-clips.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  record:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install Playwright + ffmpeg
+        run: |
+          mkdir -p /tmp/rec && cd /tmp/rec && npm init -y >/dev/null && npm i playwright@1.48.2 >/dev/null
+          npx playwright install --with-deps chromium >/dev/null
+          sudo apt-get install -y ffmpeg >/dev/null 2>&1 || true
+      - name: Record
+        run: |
+          (cd web && python3 -m http.server 8000 >/dev/null 2>&1 &)
+          sleep 2
+          cat > /tmp/rec/rec.js <<'JS'
+          const { chromium } = require('playwright');
+          const clips = [
+            ['01-hero', async (p) => { await p.waitForTimeout(6000); await p.mouse.wheel(0, 500); await p.waitForTimeout(3000); }],
+            ['02-policies', async (p) => { await p.locator('#policies').scrollIntoViewIfNeeded(); await p.waitForTimeout(9000); await p.mouse.wheel(0, 300); await p.waitForTimeout(3000); }],
+            ['03-keeper-log', async (p) => { await p.locator('#log').scrollIntoViewIfNeeded(); await p.waitForTimeout(8000); }],
+            ['04-cardano', async (p) => { await p.locator('#cardano').scrollIntoViewIfNeeded(); await p.waitForTimeout(8000); await p.mouse.wheel(0, 400); await p.waitForTimeout(3000); }],
+            ['05-inspector', async (p) => {
+              await p.locator('#inspector').scrollIntoViewIfNeeded(); await p.waitForTimeout(2000);
+              const b = p.getByRole('button', { name: /real Airnode|Load demo|Keeper evidence/i }).first();
+              if (await b.count()) { await b.click(); }
+              await p.waitForTimeout(7000);
+            }],
+          ];
+          (async () => {
+            const b = await chromium.launch();
+            for (const [name, act] of clips) {
+              const ctx = await b.newContext({ viewport: { width: 1440, height: 900 }, recordVideo: { dir: `/tmp/out/${name}`, size: { width: 1440, height: 900 } } });
+              const p = await ctx.newPage();
+              await p.goto('http://localhost:8000/index.html');
+              await p.waitForTimeout(3000);
+              try { await act(p); } catch (e) { console.log(name, 'error', e.message); }
+              await p.screenshot({ path: `/tmp/out/${name}.png` });
+              await ctx.close();
+              console.log('recorded', name);
+            }
+            await b.close();
+          })();
+          JS
+          mkdir -p /tmp/out && cd /tmp/rec && node rec.js
+      - name: Convert and commit
+        run: |
+          mkdir -p /tmp/media
+          for d in /tmp/out/*/; do n=$(basename "$d"); f=$(ls "$d"*.webm | head -1); ffmpeg -y -loglevel error -i "$f" -c:v libx264 -pix_fmt yuv420p -movflags +faststart "/tmp/media/$n.mp4"; cp "/tmp/out/$n.png" /tmp/media/; done
+          git fetch -q origin claude/bold-ride-xhu8s8 && git checkout -q -B rec origin/claude/bold-ride-xhu8s8
+          mkdir -p media/clips && cp /tmp/media/* media/clips/
+          git config user.name womp-maindev && git config user.email 226526968+womp-maindev@users.noreply.github.com
+          git add media && git commit -qm "media: dashboard clips for the demo video" && git push -q origin rec:claude/bold-ride-xhu8s8
