@@ -5,6 +5,11 @@ Everything in the Cardano track, newest first. Times are UTC, 30–31 Oct 2026. 
 only the short "Cardano" section in the root `README.md`, `docs/DEVFOLIO-cardano.md` and the dashboard file
 `web/data/cardano-run.json`.
 
+## 31 Oct — final video, 2:20
+- `web/media/cardano.mp4` and `presentation/cardano/AeroGuard-Cardano-video.mp4` are now the final 2:20 cut (12.3 MB):
+  cards on the business case / ROI / USP and on limits / next come before the closing. Durations in the docs and on
+  the site are updated.
+
 ## 31 Oct — live Aiken escrow as an optional bonus
 - `presentation/cardano/DEMO.md` has a new section, "Bonus block (optional, ~2 min)": `sh live-cover.sh now`, what
   the screen shows step by step, what to say while the block is pending, and a fallback.
