@@ -1,6 +1,6 @@
 # Video script: what to say over the Cardano video
 
-**The video:** [`aeroguard-cardano-full.mp4`](aeroguard-cardano-full.mp4) in this folder. It runs 1:57, 1080p, with no sound.
+**The video:** [`web/media/cardano.mp4`](../../web/media/cardano.mp4). It runs 1:57, 1080p, voiced with these EN lines.
 Separate clips for editing are in [`../../cardano/video/`](../../cardano/video/), numbered 01–10.
 
 **The voiced video in one command:** [`voiceover/make-voiced-video.sh`](voiceover/make-voiced-video.sh) builds
