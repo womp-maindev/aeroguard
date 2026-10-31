@@ -2,6 +2,8 @@
 
 AeroGuard is **one project entered in two tracks: API3 and Cardano** (confirmed by the organizers). This is the API3 version of the pitch: the oracle, the contract and the keeper. Say it in one sentence at the start so the API3 judges know the Cardano part exists and is judged separately.
 
+Stage checklist and both 2-minute versions (API3 + Cardano) on one page: [`presentation/PITCH-RUNBOOK.md`](../presentation/PITCH-RUNBOOK.md).
+
 About 280 words, so it fits at a calm pace. Have the screen ready as in [Run of show](#run-of-show-one-setup-every-proof): dashboard on `http://localhost:8787` (keeper API with `REHEARSE=on`, rehearsal already run once), Basescan tab with the contract, a terminal in `keeper/`.
 
 ## Script
