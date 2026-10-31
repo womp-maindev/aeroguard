@@ -75,6 +75,8 @@ Flight delays are common and compensation claims are slow: forms, evidence, week
 ## How it works
 ![AeroGuard architecture: signed status → buyPolicy, signed arrival via x402 → keeper → settle → payout](docs/img/architecture.svg)
 
+The detailed map, with the components, the signed payload, the purchase, settlement and verification flows, the money flows and the trust boundaries, is in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+
 ```
 Traveller / travel app
   │ 1  buy: attach a fresh signed AeroDataBox STATUS response (pre-departure)        → buyPolicy
@@ -100,7 +102,7 @@ Two projections per policy keep the signed payload tiny and cover both outcomes:
 **Who relies on the data:** travellers and the travel agents/bots that resell cover; LPs who fund the pool.
 **If it were forged:** the pool is drained by fake "4 h late" claims, or honest travellers are denied payment.
 **Trust assumptions:** the signature proves the AeroDataBox Airnode returned exactly this at this time. It does not prove AeroDataBox is right about the real world. We pick a recognised aviation source and require a final status.
-**Data we wanted but couldn't find on AirnodeHub:** EU261 eligibility (delay cause, extraordinary circumstances), airline compensation registries, a second independent flight source to require 2‑of‑2 agreement.
+**Data we wanted but couldn't find on AirnodeHub:** a second source of scheduled *and* actual arrival times for 2-of-2 agreement (OpenSky, on AirnodeHub, tracks aircraft but has no schedules), a first-party flight-status Airnode, EU261 eligibility (delay cause, extraordinary circumstances), route and airport delay statistics (AeroDataBox has them, its listing doesn't serve them), airline compensation records, and strike, closure and NOTAM feeds. Details: [docs/DEVFOLIO.md](docs/DEVFOLIO.md#data-we-wanted-but-couldnt-find-on-airnodehub).
 
 ### Signed data at BOTH ends — no adverse selection
 Buying cover also needs AirnodeHub-signed evidence. `buyPolicy` takes a fresh (≤15 min) signed AeroDataBox **status** response for that exact flight+date: the contract checks signer + request + freshness, accepts only pre-departure statuses (`Expected / Unknown / CheckIn / Boarding`), reads the scheduled arrival **from the signature** and requires it to be ≥ `minLeadTime` away. Nobody can insure a flight that is already late, and nobody can lie about its schedule; settlement must show the exact same signed schedule.
@@ -233,7 +235,7 @@ What the deployed contract does not handle yet, with the production fix. Each fi
 - Flight numbers restricted to `[A-Z0-9]{3,8}` so the on‑chain JSON hash can never diverge from AirnodeHub's (no escaping).
 - [`Hardening.t.sol`](contracts/test/Hardening.t.sol) pins the deployed behaviour without a redeploy. It covers empty, truncated, all-zero and malleable signatures (no zero-address recovery), a stranger settling (the payout still goes to the stored holder, for the stored coverage), payouts that revert, return false or re-enter (the policy stays `Active`), and the exact boundaries of `maxAge`, future skew, purchase-proof age and the 120/180-minute tiers.
 - Deliberate choices. Anyone may call `settle`, which is what lets the keeper be replaceable, and copying a valid settlement from the mempool gains nothing. The Airnode address is immutable: no admin key can switch which signer the contract trusts. The constructor does not reject `airnode = address(0)`, but such a deployment fails closed (tested), and the live one is set to the AeroDataBox Airnode.
-- Hackathon simplifications: owner key sets premium/limits; premium is a flat 8 % (real pricing would use route/airline delay statistics, which AeroDataBox's priced tier offers).
+- Hackathon simplifications: owner key sets premium/limits; premium is a flat 8 % (real pricing would use route and airline delay statistics, which AeroDataBox offers but its AirnodeHub listing doesn't serve).
 
 ## What's next
-LP vault earning premiums · risk-priced premiums per route · 2-source agreement (AeroDataBox + OpenSky) · ZK purchase proofs for private policies · the same contract shape for weather and rail delays.
+LP vault earning premiums · risk-priced premiums per route · 2-source agreement on the landing time (AeroDataBox schedule and arrival + OpenSky ADS-B) · ZK purchase proofs for private policies · the same contract shape for weather and rail delays.

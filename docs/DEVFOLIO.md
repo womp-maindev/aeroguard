@@ -64,7 +64,7 @@ Two small projections keep the signed payload tiny:
 ### Who relies on the data
 - **Travellers**, who are paid without filing a claim.
 - **Travel apps and agents** that resell the cover. They cannot settle with the wrong flight, even by mistake.
-- **Liquidity providers** who fund the pool. Their capital is only paid out on signed evidence, and it can only be locked by cover that was bought before the outcome was known.
+- **Whoever funds the pool.** Today that is the owner: `fundPool` is open to anyone, but in this prototype only the owner can withdraw. The capital is only paid out on signed evidence, and it can only be locked by cover that was bought before the outcome was known.
 - **Keepers**, anyone who calls `settle`. They need no trust and get no discretion.
 
 ### What breaks if the data is forged
@@ -96,11 +96,12 @@ Each one needs a contract change, so none is applied to the live deployment, whi
 - **No live payout yet.** None of the 4 live flights was 2 h late. The signed arrival still decided each on-chain outcome, and the payout tiers are shown by the tests and the rehearsal.
 
 ### Data we wanted but couldn't find on AirnodeHub
-- **A second, independent flight source** (for example OpenSky or FlightAware), so that payouts need 2-of-2 agreement between Airnodes. That would remove the single-source assumption.
+- **A second source of scheduled *and* actual arrival times**, so that payouts need 2-of-2 agreement between Airnodes and the single-source assumption goes away. AirnodeHub has the OpenSky Network (ADS-B tracking), but it has no schedules and no gate times. It is keyed by ICAO callsign (`DLH1814`, not `LH1814`), and its per-airport arrival lists are built overnight. It can cross-check *when* an aircraft landed, which is our next step, but it cannot decide a delay on its own.
+- **A first-party flight-status Airnode.** The AeroDataBox listing is a third-party attestation: its operator does not own the source. An Airnode run by the data provider or an airline would move the trust closer to the source.
 - **The cause of the delay and whether there were extraordinary circumstances**, to model EU261 eligibility and cover the gap that EU261 leaves.
-- **Historical on-time statistics per route and airline**, to price the premium by risk instead of a flat 8 %.
+- **Route and airport delay statistics**, to price the premium by risk instead of a flat 8 %. AeroDataBox offers them, but its AirnodeHub listing serves only the cheapest operations: "airport delay statistics, route statistics and flight alert webhooks are not served".
 - **Airline compensation and refund records**, to avoid paying twice when the airline already compensated.
-- **Weather and airport disruption feeds** (NOTAMs, ATC strikes), for early warnings and cover for whole airports.
+- **Actual operational disruptions** (air traffic control strikes, airport closures, NOTAMs), for early warnings and cover for whole airports. AirnodeHub has weather, including CustomWeather's weather-based delay *forecasts* per airport, but nothing on strikes, closures or NOTAMs.
 
 ### Feedback for API3 from building on AirnodeHub
 - **Missing JSON pointers.** A projection pointer that is missing makes the Airnode answer 400. A cancelled flight has no revised arrival time, so we need a second projection (`status`) just to prove a cancellation. An option to return `null` for a missing pointer would let one signed response cover both outcomes.
