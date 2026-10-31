@@ -9,11 +9,11 @@ About 280 words, so it fits at a calm pace. Have the screen ready as in [Run of 
 **0:00 — Problem (20 s)**
 > *(One line first: "AeroGuard is in the API3 and Cardano tracks; this is the API3 part.")* Your flight lands three hours late. To get money, you fill in forms, upload boarding passes, wait weeks, and a claims agency keeps a third. AeroGuard removes the claim: if signed flight data says you landed late, you are already paid.
 
-**0:20 — What it is (25 s)**
-> AeroGuard is flight-delay cover on Base Sepolia. The contract pays out only on AeroDataBox responses signed by its Airnode on API3 AirnodeHub. A keeper buys that signed data over x402 for five cents a call, and settles. Nobody files a claim and nobody approves one.
+**0:20 — What it is, and why it is different (30 s)**
+> AeroGuard is flight-delay cover on Base Sepolia. Everyone can pay out on signed data. We also sell on it: cover can only be bought with an AeroDataBox status, signed by its Airnode on API3 AirnodeHub, that says the flight hasn't left. So nobody can insure a flight that's already late. A keeper buys the signed arrival over x402 for five cents and settles. Nobody files a claim, and you can check all of it yourself, from your own wallet.
 
-**0:45 — The API3 part (35 s)** *(show the contract's request-hash code, then the policy #1 purchase tx)*
-> In AeroGuard, signed data isn't something to look at. It decides whether cover can be sold, and whether and how much gets paid. No signature, no money moves. The contract rebuilds the AirnodeHub request hash itself from the policy's flight and date, so a response about another flight doesn't count. To buy cover, you attach a fresh signed status saying the flight hasn't left, and the schedule is read from that signature. So nobody insures a flight that's already late, or lies about its schedule.
+**0:50 — The API3 part (30 s)** *(show the contract's request-hash code, then the policy #1 purchase tx)*
+> In AeroGuard, signed data isn't something to look at. It decides whether cover can be sold, and whether and how much gets paid. No signature, no money moves. The contract rebuilds the AirnodeHub request hash itself from the policy's flight and date, so a response about another flight doesn't count. Here is a real purchase: the scheduled arrival comes from the Airnode's signature, not from the buyer.
 
 **1:20 — Proof (35 s)** *(README "Live evidence" → a settlement tx, then the dashboard's tamper lab; end on the dashboard's **Local rehearsal** section, already run)*
 > Four real policies on last night's flights from Munich, bought with signed proofs and settled by our keeper. Nobody filed a claim. This one landed early, so the signed arrival closed it with no payout. Now we attack the deployed contract with a real Airnode response. Edit one value: NotSignedByAirnode. Another flight: WrongRequest. An attacker's key: rejected. Too old: Stale. None of last night's flights was two hours late, so here is the same contract on a local chain with a test signer and a fast clock: three hours late pays all, two hours pays half, a cancellation pays all.
@@ -98,8 +98,8 @@ The page reads the live contract on Base Sepolia, **Cover me** buys live with th
 
 | Time | Screen | Proof |
 |---|---|---|
-| 0:00–0:45 | Title, then the dashboard header | problem and product |
-| 0:45–1:20 | Editor: `requestHashFor` → Basescan policy #1 purchase tx | signed data at both ends |
+| 0:00–0:50 | Title, then the dashboard header | problem, product and the USP: signed data at both ends |
+| 0:50–1:20 | Editor: `requestHashFor` → Basescan policy #1 purchase tx | the request binding and a real purchase proof |
 | 1:20–1:35 | README Live evidence → one settlement tx | the valid case, live |
 | 1:35–1:45 | Tamper lab: **Run the 4 attacks** (or **Send it for real** on B) | the qualifier, with real responses |
 | 1:45–1:55 | Local rehearsal results: the payout table | every payout rule |

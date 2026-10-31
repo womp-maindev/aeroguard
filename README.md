@@ -215,6 +215,19 @@ cardano/    x402 on Cardano preprod: paid /verdict, claims agent, MCP tool, meta
 web/        dashboard: in-browser Security Inspector, tamper lab, policies, keeper log (single file, works offline)
 ```
 
+## Known limitations
+What the deployed contract does not handle yet, with the production fix. Each fix changes the contract, so none is applied to the live deployment, which holds the evidence.
+
+| Case | What happens today | Production fix |
+|---|---|---|
+| **A delay can already be visible at purchase** | The purchase proof checks the flight's *status* (`Expected / Unknown / CheckIn / Boarding`), not its revised times. A flight that still shows `Expected` while its revised departure is already late could be insured. Not yet seen on live data. | Add the revised departure/arrival to the purchase projection and refuse cover when the known delay is already near a payout tier |
+| **Several flights share a number on one date** | AeroDataBox answers with a list (multi-leg flights, or the same number twice), and the projections read the first item (`/0/…`). The request doesn't say whether the date is the departure or the arrival date, so overnight flights add ambiguity. | Pass the departure airport and `dateLocalRole: Departure`, so the signed request names exactly one leg |
+| **Diverted flight** | `Diverted` is not a final status, so the policy can't settle and only expires after 3 days: no payout for a real disruption | Treat `Diverted` as final and pay it, like a cancellation |
+| **The airline changes the schedule** | The signed schedule at settlement must equal the one at purchase (`ScheduleMismatch`), so the policy expires and the premium stays in the pool | Refund the premium on expiry, or allow a bounded schedule change |
+| **No signed evidence within 3 days** (keeper down, quota used up, Airnode offline) | The policy expires even if the flight really was late; the traveller carries the data-availability risk. GitHub's schedule for the keeper has not fired on its own; passes are started by hand | Refund the premium when a policy expires without evidence; run the keeper on a reliable scheduler (anyone can, `settle` is permissionless) |
+| **Many policies on one flight** | No cap per flight, so one cancelled flight can take a large share of the pool's capacity (solvency still holds: every sale checks free capital) | An exposure cap per flight and date |
+| **No live payout yet** | All 4 live flights landed early or less than 2 h late, so each closed with no payout. The signed arrival still decided the on-chain outcome; the payout tiers are shown by the Foundry tests and the rehearsal. The live contract trusts only the real Airnode, so a payout cannot be staged | Buy more live policies on the day; a 2 h delay or a cancellation pays on its own |
+
 ## Security notes
 - Checks‑effects‑interactions + `ReentrancyGuard`, `SafeERC20`; reserved capital tracked so the owner can only withdraw capital **not** backing active policies.
 - Flight numbers restricted to `[A-Z0-9]{3,8}` so the on‑chain JSON hash can never diverge from AirnodeHub's (no escaping).

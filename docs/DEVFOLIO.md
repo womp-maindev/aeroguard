@@ -1,6 +1,6 @@
 # AeroGuard — Devfolio submission
 
-**Tagline:** Your flight is late, you're already paid. Flight-delay cover that settles itself on data signed by the AeroDataBox Airnode on API3 AirnodeHub.
+**Tagline:** Your flight is late, you're already paid. Flight-delay cover that can only be **bought** and only **pays** on data signed by the AeroDataBox Airnode on API3 AirnodeHub, so nobody can insure a flight that's already late.
 
 **Tracks:** API3 — Any API in your contract · Cardano (one project in two tracks, confirmed by the organizers). This text covers the API3 part; the Cardano part is described in its own section of the submission.
 
@@ -19,6 +19,12 @@ Flight delays are common, and getting compensation is slow. A traveller fills in
 - **Private policies.** Commit–reveal hides which flight is insured until settlement.
 - **A judge toolkit.** A tamper CLI runs forgeries against the deployed contract, a dashboard has an in-browser Security Inspector, and a local rehearsal needs no funds.
 - **Live on testnet with real data.** 4 policies on real flights from Munich on 30 Oct 2026, each bought with a real signed AeroDataBox proof.
+
+## Why AeroGuard
+
+> **In AeroGuard, signed data gates both the sale and the payout, and you can verify that yourself, from your own wallet, on the live contract.**
+
+A parametric product that only checks data at payout has a hole at purchase: the cheapest strategy is to buy cover for a flight you already know is late, with perfectly genuine signed evidence. AeroGuard only sells cover against a fresh Airnode-signed status showing the flight hasn't left, reads the schedule from that signature, and requires the same signed schedule at settlement. Add a claim-free autonomous keeper that pays for data over x402, live evidence on real flights replayed in Solidity, and a way for judges to attack the deployed contract from their own wallet. Details: [docs/USP.md](https://github.com/womp-maindev/aeroguard/blob/main/docs/USP.md).
 
 ## From data display to economic logic
 
@@ -79,6 +85,15 @@ An honest traveller can also be hurt by forged data, for example a fake "on time
 - The pool owner sets the premium and limits for **new** policies only. The owner can never withdraw capital that backs active policies (`withdrawFree` takes only `balance − reserved`, [test](https://github.com/womp-maindev/aeroguard/blob/main/contracts/test/FlightDelayCover.t.sol#L261)).
 - The keeper is not trusted. Anyone can call `settle`, and the money always goes to the stored holder.
 - Private policies: the purchase proof cannot be checked without revealing the flight. A private buyer is therefore limited only by the lead time and a ±1 h schedule window. This is documented, and the production fix is a ZK proof of the purchase-time status.
+
+### Known limitations
+Each one needs a contract change, so none is applied to the live deployment, which holds the evidence. Production fixes are in the [README](https://github.com/womp-maindev/aeroguard/blob/main/README.md#known-limitations).
+- **The purchase proof reads the status, not the revised times.** A flight still showing `Expected` with a late revised departure could be insured.
+- **Multi-leg flights and repeated flight numbers.** The projection reads the first leg AeroDataBox returns.
+- **Diverted flights.** They don't settle, and only expire.
+- **Schedule changes, and policies with no evidence within 3 days.** Both expire, and the premium is kept.
+- **No exposure cap per flight.**
+- **No live payout yet.** None of the 4 live flights was 2 h late. The signed arrival still decided each on-chain outcome, and the payout tiers are shown by the tests and the rehearsal.
 
 ### Data we wanted but couldn't find on AirnodeHub
 - **A second, independent flight source** (for example OpenSky or FlightAware), so that payouts need 2-of-2 agreement between Airnodes. That would remove the single-source assumption.
