@@ -1,0 +1,11 @@
+{
+  "flight": "IB1314",
+  "date": "2026-10-30",
+  "airnode": "0x83FE2E8F24E66520B1902C3507De4F471248f2Ec",
+  "requestHash": "0x782dcb07ea17581332987058650693af56cf1150a2734228ac3dc8347840c54c",
+  "timestamp": "1793378516",
+  "data": "{\"scheduled\":\"2026-10-30 21:25Z\",\"status\":\"Expected\"}",
+  "signature": "0x8036e78d05e55ce43b98b2de767462779d901d15f6eb254679e5a33ac19613663972110dd117cd39f98321a9e34dc47ad75a7cee875d8bbe5d2009c17e97038c1b",
+  "fetchedAt": 1793378517,
+  "paymentTx": "0x544a72416958438be7181af6dc96111ea7d0e6544d63e7ac869faac28671dad2"
+}

@@ -1,0 +1,18 @@
+name = "aeroguard/flight-cover"
+version = "0.1.0"
+compiler = "v1.1.24"
+plutus = "v3"
+license = "MIT"
+description = "Parametric flight cover on Cardano, settled by AeroDataBox Airnode signatures checked with Plutus secp256k1 ECDSA"
+
+[repository]
+user = "womp-maindev"
+project = "aeroguard"
+platform = "github"
+
+[[dependencies]]
+name = "aiken-lang/stdlib"
+version = "v2.2.0"
+source = "github"
+
+[config]

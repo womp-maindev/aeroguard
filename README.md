@@ -204,10 +204,14 @@ It shows a whole day of AeroGuard compressed into 20 seconds. The **same contrac
 
 So the rehearsal is not the qualifying tamper test: the track asks for **real** responses (edited, too old, for another request, wrong signer), which the live evidence and the dashboard's tamper lab provide.
 
+## Cardano: pay per request via x402
+Agents pay per request on Cardano for flight outcomes any contract can verify. `GET /verdict?flight=&date=` answers 402 with 1–2 tADA on `cardano:preprod` (`@x402/cardano` `exact` scheme, `@x402/express`, Blockfrost); once paid it returns the verdict plus the Airnode-signed proof that `FlightDelayCover` verifies unchanged. The same proof also settles an Aiken (Plutus V3) flight cover validator that checks the Airnode's secp256k1 signature on Cardano (44 Aiken tests incl. real Airnode signatures — the four final landings settle it exactly as they settled policies #1–#4 on Base — and the freshness rules; open/settle/reclaim executed with Aiken's UPLC evaluator). Plus `GET /policy` (tADA buys a FlightDelayCover policy on Base, linked by `cardanoJobRef`), a budgeted claims agent, an MCP tool and `npm run qualify` for a one-command preprod run. First paid request on preprod: [tx e2ef922b…](https://preprod.cardanoscan.io/transaction/e2ef922be71ba61da9431f1a5f56f4c56f5d61348c4945194cf390dd0acd7864). Details: [`cardano/README.md`](cardano/README.md) · all paid txs: [`cardano/EVIDENCE.md`](cardano/EVIDENCE.md). Presentation: [`presentation/cardano/`](presentation/cardano/) · video clips: [`cardano/video/`](cardano/video/) · changes: [`cardano/CHANGELOG.md`](cardano/CHANGELOG.md).
+
 ## Repo
 ```
 contracts/  FlightDelayCover.sol + AirnodeHub libraries (api3dao/airnodehub-hackathon-starter), Foundry tests, threat model
 keeper/     x402 AirnodeHub client, AeroDataBox requests, buy/settle, autonomous keeper, tamper CLI, HTTP API (keeper/README.md)
+cardano/    x402 on Cardano preprod: paid /verdict, claims agent, MCP tool, metadata anchor, Aiken validator (onchain/)
 web/        dashboard: in-browser Security Inspector, tamper lab, policies, keeper log (single file, works offline)
 ```
 

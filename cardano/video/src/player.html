@@ -1,0 +1,235 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>AeroGuard Cardano clips</title>
+<style>
+@font-face { font-family: Jost; src: url(../../../web/fonts/Jost-normal.woff2); }
+@font-face { font-family: KellySlab; src: url(../../../web/fonts/KellySlab-normal.woff2); }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 1920px; height: 1080px; overflow: hidden; background: #0b1020; color: #e6edf7; font-family: Jost, sans-serif; }
+#stage { position: absolute; inset: 0; background: radial-gradient(1200px 700px at 20% 10%, #16234a 0%, #0b1020 60%); }
+.mono { font-family: 'DejaVu Sans Mono', monospace; }
+.center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+.kicker { font-size: 30px; letter-spacing: 6px; text-transform: uppercase; color: #7fb3ff; }
+.h1 { font-family: KellySlab, serif; font-size: 112px; line-height: 1.05; margin: 18px 0; }
+.h2 { font-size: 46px; color: #c9d6ea; max-width: 1500px; line-height: 1.3; }
+.pill { display: inline-block; margin: 36px 10px 0; padding: 12px 26px; border-radius: 999px; border: 2px solid #2d3d66; font-size: 30px; color: #a9bbd9; }
+.cap { position: absolute; left: 80px; right: 80px; bottom: 56px; display: flex; justify-content: space-between; align-items: center; font-size: 30px; color: #a9bbd9; }
+.cap b { color: #e6edf7; font-weight: 600; }
+.tag { padding: 8px 18px; border-radius: 10px; background: #13213f; border: 1px solid #2d3d66; font-size: 26px; }
+.term { position: absolute; left: 80px; right: 80px; top: 70px; bottom: 140px; background: #0d1117; border-radius: 18px; border: 1px solid #263354; box-shadow: 0 30px 80px rgba(0,0,0,.5); overflow: hidden; }
+.bar { height: 54px; background: #161b27; display: flex; align-items: center; padding: 0 22px; gap: 12px; font-size: 24px; color: #8b98b1; }
+.dot { width: 16px; height: 16px; border-radius: 50%; }
+.screen { position: absolute; top: 54px; left: 0; right: 0; bottom: 0; padding: 24px 32px; font-family: 'DejaVu Sans Mono', monospace; font-size: 26px; line-height: 1.5; white-space: pre-wrap; word-break: break-all; }
+.prompt { color: #7ee787; } .cmd { color: #e6edf7; } .dim { color: #7d8aa3; } .ok { color: #3fb950; } .warn { color: #d29922; }
+.hl { color: #ffd166; } .blue { color: #79c0ff; } .pink { color: #ff7ab6; } .bold { font-weight: bold; }
+.cursor { display: inline-block; width: 14px; height: 30px; background: #e6edf7; vertical-align: -6px; }
+.card { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 1500px; background: #0f1830; border: 1px solid #2d3d66; border-radius: 28px; padding: 60px 70px; box-shadow: 0 30px 80px rgba(0,0,0,.5); }
+.row { display: grid; grid-template-columns: 220px 1fr; gap: 20px; font-size: 34px; margin: 18px 0; align-items: baseline; }
+.row .k { color: #7fb3ff; font-size: 26px; text-transform: uppercase; letter-spacing: 3px; }
+table { width: 1640px; border-collapse: collapse; font-size: 30px; position: absolute; left: 140px; top: 270px; }
+th { text-align: left; color: #7fb3ff; font-size: 24px; letter-spacing: 3px; text-transform: uppercase; padding: 0 18px 18px; border-bottom: 2px solid #2d3d66; }
+td { padding: 22px 18px; border-bottom: 1px solid #1e2a49; }
+.title-top { position: absolute; left: 140px; top: 90px; font-family: KellySlab, serif; font-size: 64px; }
+.sub-top { position: absolute; left: 140px; top: 180px; font-size: 32px; color: #a9bbd9; }
+.arch { position: absolute; left: 120px; top: 90px; width: 1680px; }
+.box { position: absolute; border: 6px solid #ffd166; border-radius: 22px; box-shadow: 0 0 0 9999px rgba(11,16,32,.55); transition: none; }
+.json .k { color: #79c0ff; } .json .s { color: #a5d6ff; } .json .n { color: #ffa657; }
+</style></head>
+<body><div id="stage"></div>
+<script src="data.js"></script>
+<script>
+const $ = (h) => { document.getElementById('stage').innerHTML = h; };
+const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+const fade = (t, a, d = 0.5) => clamp((t - a) / d);
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const RUN = window.RUN, AIKEN = window.AIKEN;
+
+// --------------------------------------------------------------- terminal replay
+// items: {at, cmd} typed at CPS, or {at, out, cls}; returns visible lines (scrolls when full)
+const CPS = 32;
+function terminal(t, title, items, maxLines, caption, tag) {
+  const lines = [];
+  let typing = false;
+  for (const it of items) {
+    if (t < it.at) break;
+    if (it.cmd !== undefined) {
+      const n = Math.floor((t - it.at) * CPS);
+      const done = n >= it.cmd.length;
+      typing = !done;
+      lines.push(`<span class="prompt">❯ </span><span class="cmd">${esc(it.cmd.slice(0, n))}</span>${done ? '' : '<span class="cursor"></span>'}`);
+    } else lines.push(it.html ?? `<span class="${it.cls || ''}">${esc(it.out)}</span>`);
+  }
+  const blink = Math.floor(t * 2) % 2 === 0;
+  if (!typing) lines.push(`<span class="prompt">❯ </span>${blink ? '<span class="cursor"></span>' : ''}`);
+  // Items may span several lines: scroll by rendered lines, not by items.
+  const shown = lines.join('\n').split('\n').slice(-maxLines);
+  $(`<div class="term"><div class="bar"><span class="dot" style="background:#ff5f57"></span><span class="dot" style="background:#febc2e"></span><span class="dot" style="background:#28c840"></span><span style="margin-left:18px">${esc(title)}</span></div>
+     <div class="screen">${shown.join('\n')}</div></div>
+     <div class="cap"><span>${caption}</span><span class="tag">${tag}</span></div>`);
+}
+
+// --------------------------------------------------------------- scenes
+const S = {};
+
+S.title = { dur: 6, render(t) {
+  const o = (a) => `opacity:${fade(t, a, 0.6)};transform:translateY(${(1 - fade(t, a, 0.6)) * 20}px)`;
+  $(`<div class="center"><div class="kicker" style="${o(0.2)}">AeroGuard · Cardano track</div>
+    <div class="h1" style="${o(0.6)}">Agents pay per request<br>for flight outcomes</div>
+    <div class="h2" style="${o(1.3)}">…that any contract can verify: an Airnode-signed verdict paid in tADA over x402,<br>checked on Cardano by Aiken and on Base by FlightDelayCover.</div>
+    <div style="${o(2.2)}"><span class="pill">x402 · exact scheme</span><span class="pill">Cardano preprod</span><span class="pill">Aiken · Plutus V3</span><span class="pill">AeroDataBox Airnode</span></div></div>`);
+} };
+
+const BOXES = [ // architecture.svg coordinates (980×450) → scaled ×(1680/980)
+  { r: [20, 40, 200, 120], at: 0.8, text: '<b>1 · The agent asks</b> — GET /verdict answers <b>402</b> with a price in tADA' },
+  { r: [390, 40, 230, 140], at: 3.3, text: '<b>2 · Pay</b> — the wallet signs a Cardano tx; the server never touches keys' },
+  { r: [760, 40, 200, 120], at: 5.8, text: '<b>3 · Settle</b> — the facilitator verifies it and puts it on Cardano preprod' },
+  { r: [390, 230, 230, 90], at: 8.3, text: '<b>4 · Answer</b> — the verdict plus the AeroDataBox Airnode signature' },
+  { r: [20, 230, 300, 180], at: 10.8, text: '<b>5 · Verify anywhere</b> — Aiken on Cardano, FlightDelayCover on Base: same proof' },
+];
+S.arch = { dur: 14, render(t) {
+  const k = 1680 / 980;
+  let cur = null;
+  for (const b of BOXES) if (t >= b.at) cur = b;
+  const box = cur ? `<div class="box" style="left:${120 + cur.r[0] * k - 10}px;top:${90 + cur.r[1] * k - 10}px;width:${cur.r[2] * k + 20}px;height:${cur.r[3] * k + 20}px;opacity:${fade(t, cur.at, 0.35)}"></div>` : '';
+  $(`<img class="arch" src="../../docs/architecture.svg">${box}<div class="cap" style="bottom:40px"><span>${cur ? cur.text : '<b>How a paid request works</b>'}</span><span class="tag">architecture</span></div>`);
+} };
+
+const BUYER = 'addr_test1qq93hns3avjjdpwz9cd2cweqas9rjktydres3ja8aj43x8aupmzlgqfpg3hp0f9e6mnt2q9gh3mejyvxcmem8yfc8kqqrgud7v';
+const SELLER = 'addr_test1qr339vze7f68wcqe84c4dlsnsnwscns9q0pw29yq9crrnn0dpcerx5e9w5864wvreywu832nje343l07m0q0hj8ujsuq69xdet';
+const TX = 'e2ef922be71ba61da9431f1a5f56f4c56f5d61348c4945194cf390dd0acd7864';
+const chk = (name, val) => ({ html: `<span class="ok">✔</span> ${esc(name.padEnd(20))} <span class="dim">${esc(val)}</span>` });
+const WAIT_AT = 13.2, WAIT_LEN = 4.5;
+const Q = [
+  { at: 0.5, cmd: 'npm run qualify' },
+  { at: 1.4, out: '\n> qualify\n> node --env-file-if-exists=.env src/qualify.ts\n', cls: 'dim' },
+  { at: 2.2, out: '1/4 preflight', cls: 'bold' },
+  { at: 2.6, ...chk('Blockfrost key', 'preprod•••• (hidden)') },
+  { at: 3.0, ...chk('Buyer wallet', BUYER.slice(0, 44) + '…') },
+  { at: 3.4, ...chk('Seller address', SELLER.slice(0, 44) + '…') },
+  { at: 3.8, ...chk('Signed evidence', 'IB1314 2026-10-30 (arrival)') },
+  { at: 4.2, ...chk('Blockfrost reachable', 'https://blockfrost.io/') },
+  { at: 4.6, ...chk('Buyer balance', '10000 tADA (need ≥ 4)') },
+  { at: 5.4, out: '\n2/4 starting the paid endpoint (in-process facilitator over Blockfrost)', cls: 'bold' },
+  { at: 6.6, out: '\n3/4 paying for IB1314 2026-10-30 (this waits for the block, ~20–60 s)', cls: 'bold' },
+  { at: 7.8, html: `  <span class="hl">402 → pay 2 tADA on cardano:preprod</span> to addr_test1qr339vze7f… (exact, valid 600s)` },
+  { at: 8.4, out: '  402 → pay 0.1 tUSDM on cardano:preprod to addr_test1qr339vze7f… (exact, valid 600s)', cls: 'dim' },
+  { at: 10.0, html: `  <span class="blue">wallet signs a Cardano transaction (never broadcasts it) and retries with PAYMENT-SIGNATURE</span>` },
+];
+const Q2 = [
+  { at: WAIT_AT + WAIT_LEN + 0.2, html: `\n<span class="ok bold">4/4 done:</span> IB1314 2026-10-30 → <span class="hl">Arrived</span>; Airnode signer <span class="pink">0x83FE2E8F24E66520B1902C3507De4F471248f2Ec</span>` },
+  { at: WAIT_AT + WAIT_LEN + 1.2, html: `tx   <span class="hl">${TX}</span>` },
+  { at: WAIT_AT + WAIT_LEN + 1.8, html: `link <span class="blue">https://preprod.cardanoscan.io/transaction/${TX}</span>` },
+  { at: WAIT_AT + WAIT_LEN + 2.6, out: 'recorded in cardano/EVIDENCE.md, cardano/evidence/sales.jsonl and web/data/cardano-run.json', cls: 'dim' },
+];
+S.qualify = { dur: WAIT_AT + WAIT_LEN + 8, render(t) {
+  const items = [...Q];
+  if (t >= WAIT_AT && t < WAIT_AT + WAIT_LEN) {
+    const secs = Math.round(((t - WAIT_AT) / WAIT_LEN) * 44);
+    const sp = '⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'[Math.floor(t * 12) % 10];
+    items.push({ at: WAIT_AT, html: `  <span class="warn">${sp} waiting for the block on Cardano preprod… ${secs} s</span> <span class="dim">(44 s, sped up)</span>` });
+  }
+  if (t >= WAIT_AT + WAIT_LEN) items.push({ at: WAIT_AT + WAIT_LEN, html: `  <span class="ok">✔ settled on Cardano preprod after 44 s</span>` });
+  items.push(...Q2);
+  terminal(t, 'cardano — npm run qualify', items, 18,
+    '<b>Real run</b> · one paid request on Cardano preprod', '30 Oct 2026 · 23:16 UTC');
+} };
+
+function jsonHtml(o, ind = 0, hl = []) {
+  const pad = ' '.repeat(ind);
+  if (o === null) return '<span class="n">null</span>';
+  if (typeof o === 'string') return `<span class="s">"${esc(o.length > 70 ? o.slice(0, 66) + '…' : o)}"</span>`;
+  if (typeof o !== 'object') return `<span class="n">${esc(o)}</span>`;
+  const e = Object.entries(o);
+  return '{\n' + e.map(([k, v]) => `${pad}  <span class="k">"${k}"</span>: ${hl.includes(k) ? '<span style="background:#3a2f0b">' : ''}${jsonHtml(v, ind + 2, hl)}${hl.includes(k) ? '</span>' : ''}`).join(',\n') + `\n${pad}}`;
+}
+S.response = { dur: 11, render(t) {
+  const r = RUN.response;
+  const body = { flight: r.flight, date: r.date, verdict: { status: r.verdict.status, scheduled: r.verdict.scheduled, actual: r.verdict.actual, delayMinutes: r.verdict.delayMinutes, final: r.verdict.final },
+    evidence: r.evidence, paidWith: { network: r.paidWith.network, txHash: r.paidWith.txHash, amount: r.paidWith.amount + ' lovelace' } };
+  const hl = t > 3 && t < 6 ? ['status', 'actual'] : t >= 6 && t < 8.5 ? ['airnode', 'signature', 'requestHash'] : t >= 8.5 ? ['txHash', 'amount'] : [];
+  const cap = t < 3 ? '<b>What the agent gets back</b> — the paid response'
+    : t < 6 ? '<b>The verdict</b>: arrived 21:00Z, 25 min early → no payout'
+    : t < 8.5 ? '<b>The proof</b>: AeroDataBox Airnode signature — any contract can check it'
+    : '<b>The receipt</b>: the Cardano payment that bought it';
+  $(`<div class="term" style="opacity:${fade(t, 0, 0.4)}"><div class="bar"><span class="dot" style="background:#ff5f57"></span><span class="dot" style="background:#febc2e"></span><span class="dot" style="background:#28c840"></span><span style="margin-left:18px">200 OK · GET /verdict?flight=IB1314&amp;date=2026-10-30</span></div>
+     <div class="screen json" style="font-size:22px;line-height:1.42">${jsonHtml(body, 0, hl)}</div></div>
+     <div class="cap"><span>${cap}</span><span class="tag">real response</span></div>`);
+} };
+
+S.tx = { dur: 7, render(t) {
+  const o = (a) => `opacity:${fade(t, a, 0.5)}`;
+  $(`<div class="card"><div class="kicker" style="${o(0)}">Paid on Cardano preprod · x402</div>
+    <div class="h1" style="font-size:84px;${o(0.3)}">2 tADA → one verdict</div>
+    <div class="row" style="${o(0.9)}"><span class="k">tx</span><span class="mono hl" style="font-size:30px">${TX}</span></div>
+    <div class="row" style="${o(1.4)}"><span class="k">from</span><span class="mono dim" style="font-size:26px">${BUYER.slice(0, 60)}…</span></div>
+    <div class="row" style="${o(1.9)}"><span class="k">to</span><span class="mono dim" style="font-size:26px">${SELLER.slice(0, 60)}…</span></div>
+    <div class="row" style="${o(2.4)}"><span class="k">for</span><span>IB1314 · 30 Oct 2026 · Arrived 21:00Z · signed by Airnode 0x83FE…F2Ec</span></div>
+    <div class="row" style="${o(3.0)}"><span class="k">check</span><span class="blue mono" style="font-size:26px">preprod.cardanoscan.io/transaction/e2ef922b…</span></div></div>`);
+} };
+
+const AIK = (() => {
+  const mods = AIKEN.modules.filter((m) => m.name.startsWith('aeroguard/'));
+  const pick = { 'aeroguard/cover_test': ['real_airnode_signature_verifies', 'tamper_edited_status_fails', 'tamper_other_signer_fails', 'real_airnode_arrival_relabelled_as_arrived_fails',
+    'delayed_200_min_pays_holder_in_full', 'delayed_130_min_splits_cover', 'canceled_pays_holder_in_full', 'one_payout_cannot_settle_two_policies', 'stale_answer_fails', 'answer_signed_before_the_landing_it_reports_fails'] };
+  const items = [{ at: 0.5, cmd: 'cd cardano/onchain && aiken check' }, { at: 1.6, out: '    Compiling aeroguard/flight-cover 0.1.0 (.)\n      Testing ...\n', cls: 'dim' }];
+  let at = 2.4;
+  for (const m of mods) {
+    const tests = pick[m.name] ? m.tests.filter((x) => pick[m.name].includes(x.title)) : m.tests;
+    const real = m.name.includes('real_final');
+    items.push({ at, html: `<span class="${real ? 'hl' : 'blue'}">┍━ ${m.name} ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${real ? '  ← real Airnode landing' : ''}</span>` });
+    at += 0.3;
+    for (const x of tests) {
+      items.push({ at, html: `│ <span class="ok bold">PASS</span> <span class="dim">[mem: ${String(x.execution_units.mem).padStart(7)}, cpu: ${String(x.execution_units.cpu).padStart(9)}]</span> ${esc(x.title)}` });
+      at += real ? 0.28 : 0.22;
+    }
+    items.push({ at, html: `<span class="${real ? 'hl' : 'blue'}">┕━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ ${m.tests.length} tests | ${m.tests.length} passed | 0 failed</span>` });
+    at += 0.4;
+  }
+  const total = mods.reduce((n, m) => n + m.tests.length, 0);
+  items.push({ at: at + 0.2, html: `\n<span class="ok bold">      Summary ${total} tests, ${total} passed, 0 failed</span>  <span class="dim">(Aiken v1.1.24 · Plutus V3)</span>` });
+  return { items, dur: at + 4 };
+})();
+S.aiken = { dur: AIK.dur, render(t) {
+  const cap = t < 6 ? '<b>Aiken contract on Cardano</b> — verifies the Airnode secp256k1 signature with Plutus builtins'
+    : '<b>Real landings</b> — the same signatures that closed the 4 Base policies settle the Cardano cover';
+  terminal(t, 'onchain — aiken check', AIK.items, 20, cap, 'real test run');
+} };
+
+const LANDINGS = [
+  ['#1 IB1314', 'MUC → MAD', '21:00Z · 25 min early', '0xf0aa5db2…'],
+  ['#2 LH1816', 'MUC → BCN', '22:06Z · 11 min late', '0x5270aa58…'],
+  ['#3 EI357', 'MUC → DUB', '21:26Z · 29 min early', '0x5a5e4fc7…'],
+  ['#4 BA955', 'MUC → LHR', '21:47Z · 3 min early', '0x973e29d8…'],
+];
+S.chains = { dur: 11, render(t) {
+  const rows = LANDINGS.map((r, i) => `<tr style="opacity:${fade(t, 1.6 + i * 0.7, 0.5)}"><td><b>${r[0]}</b><br><span class="dim" style="font-size:24px">${r[1]}</span></td><td>${r[2]}</td>
+    <td><span class="ok">ClosedNoPayout</span><br><span class="dim mono" style="font-size:22px">Base tx ${r[3]}</span></td><td><span class="ok">no payout · cover back to insurer</span><br><span class="dim" style="font-size:22px">holder payout refused</span></td></tr>`).join('');
+  $(`<div class="title-top" style="opacity:${fade(t, 0.2)}">One signed answer, the same verdict on two chains</div>
+    <div class="sub-top" style="opacity:${fade(t, 0.7)}">Live policies, 30 Oct 2026 — the keeper's AeroDataBox Airnode answers, checked by two independent contracts</div>
+    <table><tr style="opacity:${fade(t, 1.1)}"><th>Policy</th><th>Signed landing</th><th>Base · FlightDelayCover.sol</th><th>Cardano · Aiken flight_cover</th></tr>${rows}</table>
+    <div class="cap"><span style="opacity:${fade(t, 5.2)}"><b>None was late enough to pay</b> (threshold 120 min) — and both chains agree, from the same signature</span><span class="tag">real data</span></div>`);
+} };
+
+S.policy = { dur: 9, render(t) {
+  const step = (a, h, s) => `<div style="opacity:${fade(t, a)};flex:1;background:#0f1830;border:1px solid #2d3d66;border-radius:22px;padding:34px"><div class="kicker" style="font-size:22px">${h}</div><div style="font-size:32px;margin-top:14px">${s}</div></div>`;
+  const arrow = (a) => `<div style="opacity:${fade(t, a)};font-size:60px;color:#ffd166;align-self:center">→</div>`;
+  $(`<div class="title-top" style="opacity:${fade(t, 0.2)}">Cardano pays for cover on Base</div>
+    <div class="sub-top" style="opacity:${fade(t, 0.6)}">GET /policy — the premium in tADA buys a real FlightDelayCover policy</div>
+    <div style="position:absolute;left:140px;right:140px;top:330px;display:flex;gap:28px">
+      ${step(1.0, 'Cardano', 'Agent pays the premium in <b>tADA</b> over x402 — priced from the contract quote')}${arrow(1.8)}
+      ${step(2.2, 'after settlement', 'Server buys the policy on <b>Base Sepolia</b> with a fresh signed status proof')}${arrow(3.0)}
+      ${step(3.4, 'linked', '<span class="mono" style="font-size:26px">cardanoJobRef =<br>keccak256("cardano:&lt;tx&gt;")</span>')}</div>
+    <div class="cap"><span style="opacity:${fade(t, 4.6)}">No settled payment, no policy · a failed purchase is recorded as a refund due</span><span class="tag">tested offline · 8 tests</span></div>`);
+} };
+
+S.outro = { dur: 6, render(t) {
+  const o = (a) => `opacity:${fade(t, a, 0.6)}`;
+  $(`<div class="center"><div class="h1" style="font-size:96px;${o(0.2)}">Agents pay per request on Cardano<br>for flight outcomes any contract can verify.</div>
+    <div class="h2" style="${o(1.2)}">53 tests · 44 Aiken tests · a real x402 payment on preprod · 4 live landings verified on two chains</div>
+    <div style="${o(2.0)}"><span class="pill">github.com/womp-maindev/aeroguard · cardano/</span></div></div>`);
+} };
+
+const clip = new URLSearchParams(location.search).get('clip');
+window.DUR = S[clip].dur;
+window.seek = (t) => S[clip].render(t);
+seek(0);
+</script></body></html>
