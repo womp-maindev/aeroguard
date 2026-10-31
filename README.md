@@ -179,7 +179,30 @@ Rehearsal responses are signed with a local test key and labelled; the real depl
 ```bash
 cd keeper && REHEARSE=on FLIGHT_COVER_ADDRESS=0x257054204c4Cd43846C4553eBe6D709841980a80 npm run api
 ```
+In PowerShell, put `REHEARSE=on` and `FLIGHT_COVER_ADDRESS=…` in `.env` instead, then run `npm run api`.
 Open <http://localhost:8787> and find **Local rehearsal → Run the full rehearsal**. The API starts a fresh anvil on `:8545` and runs the same script. The page shows the phases, the purchases, every attack with the contract's answer, the keeper's settlements and the expiry, then links to the rehearsal chain in the same dashboard. `REHEARSE=on` starts processes, so use it on your own laptop only. It answers pages on `localhost` only, runs one fixed script, keeps private keys out of that script's environment, and refuses to run if something else already serves `:8545`.
+
+### What the rehearsal proves, and what it doesn't
+It shows a whole day of AeroGuard compressed into 20 seconds. The **same contract and the same keeper code** run on a private local chain where two things are under our control. The **clock** jumps from 06:00 (buying) to 22:00 (landed) to three days later. And a **local test key** stands in for the Airnode, so any outcome can be produced on demand. Real flights can't be fast-forwarded, and all four live policies happened to close with no payout. Think of a flight simulator next to the real flight.
+
+| It proves | How |
+|---|---|
+| Every payout rule works | 100 % (195 min late), 50 % (135 min), nothing (10 min), 100 % (cancelled); the holder ends with exactly 7 aUSD |
+| No one can insure a flight already known to be late | buying after landing is rejected on-chain |
+| The tamper test runs through the real code path | the keeper's own tamper code sends 4 forgeries, all rejected; the genuine response pays |
+| Nobody files a claim | the keeper finds and settles every policy by itself |
+| Private policies and expiry behave | the private policy is never looked up, then expires and releases its coverage |
+| The lifecycle can't silently break | anyone can rerun it without keys or funds, and CI runs it on every push |
+
+**It does not prove** that the real Airnode's signatures are accepted (the signer is a test key, and the live contract rejects every rehearsal response), that x402 payments work, or that AeroDataBox's data is right. Those come from the other evidence:
+
+| Evidence | Shows |
+|---|---|
+| [Live on Base Sepolia](#live-evidence-base-sepolia-real-aerodatabox-data) | **authenticity**: the real Airnode signature, real x402 payments, the deployed contract, the tamper test with a real response, real settlements |
+| Foundry tests (86) | **edge cases**: every boundary and attack, a real Airnode capture checked byte for byte, all 4 live policies replayed |
+| Local rehearsal | **completeness**: the whole lifecycle and every outcome, in 20 seconds, on demand |
+
+So the rehearsal is not the qualifying tamper test: the track asks for **real** responses (edited, too old, for another request, wrong signer), which the live evidence and the dashboard's tamper lab provide.
 
 ## Repo
 ```
