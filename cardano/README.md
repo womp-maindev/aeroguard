@@ -4,12 +4,12 @@ Agents pay per request on Cardano for flight outcomes any contract can verify.
 
 ![Agent pays over x402 on Cardano preprod; the server returns an Airnode-signed verdict that the Aiken cover and FlightDelayCover both verify](docs/architecture.svg)
 
-**Video:** [`video/aeroguard-cardano-full.mp4`](video/aeroguard-cardano-full.mp4) (1:57, no sound) and ten separate clips, see [`video/SHOTLIST.md`](video/SHOTLIST.md). **All changes:** [`CHANGELOG.md`](CHANGELOG.md). **Slides for the pitch:** [`../presentation/cardano/`](../presentation/cardano/).
+**Video:** [`aeroguard-cardano-full.mp4`](../presentation/cardano/aeroguard-cardano-full.mp4) (1:57, no sound) and ten separate clips, see [`video/SHOTLIST.md`](video/SHOTLIST.md). **All changes:** [`CHANGELOG.md`](CHANGELOG.md). **Slides for the pitch:** [`../presentation/cardano/`](../presentation/cardano/).
 
 **Judge in 60 seconds (no wallet):**
 1. **The paid request on chain:** [tx `e2ef922b…` on Cardanoscan](https://preprod.cardanoscan.io/transaction/e2ef922be71ba61da9431f1a5f56f4c56f5d61348c4945194cf390dd0acd7864). An agent paid 2 tADA over x402 for the final IB1314 verdict.
 2. **The same run in the dashboard:** [Cardano panel](https://womp-maindev.github.io/aeroguard/#cardano) shows the 402 offer, the payment and the Airnode-signed verdict.
-3. **The video:** [`video/aeroguard-cardano-full.mp4`](video/aeroguard-cardano-full.mp4) (1:57), the real run, the response, `aiken check` and the live landings.
+3. **The video:** [`aeroguard-cardano-full.mp4`](../presentation/cardano/aeroguard-cardano-full.mp4) (1:57), the real run, the response, `aiken check` and the live landings.
 4. **Offline:** `cd cardano && npm i && npm test` (53 tests) and `cd onchain && aiken check` (44 tests), see below.
 
 **For judges (3 min, no funds, no keys):**

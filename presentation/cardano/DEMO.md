@@ -92,7 +92,7 @@ pays nothing). It prints three Cardanoscan links and writes them to `COVER-EVIDE
   slide 4 (its video is that real run) and the Cardanoscan tab. Continue with slide 5.
 - **`Buyer balance ❌`:** fund the buyer address from https://docs.cardano.org/cardano-testnets/tools/faucet (Preprod)
   — or use the fallback above.
-- **Slides don't show videos:** use the full cut `cardano/video/aeroguard-cardano-full.mp4` instead.
+- **Slides don't show videos:** use the full cut `presentation/cardano/aeroguard-cardano-full.mp4` instead.
 
 ## What judges can verify themselves
 - QR on slide 4 → the paid transaction on Cardanoscan.
