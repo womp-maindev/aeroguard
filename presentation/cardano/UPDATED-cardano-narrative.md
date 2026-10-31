@@ -150,5 +150,5 @@ AeroDataBox ──signs──▶ API3 Airnode (AirnodeHub)
 **Links**
 - Repo: https://github.com/womp-maindev/aeroguard
 - Live site: https://womp-maindev.github.io/aeroguard/#cardano
-- Video (2:04): https://womp-maindev.github.io/aeroguard/media/cardano.mp4
+- Video (2:20): https://womp-maindev.github.io/aeroguard/media/cardano.mp4
 - Paid tx: https://preprod.cardanoscan.io/transaction/e2ef922be71ba61da9431f1a5f56f4c56f5d61348c4945194cf390dd0acd7864
