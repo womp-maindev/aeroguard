@@ -5,6 +5,10 @@ Everything in the Cardano track, newest first. Times are UTC, 30–31 Oct 2026. 
 only the short "Cardano" section in the root `README.md`, `docs/DEVFOLIO-cardano.md` and the dashboard file
 `web/data/cardano-run.json`.
 
+## 31 Oct — wording after policies #5–#11
+- Main now has 11 policies (7 fly today). The Cardano docs and speaker notes say "the four policies of 30 Oct" /
+  "our first four policies" where they meant #1–#4, so nobody reads it as "all our policies". No code changes.
+
 ## 31 Oct — presentation: video and what to say, in one place
 - `presentation/cardano/aeroguard-cardano-full.mp4`: the full video now sits next to the slides.
 - `presentation/cardano/VIDEO-SCRIPT.md`: what to say over the video, block by block with timecodes. Each block has
