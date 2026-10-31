@@ -7,6 +7,10 @@ on:
     branches: [claude/bold-ride-xhu8s8]
     paths: [media/voiced/*.tsv, .github/workflows/voice-video.yml]
   workflow_dispatch:
+    inputs:
+      voice_id:
+        description: "ElevenLabs voice id (default: Adam)"
+        default: "pNInz6obpgDQGcFmaJgB"
 
 permissions:
   contents: write
@@ -28,6 +32,9 @@ jobs:
           curl -sSL -o voice.onnx $base/en_US-ryan-high.onnx
           curl -sSL -o voice.onnx.json $base/en_US-ryan-high.onnx.json
       - name: Synthesize and mix
+        env:
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+          VOICE_ID: ${{ inputs.voice_id || 'pNInz6obpgDQGcFmaJgB' }}
         run: |
           set -e
           git fetch -q origin main
@@ -38,7 +45,14 @@ jobs:
             local vid=$1 tsv=$2 out=$3 i=0 inputs="" filters="" mix=""
             while IFS=$'\t' read -r start slot text; do
               [ -z "$start" ] && continue
-              echo "$text" | piper --model /tmp/v/voice.onnx --length_scale 0.95 --output_file /tmp/v/$out-$i.wav
+              if [ -n "$ELEVENLABS_API_KEY" ]; then
+                body=$(python3 -c "import json,sys;print(json.dumps({'text':sys.argv[1],'model_id':'eleven_multilingual_v2','voice_settings':{'stability':0.5,'similarity_boost':0.75,'style':0.2}}))" "$text")
+                code=$(curl -sS -o /tmp/v/$out-$i.mp3 -w '%{http_code}' -X POST "https://api.elevenlabs.io/v1/text-to-speech/$VOICE_ID?output_format=mp3_44100_128" -H "xi-api-key: $ELEVENLABS_API_KEY" -H 'Content-Type: application/json' -d "$body")
+                [ "$code" = "200" ] || { echo "ElevenLabs HTTP $code: $(head -c 300 /tmp/v/$out-$i.mp3)"; exit 1; }
+                ffmpeg -y -loglevel error -i /tmp/v/$out-$i.mp3 /tmp/v/$out-$i.wav
+              else
+                echo "$text" | piper --model /tmp/v/voice.onnx --length_scale 0.95 --output_file /tmp/v/$out-$i.wav
+              fi
               d=$(ffprobe -v error -show_entries format=duration -of csv=p=0 /tmp/v/$out-$i.wav)
               t=$(python3 -c "d=$d;s=$slot-0.25;print(max(1.0,min(1.35,d/s)))")
               ms=$(python3 -c "print(int(($start+0.15)*1000))")
@@ -59,4 +73,4 @@ jobs:
       - name: Commit
         run: |
           git config user.name womp-maindev && git config user.email 226526968+womp-maindev@users.noreply.github.com
-          git add media/voiced/*.mp4 && git commit -qm "media: voiced videos (demo, API3, Cardano)" && git push -q origin HEAD:claude/bold-ride-xhu8s8
+          git add media/voiced/*.mp4 && git commit -qm "media: voiced videos (demo, API3, Cardano)${ELEVEN:+ — ElevenLabs}" && git push -q origin HEAD:claude/bold-ride-xhu8s8
