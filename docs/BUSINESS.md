@@ -42,7 +42,7 @@ The dollar figures assume ETH at $3,000. At ten times the gas price, the on-chai
 
 ### Lookups per policy
 - **Purchase:** one signed status per policy, the purchase proof.
-- **Settlement:** shared by every policy on the same flight and date, because they have the same request hash. The keeper takes one early look 3 h before arrival (for cancellations), then checks from 30 min after the scheduled arrival. The 4 live policies needed **2–3 lookups per flight** ([docs/EVIDENCE.md](EVIDENCE.md)). The hard cap is 20 lookups plus the early look.
+- **Settlement:** shared by every policy on the same flight and date, because they have the same request hash. The keeper takes one early look 3 h before arrival (for cancellations), then checks from 30 min after the scheduled arrival. The 4 policies settled on 30 Oct needed **2–3 lookups per flight** ([docs/EVIDENCE.md](EVIDENCE.md)). The hard cap is 20 lookups plus the early look.
 
 So the data and gas cost of one policy is:
 
