@@ -231,6 +231,10 @@ video/              API3 clips rendered from real data + render source (video/SH
 .github/workflows/  ci, keeper, buy, proofs, pages, cloudflare, screenshots, video
 ```
 
+## Team
+- **Mihail** <sub>(WompSolutions · [womp.solutions](https://womp.solutions))</sub> — product, API3 contract & keeper, pitch
+- **Eskender Assefa** — contract hardening tests, wallet tamper lab (real transactions from the judge's wallet), local rehearsal in the dashboard, business case / USP / architecture docs and the pitch deck
+
 ## Known limitations
 What the deployed contract does not handle yet, with the production fix. Each fix changes the contract, so none is applied to the live deployment, which holds the evidence.
 

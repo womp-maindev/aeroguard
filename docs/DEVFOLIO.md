@@ -142,3 +142,7 @@ Full analysis, with assumptions, the worst case and sources: [docs/BUSINESS.md](
 - Threat model: [`contracts/README.md`](https://github.com/womp-maindev/aeroguard/blob/main/contracts/README.md#threat-model)
 - **Video (API3 track, 2:29, voiced):** https://github.com/womp-maindev/aeroguard/blob/main/web/media/api3.mp4 (also https://womp-maindev.github.io/aeroguard/media/api3.mp4)
 - Overview of both tracks (1:47): https://github.com/womp-maindev/aeroguard/blob/main/web/media/demo.mp4
+
+## Team
+- **Mihail** <sub>(WompSolutions · [womp.solutions](https://womp.solutions))</sub> — product, API3 contract & keeper, pitch
+- **Eskender Assefa** — contract hardening tests, wallet tamper lab (real transactions from the judge's wallet), local rehearsal in the dashboard, business case / USP / architecture docs and the pitch deck
