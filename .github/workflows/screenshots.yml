@@ -1,0 +1,35 @@
+name: Dashboard screenshots
+# takes live screenshots of web/ against base sepolia and pushes them to the screenshots branch.
+# copy what you want into docs/img/ from there.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  shots:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: playwright
+        run: |
+          mkdir -p /tmp/pw && cd /tmp/pw && npm init -y >/dev/null && npm i playwright@1.49.1 >/dev/null
+          npx playwright install --with-deps chromium
+      - name: take screenshots
+        run: |
+          (cd web && python3 -m http.server 8080 >/dev/null 2>&1 &)
+          sleep 1
+          NODE_PATH=/tmp/pw/node_modules OUT=$RUNNER_TEMP/shots node .github/scripts/screenshots.cjs
+      - name: push to the screenshots branch
+        run: |
+          cd "$RUNNER_TEMP/shots"
+          git init -q && git checkout -q -b screenshots
+          git config user.name "github-actions[bot]" && git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add . && git commit -qm "screenshots ${{ github.sha }}"
+          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" screenshots
