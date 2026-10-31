@@ -53,6 +53,30 @@ Claude's PATH.
 
 **Budget:** each demo costs about 2.2 tADA. Run `npm run preflight` for the current balance.
 
+## Bonus block (optional, ~2 min): live Aiken escrow
+Only if there is time. The main demo above is enough without it.
+
+**One command** in `~/aeroguard-run/cardano` (any clone: `cd cardano`):
+```bash
+sh live-cover.sh now
+```
+
+**What the screen shows, step by step:**
+1. **x402 payment.** `402 → pay 2 tADA`, the wallet signs, the facilitator settles. Then `4/4 done: LH1816 … Arrived` and the **first Cardanoscan link** (the payment).
+2. **Open escrow.** `cover opened at addr_test1wqg866…` and the **second link**: 5 tADA locked at the Aiken script.
+3. **Wait for the block.** `waiting for … on chain ....... ok`, about 20–60 s.
+4. **Settle by the Airnode's signature.** `settled (none)` and the **third link**. The script checked the signature on chain, and the cover goes back to the insurer, because LH1816 was only 11 min late.
+
+All three links are also written to `COVER-EVIDENCE.md`.
+
+**What to say while the block is pending:**
+> "The agent just bought the verdict over x402. Now the same signed bytes go into a Cardano escrow as the redeemer. Plutus has no ecrecover, so our Aiken script rebuilds the exact bytes the Airnode signed and checks them with the secp256k1 builtin. No signature, no payout."
+
+**If time runs out or it fails:** stop it (Ctrl-C) and say:
+> "The escrow is built and tested on real signatures: 44 Aiken tests. Deployment is next."
+
+Then go on with the deck.
+
 ## Aiken cover live on preprod (before the pitch, ~3 min)
 Run this in `~/aeroguard-run/cardano` (it starts its own endpoint on a free port):
 ```bash

@@ -5,6 +5,11 @@ Everything in the Cardano track, newest first. Times are UTC, 30–31 Oct 2026. 
 only the short "Cardano" section in the root `README.md`, `docs/DEVFOLIO-cardano.md` and the dashboard file
 `web/data/cardano-run.json`.
 
+## 31 Oct — live Aiken escrow as an optional bonus
+- `presentation/cardano/DEMO.md` has a new section, "Bonus block (optional, ~2 min)": `sh live-cover.sh now`, what
+  the screen shows step by step, what to say while the block is pending, and a fallback.
+- The 2-speaker pitch and `PITCH-RUNBOOK.md` each get one line pointing to it.
+
 ## 31 Oct — the voiced 2:04 cut is live
 - `web/media/cardano.mp4` and `presentation/cardano/AeroGuard-Cardano-video.mp4` are now the new cut, voiced from the
   shifted `lines.tsv` (2:04, 12.5 MB). The silent 16.7 MB render is no longer committed. Durations in the docs and on
