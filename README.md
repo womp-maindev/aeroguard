@@ -4,7 +4,7 @@ Parametric flight-delay cover that settles itself. A smart contract pays out **o
 
 [![CI](https://github.com/womp-maindev/aeroguard/actions/workflows/ci.yml/badge.svg)](https://github.com/womp-maindev/aeroguard/actions/workflows/ci.yml) [![Keeper](https://github.com/womp-maindev/aeroguard/actions/workflows/keeper.yml/badge.svg)](https://github.com/womp-maindev/aeroguard/actions/workflows/keeper.yml)
 
-**60-second tour:** [▶ live dashboard](https://womp-maindev.github.io/aeroguard/) · [🎬 1:47 demo video](docs/media/aeroguard-demo.mp4) ([API3 clips](video/SHOTLIST.md)) · [🧾 every policy, signature and tx](docs/EVIDENCE.md) · [🛡 try to cheat the contract](https://womp-maindev.github.io/aeroguard/#lab)
+**60-second tour:** [▶ live dashboard](https://womp-maindev.github.io/aeroguard/) · 🎬 [1:47 demo, both tracks — the submission video](web/media/demo.mp4) · [API3 deep-dive 2:08](video/aeroguard-api3-full.mp4) · [Cardano 1:57](cardano/video/aeroguard-cardano-full.mp4) · [🧾 every policy, signature and tx](docs/EVIDENCE.md) · [🛡 try to cheat the contract](https://womp-maindev.github.io/aeroguard/#lab)
 
 | Security Inspector: the real AirnodeHub-signed proof for policy #1, checked in the browser | Tamper lab: 4 forgeries, 4 reverts |
 |---|---|
