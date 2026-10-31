@@ -94,7 +94,7 @@ Each one needs a contract change, so none is applied to the live deployment, whi
 - **Diverted flights.** They don't settle, and only expire.
 - **Schedule changes, and policies with no evidence within 3 days.** Both expire, and the premium is kept.
 - **No exposure cap per flight.**
-- **No live payout yet.** None of the 4 live flights was 2 h late. The signed arrival still decided each on-chain outcome, and the payout tiers are shown by the tests and the rehearsal.
+- **No live payout yet** (as of the morning of 31 Oct). None of the 4 flights settled on 30 Oct was 2 h late; #5–#11 settle on pitch day. The signed arrival still decided each on-chain outcome, and the payout tiers are shown by the tests and the rehearsal.
 
 ### Data we wanted but couldn't find on AirnodeHub
 - **A second source of scheduled *and* actual arrival times**, so that payouts need 2-of-2 agreement between Airnodes and the single-source assumption goes away. AirnodeHub has the OpenSky Network (ADS-B tracking), but it has no schedules and no gate times. It is keyed by ICAO callsign (`DLH1814`, not `LH1814`), and its per-airport arrival lists are built overnight. It can cross-check *when* an aircraft landed, which is our next step, but it cannot decide a delay on its own.

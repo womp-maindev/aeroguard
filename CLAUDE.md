@@ -6,7 +6,7 @@ Read first: `README.md`, `contracts/README.md`, then `docs/STATUS.md` (what is d
 - Commit as `womp-maindev` only: `git config user.name womp-maindev && git config user.email 226526968+womp-maindev@users.noreply.github.com`. No AI co-author trailers.
 - Never commit `.env` or private keys. The keeper key lives in the user's local `.env` and in the GitHub secret `KEEPER_PK`.
 - Deadline Sat 31 Oct 2026 15:00 CET (Devfolio). Repo must be public before then. Live judging 15:00–17:00 in Munich.
-- Do not redeploy `FlightDelayCover` unless asked: 4 live policies sit on the current deployment.
+- Do not redeploy `FlightDelayCover` unless asked: 11 live policies sit on the current deployment.
 - AeroDataBox quota is shared by all teams: cache, never poll, prefer `keeper/fixtures` and `contracts/test/fixtures` for tests.
 
 ## Commands
