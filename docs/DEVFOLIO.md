@@ -20,6 +20,15 @@ Flight delays are common, and getting compensation is slow. A traveller fills in
 - **A judge toolkit.** A tamper CLI runs forgeries against the deployed contract, a dashboard has an in-browser Security Inspector, and a local rehearsal needs no funds.
 - **Live on testnet with real data.** 4 policies on real flights from Munich on 30 Oct 2026, each bought with a real signed AeroDataBox proof.
 
+## From data display to economic logic
+
+A common pattern is to fetch data, pass it to a contract, and show it on a frontend: the contract stores a value, and nothing depends on it. AeroGuard closes a full economic loop instead:
+1. **Cover is sold** against a signed pre-departure status. The premium is paid into the pool, and the coverage is held back.
+2. **The outcome is verified on-chain** from a signed AeroDataBox arrival or cancellation.
+3. **The payout follows automatically**: 100 % at 3 h late or cancelled, 50 % at 2 h, to the stored holder, with no claim.
+
+The verified data isn't something to look at; it is the only thing that can move capital. Remove the Airnode signature and the contract has nothing it can safely pay on. **No signature, no money moves.**
+
 ## How it works
 
 ```
@@ -84,6 +93,25 @@ An honest traveller can also be hurt by forged data, for example a fake "on time
 - **Observation time.** The signature timestamp says when the Airnode signed, not when the source last updated. We added our own `ObservedTooEarly` checks; a signed `observedAt` from the source would make that exact.
 - **Signer rotation.** The signer address is immutable in our contract. An on-chain registry or rotation event for Airnode signers would let live contracts follow a key change instead of expiring.
 - **What worked very well:** x402 per call with no account. The payment tx in the `PAYMENT-RESPONSE` header gives every signed response an auditable on-chain receipt ([docs/EVIDENCE.md](https://github.com/womp-maindev/aeroguard/blob/main/docs/EVIDENCE.md)).
+
+## Business case and ROI of the API3 part
+
+**Use case:** embedded flight-delay cover that travel apps and agents sell at checkout, paid automatically on a signed outcome. It complements EU261, which needs a claim, starts at 3 h, and excludes extraordinary circumstances. AeroGuard pays from 2 h, whatever the cause.
+
+| | Claim-based today | AeroGuard |
+|---|---|---|
+| Time to money | weeks to months | minutes after the keeper's first check, 30 min after the scheduled arrival |
+| Middlemen | claim agencies keep about 31–35 % of the payout (AirHelp 35 % incl. VAT, EUclaim 31 %) | none |
+| Uptake | claims-company estimates of eligible passengers who claim range from about 2 % to about a third | every qualifying policy pays, because nobody has to claim |
+
+**What the API3 part costs, measured on Base Sepolia:**
+- Gas: `buyPolicy` 309,460 gas and `settle` about 125,700 gas, together under $0.01.
+- Data: $0.05 per signed AeroDataBox lookup over x402.
+- One signed outcome settles every policy on a flight, and the live flights needed 2–3 lookups each.
+
+So a policy costs about **$0.18** when it is alone on its flight, or **$0.07** when ten share it. For $50 cover at an 8 % premium, that is **4.6 % or 1.8 % of the premium**. That is the price of fraud-resistant, instant settlement, the job a claims team does in a classic product. For API3, demand scales with policies: as an illustration, 10,000 policies a day is about 15,000 paid calls, or $750 a day for one data operation.
+
+Full analysis, with assumptions, the worst case and sources: [docs/BUSINESS.md](https://github.com/womp-maindev/aeroguard/blob/main/docs/BUSINESS.md).
 
 ## Links
 - Evidence for every policy, signed response and x402 payment: https://github.com/womp-maindev/aeroguard/blob/main/docs/EVIDENCE.md
