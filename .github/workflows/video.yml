@@ -53,6 +53,6 @@ jobs:
       - name: Commit to main
         run: |
           git config user.name womp-maindev && git config user.email 226526968+womp-maindev@users.noreply.github.com
-          git add video/*.mp4 video/src/forge-test.txt video/src/rehearse.txt
+          git add video/[0-9]*.mp4 video/src/forge-test.txt video/src/rehearse.txt
           git commit -qm "video: re-rendered API3 clips from live data ($(date -u +%H:%MZ))" || exit 0
           for i in 1 2 3; do git pull -q --rebase origin main && git push -q origin HEAD:main && break; sleep 5; done

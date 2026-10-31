@@ -7,10 +7,9 @@ Everything shown is real: the signed proof is policy #1's AirnodeHub response, t
 and clips 5 and 7 are the live dashboard reading Base Sepolia (recorded in GitHub Actions; this render uses the 31 Oct 05:00Z recording, the "Render API3 video" workflow records them fresh).
 
 Re-render after new settlements: Actions → **Render API3 video** → Run workflow (`.github/workflows/video.yml`: fresh `forge test`, fresh anvil rehearsal,
-the keeper's latest log, live dashboard; commits the clips and the silent full cut here). Locally: `sh video/src/render.sh` (dashboard clips need `LIVE=1` and the Base Sepolia RPC).
+the keeper's latest log, live dashboard; commits the clips here). Locally: `sh video/src/render.sh` (dashboard clips need `LIVE=1` and the Base Sepolia RPC).
 
-Silent full cut: [`aeroguard-api3-full.mp4`](aeroguard-api3-full.mp4) (2:15, CFR 30 fps, 0.3 s fades at every cut, 0.5 s held first frame).
-The voiced version is [`web/media/api3.mp4`](../web/media/api3.mp4) (until the new voice-over lands it is the earlier 2:08 cut).
+The voiced cut (2:15, CFR 30 fps, 0.3 s fades at every cut, 0.5 s held first frame) is [`web/media/api3.mp4`](../web/media/api3.mp4). `src/assemble.sh` rebuilds the silent full cut locally (not committed, to keep the repo small).
 
 | # | Clip | Start (s) | Length (s) |
 |---|---|---|---|
