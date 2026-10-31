@@ -48,7 +48,7 @@ failed purchase is recorded as a refund due, and no policy is ever bought withou
 the contract rule, logs each Cardano receipt. `npm run mcp` exposes `list_flights` (free) and `get_flight_verdict`
 (paid) as MCP tools for LLM agents.
 
-**One signed answer, the same verdict on two chains.** All four live policies landed within the threshold. The keeper's
+**One signed answer, the same verdict on two chains.** The four policies of 30 Oct all landed within the threshold. The keeper's
 signed `Arrived` answers closed them on Base Sepolia with no payout; the very same signatures, verified with Plutus V3
 builtins, settle the Aiken cover the same way, and paying the holder with them is rejected.
 

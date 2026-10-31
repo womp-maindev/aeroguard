@@ -2,6 +2,8 @@
 
 [![CI](https://github.com/womp-maindev/aeroguard/actions/workflows/ci.yml/badge.svg)](https://github.com/womp-maindev/aeroguard/actions/workflows/ci.yml) [![Keeper](https://github.com/womp-maindev/aeroguard/actions/workflows/keeper.yml/badge.svg)](https://github.com/womp-maindev/aeroguard/actions/workflows/keeper.yml)
 
+**60-second tour:** [▶ live dashboard](https://womp-maindev.github.io/aeroguard/) · 🎬 video: link after upload · [🧾 every policy, signature and tx](docs/EVIDENCE.md) · [🛡 try to cheat the contract](https://womp-maindev.github.io/aeroguard/#lab)
+
 | Security Inspector: the real AirnodeHub-signed proof for policy #1, checked in the browser | Tamper lab: 4 forgeries, 4 reverts |
 |---|---|
 | [![Security Inspector](docs/img/inspector.png)](docs/img/inspector.png) | [![Tamper lab](docs/img/tamper-lab.png)](docs/img/tamper-lab.png) |
@@ -207,7 +209,14 @@ It shows a whole day of AeroGuard compressed into 20 seconds. The **same contrac
 So the rehearsal is not the qualifying tamper test: the track asks for **real** responses (edited, too old, for another request, wrong signer), which the live evidence and the dashboard's tamper lab provide.
 
 ## Cardano: pay per request via x402
-Agents pay per request on Cardano for flight outcomes any contract can verify. `GET /verdict?flight=&date=` answers 402 with 1–2 tADA on `cardano:preprod` (`@x402/cardano` `exact` scheme, `@x402/express`, Blockfrost); once paid it returns the verdict plus the Airnode-signed proof that `FlightDelayCover` verifies unchanged. The same proof also settles an Aiken (Plutus V3) flight cover validator that checks the Airnode's secp256k1 signature on Cardano (44 Aiken tests incl. real Airnode signatures — the four final landings settle it exactly as they settled policies #1–#4 on Base — and the freshness rules; open/settle/reclaim executed with Aiken's UPLC evaluator). Plus `GET /policy` (tADA buys a FlightDelayCover policy on Base, linked by `cardanoJobRef`), a budgeted claims agent, an MCP tool and `npm run qualify` for a one-command preprod run. First paid request on preprod: [tx e2ef922b…](https://preprod.cardanoscan.io/transaction/e2ef922be71ba61da9431f1a5f56f4c56f5d61348c4945194cf390dd0acd7864). Details: [`cardano/README.md`](cardano/README.md) · all paid txs: [`cardano/EVIDENCE.md`](cardano/EVIDENCE.md). Presentation: [`presentation/cardano/`](presentation/cardano/) · video clips: [`cardano/video/`](cardano/video/) · changes: [`cardano/CHANGELOG.md`](cardano/CHANGELOG.md).
+Agents pay per request on Cardano for flight outcomes any contract can verify. Details: [`cardano/README.md`](cardano/README.md).
+
+- **Live on preprod:** `GET /verdict?flight=&date=` answers 402 with 1–2 tADA (`@x402/cardano` `exact` scheme, `@x402/express`, Blockfrost). Once paid, it returns the verdict plus the Airnode-signed proof that `FlightDelayCover` verifies unchanged. First paid request: [tx e2ef922b…](https://preprod.cardanoscan.io/transaction/e2ef922be71ba61da9431f1a5f56f4c56f5d61348c4945194cf390dd0acd7864); all paid requests are listed in [`cardano/EVIDENCE.md`](cardano/EVIDENCE.md).
+- **Same proof on Cardano (tested, not deployed):** an Aiken (Plutus V3) flight cover checks the Airnode's secp256k1 signature. Its 44 tests include the four real final landings, which settle it exactly as they settled policies #1–#4 on Base. Open, settle and reclaim run in Aiken's UPLC evaluator.
+- **tADA buys Base cover (tested offline):** `GET /policy` buys a `FlightDelayCover` policy only after the Cardano payment settles, and writes `cardanoJobRef = keccak256("cardano:<payment tx>")` into it.
+- **Agents:** a budgeted claims agent, an MCP tool for LLM agents, and `npm run qualify` for a one-command preprod run.
+
+Presentation: [`presentation/cardano/`](presentation/cardano/) · video clips: [`cardano/video/`](cardano/video/) · changes: [`cardano/CHANGELOG.md`](cardano/CHANGELOG.md).
 
 ## Repo
 ```
@@ -226,9 +235,9 @@ What the deployed contract does not handle yet, with the production fix. Each fi
 | **Several flights share a number on one date** | AeroDataBox answers with a list (multi-leg flights, or the same number twice), and the projections read the first item (`/0/…`). The request doesn't say whether the date is the departure or the arrival date, so overnight flights add ambiguity. | Pass the departure airport and `dateLocalRole: Departure`, so the signed request names exactly one leg |
 | **Diverted flight** | `Diverted` is not a final status, so the policy can't settle and only expires after 3 days: no payout for a real disruption | Treat `Diverted` as final and pay it, like a cancellation |
 | **The airline changes the schedule** | The signed schedule at settlement must equal the one at purchase (`ScheduleMismatch`), so the policy expires and the premium stays in the pool | Refund the premium on expiry, or allow a bounded schedule change |
-| **No signed evidence within 3 days** (keeper down, quota used up, Airnode offline) | The policy expires even if the flight really was late; the traveller carries the data-availability risk. GitHub's schedule for the keeper has not fired on its own; passes are started by hand | Refund the premium when a policy expires without evidence; run the keeper on a reliable scheduler (anyone can, `settle` is permissionless) |
+| **No signed evidence within 3 days** (keeper down, quota used up, Airnode offline) | The policy expires even if the flight really was late; the traveller carries the data-availability risk. GitHub's schedule for the keeper fires only sporadically (2 runs overnight), so passes are also started by hand | Refund the premium when a policy expires without evidence; run the keeper on a reliable scheduler (anyone can, `settle` is permissionless) |
 | **Many policies on one flight** | No cap per flight, so one cancelled flight can take a large share of the pool's capacity (solvency still holds: every sale checks free capital) | An exposure cap per flight and date |
-| **No live payout yet** | All 4 live flights landed early or less than 2 h late, so each closed with no payout. The signed arrival still decided the on-chain outcome; the payout tiers are shown by the Foundry tests and the rehearsal. The live contract trusts only the real Airnode, so a payout cannot be staged | Buy more live policies on the day; a 2 h delay or a cancellation pays on its own |
+| **No live payout yet** | Policies #1–#4 (30 Oct) landed early or less than 2 h late, so each closed with no payout; #5–#11 settle on pitch day. The signed arrival still decided the on-chain outcome; the payout tiers are shown by the Foundry tests and the rehearsal. The live contract trusts only the real Airnode, so a payout cannot be staged | Done: 7 more live policies on 31 Oct flights; a 2 h delay or a cancellation pays on its own |
 
 ## Security notes
 - Checks‑effects‑interactions + `ReentrancyGuard`, `SafeERC20`; reserved capital tracked so the owner can only withdraw capital **not** backing active policies.
