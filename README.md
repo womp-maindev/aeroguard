@@ -216,10 +216,14 @@ Presentation: [`presentation/cardano/`](presentation/cardano/) · video clips: [
 
 ## Repo
 ```
-contracts/  FlightDelayCover.sol + AirnodeHub libraries (api3dao/airnodehub-hackathon-starter), Foundry tests, threat model
-keeper/     x402 AirnodeHub client, AeroDataBox requests, buy/settle, autonomous keeper, tamper CLI, HTTP API (keeper/README.md)
-cardano/    x402 on Cardano preprod: paid /verdict, claims agent, MCP tool, metadata anchor, Aiken validator (onchain/)
-web/        dashboard: in-browser Security Inspector, tamper lab, policies, keeper log (single file, works offline)
+contracts/          FlightDelayCover.sol + AirnodeHub libraries, 86 Foundry tests (live replays, hardening), real fixtures, threat model
+keeper/             x402 AirnodeHub client, buy/settle, autonomous keeper + schedule, tamper CLI, rehearsal, HTTP API (keeper/README.md)
+cardano/            x402 on Cardano preprod (/verdict, /policy, claims agent, MCP tool); onchain/ Aiken cover; video/ clips; evidence/
+web/                dashboard (Inspector, tamper lab, wallet sends, policies, keeper log); media/ = api3.mp4, cardano.mp4, demo.mp4 (overview); data/ snapshot
+docs/               DEVFOLIO, DEVFOLIO-cardano, EVIDENCE, PITCH, ARCHITECTURE, BUSINESS, USP, SLIDES, VIDEO, BATCH-BUY, STATUS; img/
+presentation/       PITCH-RUNBOOK (stage, both tracks), cardano/ deck
+video/              API3 clips rendered from real data + render source (video/SHOTLIST.md)
+.github/workflows/  ci, keeper, buy, proofs, pages, cloudflare, screenshots, video
 ```
 
 ## Known limitations
