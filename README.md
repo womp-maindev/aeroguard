@@ -1,15 +1,16 @@
 # AeroGuard — your flight is late, you're already paid
 
+Parametric flight-delay cover that settles itself. A smart contract pays out **only** on flight data signed by the **AeroDataBox Airnode on API3 AirnodeHub**, and an autonomous keeper buys that data over **x402** and settles policies on-chain without anyone filing a claim.
+
 [![CI](https://github.com/womp-maindev/aeroguard/actions/workflows/ci.yml/badge.svg)](https://github.com/womp-maindev/aeroguard/actions/workflows/ci.yml) [![Keeper](https://github.com/womp-maindev/aeroguard/actions/workflows/keeper.yml/badge.svg)](https://github.com/womp-maindev/aeroguard/actions/workflows/keeper.yml)
 
-**60-second tour:** [▶ live dashboard](https://womp-maindev.github.io/aeroguard/) · 🎬 video: link after upload · [🧾 every policy, signature and tx](docs/EVIDENCE.md) · [🛡 try to cheat the contract](https://womp-maindev.github.io/aeroguard/#lab)
+**60-second tour:** [▶ live dashboard](https://womp-maindev.github.io/aeroguard/) · [🎬 1:47 demo video](docs/media/aeroguard-demo.mp4) ([API3 clips](video/SHOTLIST.md)) · [🧾 every policy, signature and tx](docs/EVIDENCE.md) · [🛡 try to cheat the contract](https://womp-maindev.github.io/aeroguard/#lab)
 
 | Security Inspector: the real AirnodeHub-signed proof for policy #1, checked in the browser | Tamper lab: 4 forgeries, 4 reverts |
 |---|---|
 | [![Security Inspector](docs/img/inspector.png)](docs/img/inspector.png) | [![Tamper lab](docs/img/tamper-lab.png)](docs/img/tamper-lab.png) |
 | Signer recovers to the AeroDataBox Airnode, the request hash matches IB1314 on 30 Oct, and the evidence is rejected as `Stale(1793378516)` / `NotFinal(Expected)`: the same answer the live contract gave. | Captured live against the deployed contract on Base Sepolia: the four forgeries go to `settle()` as `eth_call` (nothing written) on policy #11, starting from its real signed purchase proof. All four are blocked by the real bytecode. |
 
-Parametric flight-delay cover that settles itself. A smart contract pays out **only** on flight data signed by the **AeroDataBox Airnode on API3 AirnodeHub**, and an autonomous keeper buys that data over **x402** and settles policies on-chain without anyone filing a claim.
 
 ## Judge quickstart (3 min)
 
@@ -51,6 +52,15 @@ anvil --chain-id 84532 & npm run rehearse        # local deploy, 5 signed purcha
 | Trusted signer | AeroDataBox Airnode `0x83FE2E8F24E66520B1902C3507De4F471248f2Ec` |
 | Data operation | `flightStatusOnDate` (0.05 aUSD per call, x402) |
 | Payment token | aUSD `0xbeA34973e5f67F18F656A2C6070C64326C791808` |
+
+## Judge FAQ
+Longer answers: [docs/PITCH.md → Q&A](docs/PITCH.md#qa).
+
+- **Etherisc and AXA fizzy did this already?** They relied on a relay or the insurer to post the outcome, and nothing stopped cover on an already-late flight. Here the contract checks the AeroDataBox Airnode's own signature, purchase needs a signed pre-departure proof, and `settle` has no privileged caller.
+- **Why 0 payouts so far?** Every settled flight landed early or < 2 h late, so 0 is the correct, signed result. The 50 % / 100 % / cancellation path is in the tests and the rehearsal; the 31 Oct policies settle during judging, so a real delay pays live.
+- **Why trust AeroDataBox?** The signature proves the Airnode returned exactly this data for this request at this time. We pay only on a final status, signed after the landing it reports, and fresh. Next: cross-check landings with OpenSky's Airnode.
+- **Who calls `settle`?** Anyone. The payout is computed from signed fields and always goes to the stored holder; each policy settles once. Our keeper is just the first caller.
+- **What's the Cardano link?** Same project, second track: an agent pays tADA over x402 for the same Airnode-signed verdict, which the Aiken cover verifies on Cardano; `GET /policy` buys Base cover linked to the Cardano payment. The API3 payout depends only on AirnodeHub-signed data.
 
 ## Live evidence (Base Sepolia, real AeroDataBox data)
 Every policy, signed response and x402 payment in one place: [docs/EVIDENCE.md](docs/EVIDENCE.md).

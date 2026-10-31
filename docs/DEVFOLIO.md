@@ -139,4 +139,5 @@ Full analysis, with assumptions, the worst case and sources: [docs/BUSINESS.md](
 - Policy #1 purchase with a signed proof: https://sepolia.basescan.org/tx/0xbfd3ae73074ff63a3ef5f7e56b211d1ffb7223e2db944d0cc38ed069d1958b8d
 - Keeper runs: https://github.com/womp-maindev/aeroguard/actions/workflows/keeper.yml
 - Threat model: [`contracts/README.md`](https://github.com/womp-maindev/aeroguard/blob/main/contracts/README.md#threat-model)
-- Video: see [`docs/VIDEO.md`](https://github.com/womp-maindev/aeroguard/blob/main/docs/VIDEO.md) (the link is added after recording)
+- Demo video (1:47, voiced, both tracks): https://github.com/womp-maindev/aeroguard/blob/main/docs/media/aeroguard-demo.mp4
+- API3 clips rendered from real data (no audio, for the pitch): https://github.com/womp-maindev/aeroguard/blob/main/video/SHOTLIST.md

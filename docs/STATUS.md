@@ -28,10 +28,15 @@ Each run: settle what landed → push notification with the first payout tx → 
 Steps 1–4 work from a phone: everything runs in GitHub Actions or in the browser, and the keeper key never leaves the GitHub secret. The pitch (step 5) is on the laptop.
 1. **GitHub (mobile browser, "Desktop site" on)** → Settings → Advanced Security: enable **Secret Protection** + **Push protection**.
 2. **By 14:00 CET**: Settings → General → Danger zone → **Change visibility → Public**. Then Actions → "Dashboard on GitHub Pages" → **Run workflow**. Open https://womp-maindev.github.io/aeroguard/ on the phone and check that the policies and the keeper log show up.
-3. **Video** (optional): screen-record the phone on the Pages dashboard (Inspector → load a real response; Tamper lab → Run the 4 attacks) plus one Basescan settle tx, about 2 min (`docs/VIDEO.md`). Upload it unlisted and send the link in this chat: it goes into README + DEVFOLIO.
+3. **Video**: done. The voiced 1:47 demo is in the repo ([`docs/media/aeroguard-demo.mp4`](media/aeroguard-demo.mp4), linked from README, DEVFOLIO and EVIDENCE); API3 clips rendered from real data are in [`video/`](../video/SHOTLIST.md) (re-render after new settlements: Actions → "Render API3 video"). Optional: upload the demo unlisted to YouTube and send the link; it goes into README + DEVFOLIO.
 4. **By 14:30**: tum.devfolio.co on the phone → one project, tracks **API3 + Cardano**, text copied from `docs/DEVFOLIO.md` (open it on GitHub → Raw → copy).
 5. **Pitch 15:00, laptop**: `docs/PITCH.md`. Open the Pages dashboard in the browser (no setup), or `cd keeper && npm run api` for the local dashboard with **Cover me**. Before going on stage, check that the laptop has the repo up to date (`git pull`) and `.env` with `KEEPER_PK`. Live purchase on stage: send **"купи <FLIGHT>@<YYYY-MM-DD>"** in this chat; the API3 session runs the "Buy policies" workflow and replies with the Basescan link in about 30 s. Or tap Actions → "Buy policies" → Run workflow yourself.
 6. Payouts: the API3 session sends a push if a Saturday policy pays out; otherwise the pitch line in `docs/PITCH.md` ("no delay → no payout, and nobody can fake one") applies.
+
+## Final state (live vs tested)
+- **Live on Base Sepolia:** contract, 11 real policies bought with signed AeroDataBox proofs, #1–#4 settled by the keeper on signed arrivals (`ClosedNoPayout`), #5–#11 settling today, x402 payments for every lookup, the tamper results on policy #1, the dashboard reading the chain.
+- **Live on Cardano preprod:** the x402 verdict sale in tADA (tx `e2ef922b…`); the Aiken cover runs in one command (`cardano/live-cover.sh`).
+- **Tested only:** payouts (50 % / 100 % / cancelled) in 86 forge tests and the anvil rehearsal (no live flight has been ≥ 2 h late yet); `GET /policy` (Cardano pays for Base cover) offline.
 
 ## Open issues
 - GitHub's schedule for `keeper.yml` now fires on its own, but sparsely (2 scheduled runs by 03:30Z on 31 Oct, at 22:55Z and 02:14Z, both successful, against a 15-min cron). Manual `workflow_dispatch` runs fill the gaps, so trigger one after each landing.
