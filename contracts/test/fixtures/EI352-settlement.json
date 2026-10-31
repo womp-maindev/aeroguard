@@ -1,0 +1,18 @@
+{
+  "_note": "REAL: the AeroDataBox Airnode response that settled policy #7 on Base Sepolia (settle tx 0xa74101c2e2482306712716deda11727893dcd10d448148dbaa3db5888dbb66c1), published by the keeper in keeper-data/keeper.json (run 41189790809)",
+  "policyId": 7,
+  "flight": "EI352",
+  "date": "2026-10-31",
+  "kind": "arrival",
+  "airnode": "0x83FE2E8F24E66520B1902C3507De4F471248f2Ec",
+  "requestHash": "0x71d52b067e3ece9ac983c0e1493618b4795ac466bcbfe52a7dcfac9327c9c6c9",
+  "timestamp": 1793439777,
+  "data": "{\"actual\":\"2026-10-31 08:45Z\",\"scheduled\":\"2026-10-31 09:10Z\",\"status\":\"Arrived\"}",
+  "signature": "0x64ea1bdd64a97e2efd2b918dd9f2cd4d7e11a24f14ef4d89b8fea5eacb71698d1b692d8b14eee105ed2952d545d872e63b50b05c62850ddae692a8e6673da03d1c",
+  "fetchedAt": 1793439778,
+  "paymentTx": "0x22c90b0ad73cc6d93415f005d82c46f5651edbca40b2b33c94ffa0df259409dc",
+  "settleTx": "0xa74101c2e2482306712716deda11727893dcd10d448148dbaa3db5888dbb66c1",
+  "outcome": "ClosedNoPayout",
+  "payout": 0,
+  "delayMinutes": 0
+}
