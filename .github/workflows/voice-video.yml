@@ -42,7 +42,9 @@ jobs:
             echo "line $i: ${d}s in ${slot}s slot, tempo $t"
             i=$((i+1))
           done < lines.tsv
-          ffmpeg -y -loglevel error -i aeroguard-demo-draft.mp4 $inputs -filter_complex "${filters}${mix}amix=inputs=$i:normalize=0,volume=1.6[aout]" -map 0:v -map "[aout]" -c:v copy -c:a aac -b:a 160k -shortest aeroguard-demo-voiced.mp4
+          dur=$(ffprobe -v error -show_entries format=duration -of csv=p=0 aeroguard-demo-draft.mp4)
+          ffmpeg -y -loglevel error -f lavfi -t "$dur" -i anullsrc=r=22050:cl=mono $inputs -filter_complex "${filters}[0:a]${mix}amix=inputs=$((i+1)):duration=first:normalize=0,volume=1.6[aout]" -map "[aout]" -ar 44100 /tmp/v/vo.wav
+          ffmpeg -y -loglevel error -i aeroguard-demo-draft.mp4 -i /tmp/v/vo.wav -map 0:v -map 1:a -c:v copy -c:a aac -b:a 160k -movflags +faststart aeroguard-demo-voiced.mp4
           ls -la aeroguard-demo-voiced.mp4
       - name: Commit
         run: |
