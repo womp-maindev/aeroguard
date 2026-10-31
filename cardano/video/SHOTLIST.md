@@ -23,3 +23,21 @@ Notes
 - Clip 3: the 44 s wait for the block is compressed and labelled "(44 s, sped up)"; the Blockfrost key is masked.
 - Clip 9 is the only part not run live (8 offline tests); its caption says so.
 - To show Cardanoscan itself, record 3–5 s of https://preprod.cardanoscan.io/transaction/e2ef922be71ba61da9431f1a5f56f4c56f5d61348c4945194cf390dd0acd7864 in your browser (blocked from our build box).
+
+## Final cut timings (31 Oct, `sh src/assemble.sh`)
+0.3 s dip between clips, constant 30 fps, keyframe every second. 0.5 s still lead-in at the start of the title.
+
+| Clip | Start (s) | Length (s) |
+|---|---|---|
+| 01-title (site hero sky, drifting planes) | 0.00 | 6.50 |
+| 01b-site (live site: hero → Cardano x402 panel) | 6.50 | 6.00 |
+| 02-arch | 12.50 | 14.00 |
+| 03-qualify | 26.50 | 25.70 |
+| 04-response | 52.20 | 11.00 |
+| 05-tx | 63.20 | 7.00 |
+| 06-dashboard | 70.20 | 12.00 |
+| 07-aiken | 82.20 | 15.47 |
+| 08-chains | 97.67 | 11.00 |
+| 09-policy | 108.67 | 9.00 |
+| 10-outro | 117.67 | 6.00 |
+| **total** | | **123.67** |
