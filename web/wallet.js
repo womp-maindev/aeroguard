@@ -41,9 +41,12 @@
     // optional: nicer revert text and a policy refresh
     decodeRevert: typeof decodeRevert !== 'undefined' ? decodeRevert : undefined,
     explain: typeof explain !== 'undefined' ? explain : undefined,
+    titleOf: typeof titleOf !== 'undefined' ? titleOf : undefined,
+    shortCode: typeof shortCode !== 'undefined' ? shortCode : undefined,
+    allEvidence: typeof allEvidence !== 'undefined' ? allEvidence : undefined,
     refreshChain: typeof refreshChain !== 'undefined' ? refreshChain : undefined,
   };
-  const OPTIONAL = ['decodeRevert', 'explain', 'refreshChain'];
+  const OPTIONAL = ['decodeRevert', 'explain', 'titleOf', 'shortCode', 'allEvidence', 'refreshChain'];
   // CONTRACT is a let that the page reassigns when it finds a local keeper API, so it is read live.
   const g = (name) => (name === 'CONTRACT' && typeof CONTRACT !== 'undefined' ? CONTRACT : PAGE[name]);
   const missing = Object.keys(PAGE).filter((n) => !OPTIONAL.includes(n) && PAGE[n] === undefined);
@@ -150,7 +153,13 @@
     if (!p) return;
     const base = g('labBase')(p);
     if ((mode === 'stale' || mode === 'valid') && !base.genuine && !el('tUseInsp')?.checked) {
-      return result(mode, 'sk', 'SKIPPED', `Needs a genuine Airnode response for ${p.flight}; none is published for this policy yet.`);
+      return result(mode, 'sk', 'SKIPPED', `This test needs a real signed response for ${p.flight}, and there is none yet.`);
+    }
+    if (mode === 'stale' && base.genuine && typeof g('allEvidence') === 'function') {
+      // stale wants the oldest real response for this policy, like the eth_call lab
+      const hs = [p.arrivalRequestHash, p.statusRequestHash].map((h) => String(h).toLowerCase());
+      const old = g('allEvidence')().filter((x) => hs.includes(String(x.requestHash).toLowerCase())).sort((x, y) => Number(x.timestamp) - Number(y.timestamp))[0];
+      if (old) base.r = old;
     }
     if (mode === 'stale' && Math.floor(Date.now() / 1000) - Number(base.r.timestamp) <= Number(p.maxAge)) {
       return result(mode, 'sk', 'SKIPPED', 'The base response is still fresh, so it cannot show Stale yet.');
@@ -162,10 +171,13 @@
     await submit(mode, p, r);
   }
 
+  // same look as the eth_call lab: short title, one plain sentence, the raw revert small underneath
   const withExplanation = (reason) => {
-    const explain = g('explain');
+    const explain = g('explain'), titleOf = g('titleOf'), shortCode = g('shortCode');
     const plain = typeof explain === 'function' ? explain(reason) : '';
-    return `<code>${escape(reason)}</code>${plain ? `<span class="e">${escape(plain)}</span>` : ''}`;
+    const title = typeof titleOf === 'function' ? `<b class="t">${escape(titleOf(reason))}</b>` : '';
+    const code = typeof shortCode === 'function' ? shortCode(reason) : reason;
+    return `${title}${plain ? `<span class="e">${escape(plain)}</span>` : ''}<code class="c" title="${escape(reason)}">${escape(code)}</code>`;
   };
 
   // Sends settle(policy, response) from the wallet and reports the on-chain outcome in `box`.
@@ -190,7 +202,8 @@
       if (receipt.status === '0x1') {
         result(box, 'ok', 'CONFIRMED · ON-CHAIN', `<span class="e">settle() succeeded in ${link}. Policy state refreshed.</span>`);
       } else {
-        result(box, 'no', 'REVERTED · ON-CHAIN', `${withExplanation(await revertReason(tx, receipt.blockNumber))}<span class="e">Transaction ${link}</span>`);
+        const attack = box !== 'valid' && box !== 'own';
+        result(box, attack ? 'blk' : 'no', attack ? '🛡 BLOCKED · ON-CHAIN' : 'REVERTED · ON-CHAIN', `${withExplanation(await revertReason(tx, receipt.blockNumber))}<span class="e">Transaction ${link}</span>`);
       }
       const refresh = g('refreshChain');
       if (typeof refresh === 'function') await refresh();
@@ -551,6 +564,7 @@
     const style = document.createElement('style');
     style.textContent = `
       #wPanel { padding: 16px 18px; border-top: 1px solid var(--line, #e1e5eb); }
+      #wPanel h3 { margin: 0; font: 400 21px/1.15 var(--display, serif); }
       #wPanel > p { font-size: 13px; color: var(--mute, #556071); margin: 4px 0 0; }
       #wPanel .wtop { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 12px 0 14px; font-size: 13px; }
       #wPanel .warn { font-weight: 600; color: var(--bad, #d0342c); }
@@ -573,7 +587,7 @@
     const panel = document.createElement('div');
     panel.id = 'wPanel';
     panel.innerHTML = `
-      <h4>Send it for real</h4>
+      <h3>Send it for real</h3>
       <p>The same forgeries as above, sent as real <code>settle()</code> transactions from your wallet to the deployed
       contract. A rejected one is mined as a failed transaction, so the revert is on Basescan. Works on an
       <b>Active</b> policy; a settled one stops at <code>NotActive</code>.</p>
@@ -585,7 +599,7 @@
           <div class="res" id="wres-valid"><span class="e">Settles for good if final. Asks first.</span></div></div>
       </div>
       <div class="wown">
-        <h4>Your own response</h4>
+        <h3>Your own response</h3>
         <p>Paste any AirnodeHub response (or a keeper fixture) for the target policy, edit it however you like, then
         check it with an <code>eth_call</code> or send it for real. <code>data</code> must be the exact string that was
         signed.</p>
