@@ -7,7 +7,7 @@ Tracks: **one project, two tracks** (confirmed by the organizers): **API3 "Any A
 - Signer: AeroDataBox Airnode `0x83FE2E8F24E66520B1902C3507De4F471248f2Ec`; aUSD `0xbeA34973e5f67F18F656A2C6070C64326C791808` (faucet cap 10 aUSD/account, `mintFromFaucet(uint256)`).
 - Pool funded 4 aUSD. Policies (0.5 aUSD cover, bought with signed pre-departure proofs, sched. arrival UTC):
   #1 IB1314 MUC→MAD 21:25 · #2 LH1816 MUC→BCN 21:55 · #3 EI357 MUC→DUB 21:55 · #4 BA955 MUC→LHR 21:50 (all 2026-10-30)
-- Keeper: GitHub Actions `.github/workflows/keeper.yml`, cron `7,22,37,52 * * * *` (schedule has **not fired yet**; runs are manual `workflow_dispatch`, safe at any time, input `force` ignores the 30-min rhythm). Secret `KEEPER_PK` set. Each run logs balances, gas headroom and policies, prints + uploads the signed response of every settlement (artifact `settlement-evidence`), and commits its log + all signed responses to `keeper-data/keeper.json` (read by the dashboard on Pages). Unsettled policies are expired after scheduled + 3 days; private policies are never looked up.
+- Keeper: GitHub Actions `.github/workflows/keeper.yml`, cron `7,22,37,52 * * * *` (the schedule fires on its own since 22:55Z on 30 Oct, but sparsely: 2 scheduled runs by 03:30Z on 31 Oct, both successful; manual `workflow_dispatch` fills the gaps, safe at any time, input `force` ignores the 30-min rhythm). Secret `KEEPER_PK` set. Each run logs balances, gas headroom and policies, prints + uploads the signed response of every settlement (artifact `settlement-evidence`), and commits its log + all signed responses to `keeper-data/keeper.json` (read by the dashboard on Pages). Unsettled policies are expired after scheduled + 3 days; private policies are never looked up.
 - Check schedule (`keeper/src/schedule.ts`, tested): one early look 3 h before arrival (done 19:10 UTC), then every 30 min from +30 min to +6 h, every 3 h to +24 h, max 20 lookups/policy. Next checks: #1 ≥ 21:55Z, #4 ≥ 22:20Z, #2/#3 ≥ 22:25Z. The API3 session triggers runs at 21:57, 22:27, 22:57, 23:27, 23:57, 01:27 UTC. A forced look at #1 at 20:59 UTC got "Approaching" (not final). Manual input `policy` = only that policy.
 - Balances 20:59 UTC: keeper 0.000368 ETH (≈66× the gas for 4 settles at 0.007 gwei; a faucet top-up is still nice), ~5.3 aUSD; pool 4.16 aUSD, reserved 2.00, free 2.16.
 - On-chain tamper results (policy #1, real Airnode data): edit → NotSignedByAirnode, wrongreq → WrongRequest, wrongsigner → NotSignedByAirnode, stale → Stale(1793378516), genuine pre-departure → NotFinal(Expected).
@@ -34,7 +34,7 @@ Steps 1–4 work from a phone: everything runs in GitHub Actions or in the brows
 6. Payouts: the API3 session sends a push if a Saturday policy pays out; otherwise the pitch line in `docs/PITCH.md` ("no delay → no payout, and nobody can fake one") applies.
 
 ## Open issues
-- GitHub's schedule for `keeper.yml` has never fired (0 scheduled runs); manual `workflow_dispatch` runs cover it.
+- GitHub's schedule for `keeper.yml` now fires on its own, but sparsely (2 scheduled runs by 03:30Z on 31 Oct, at 22:55Z and 02:14Z, both successful, against a 15-min cron). Manual `workflow_dispatch` runs fill the gaps, so trigger one after each landing.
 - Some Frontend commits on `main` carry a `Co-Authored-By: Claude` trailer, against CLAUDE.md. Avoid in new commits; rewriting `main` history would need a force-push and the owner's go.
 
 ## Known decisions / limits

@@ -55,7 +55,7 @@ Every sale checks `freeCapital() >= coverage` after the premium is paid in. `res
 It is what makes the cover claim-free. `settle` has no discretion: the payout is computed from signed fields and always goes to the stored holder. A caller can only provide evidence, and the contract rejects any evidence that is not right. Each policy settles exactly once (`NotActive` on the second try). If our keeper goes down, anyone can settle, including the traveller.
 
 **"Was the keeper really autonomous?"**
-It decides on its own what to buy, when, and whether the evidence is final, then settles. What starts a pass differs: `npm run keeper` is a plain unattended loop, and in GitHub Actions a pass runs on a schedule. On 30 Oct GitHub's scheduler never fired for this new workflow, so those passes were started with the Run button. Same code, same decisions, and because `settle` gives the caller no power, any of these triggers (or a stranger) is fine.
+It decides on its own what to buy, when, and whether the evidence is final, then settles. What starts a pass differs: `npm run keeper` is a plain unattended loop, and in GitHub Actions a pass runs on a schedule. On 30 Oct GitHub's scheduler didn't fire at first, so the first passes were started with the Run button; it first fired on its own at 22:55Z on 30 Oct, and again at 02:14Z on 31 Oct (both runs successful), though less often than the cron asks. Same code, same decisions, and because `settle` gives the caller no power, any of these triggers (or a stranger) is fine.
 
 **"Can a keeper pick a favourable response?"**
 Only among genuine, fresh, final responses for this exact flight. Once a flight has landed, those all say the same thing. Responses that are old, early or not final are rejected.
