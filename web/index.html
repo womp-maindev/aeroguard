@@ -247,6 +247,7 @@
   .pitch-qr { display: grid; justify-items: center; gap: 12px; text-align: center; font-size: clamp(16px, 1.3vw, 24px); }
   .pitch-qr img { width: min(30vw, 46vh); height: auto; border-radius: 16px; border: 1px solid var(--line); box-shadow: var(--shadow); }
   .pitch-qr code { color: var(--mute); font-size: .8em; }
+  .pitch-team { margin: 2vh 0 0; font-size: clamp(14px, 1.05vw, 19px); color: var(--text); } .pitch-team span { color: var(--mute); font-size: .85em; }
   .pitch-x { position: absolute; top: 18px; right: 18px; border-radius: 50%; width: 40px; height: 40px; justify-content: center; padding: 0; background: var(--card); border: 1px solid var(--line2); }
   body.pitching { overflow: hidden; }
   @media (max-width: 900px) { .pitch { grid-template-columns: 1fr; } .pitch-qr { display: none; } .pitch-stats { grid-template-columns: 1fr 1fr 1fr; } }
@@ -334,7 +335,7 @@
   footer.site .wrap.credit { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap; margin-bottom: 22px; }
   .sig { font: 600 34px/1.1 var(--hand); color: var(--text); transform: rotate(-2deg); transform-origin: left; display: inline-block; }
   .sig b { font-weight: 700; color: var(--accent-hi); }
-  .sig:hover { text-decoration: none; color: var(--accent); }
+  .sig small { font-size: .7em; font-weight: 600; } .sig small a { color: var(--mute); text-decoration: none; } .sig small a:hover { color: var(--accent); }
   .site-link { font: 500 13px var(--sans); letter-spacing: .22em; text-transform: uppercase; color: var(--text); border-bottom: 1.5px solid var(--accent); padding-bottom: 3px; }
   .site-link:hover { text-decoration: none; color: var(--accent); border-color: var(--accent); }
   footer.site .wrap { display: grid; grid-template-columns: 1.4fr 1fr; gap: 24px; }
@@ -738,6 +739,7 @@
     </div>
     <div class="pitch-go"><button class="btn-primary" type="button" onclick="cheat()">Try to steal from this contract</button><div class="pitch-out" id="pOut"></div></div>
     <p class="next-up" id="pNext"></p>
+    <p class="pitch-team">Team: Mihail <span>(WompSolutions)</span> · Eskender Assefa</p>
   </div>
   <div class="pitch-qr"><img src="img/qr-lab.svg" alt="QR code to the tamper lab" width="380" height="380" /><span>Scan it. Try it yourself.</span><code>womp-maindev.github.io/aeroguard</code></div>
 </section>
@@ -750,7 +752,7 @@
 
 <footer class="site">
   <div class="wrap credit">
-    <a class="sig" href="https://womp.solutions" target="_blank" rel="noopener">made by <b>WompSolutions</b> &amp; <b>Eskender</b></a>
+    <span class="sig">made by <b>Mihail</b> <small><a href="https://womp.solutions" target="_blank" rel="noopener">(WompSolutions)</a></small> &amp; <b>Eskender Assefa</b></span>
     <a class="site-link" href="https://womp.solutions" target="_blank" rel="noopener">womp.solutions ↗</a>
   </div>
   <div class="wrap">
