@@ -121,3 +121,6 @@ Ready-made clips (1080p, no sound) in [`cardano/video/`](../cardano/video/); tim
 > Back comes the verdict and the Airnode's signature — the same proof our Aiken contract checks on Cardano with
 > Plutus' secp256k1 builtin. **[aiken check: 44 passed]**
 > Agents pay per request on Cardano for flight outcomes any contract can verify."
+
+## Team
+Team: **Mihail** <sub>(WompSolutions)</sub> · **Eskender Assefa**
