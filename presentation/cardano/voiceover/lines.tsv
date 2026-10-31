@@ -4,7 +4,7 @@
 45.7	56.7	What the agent gets back: the verdict, landed twenty-five minutes early. The proof, the Airnode's signature over exactly this data. And the receipt, the Cardano payment that bought it.
 56.7	63.7	Two tADA for one verdict. No account, no API key. You can check it on Cardanoscan.
 63.7	75.7	Our dashboard shows the same exchange in three steps: the 402 offer, the payment, and the signed verdict.
-75.7	91.2	And it's not just JSON. Our Aiken contract on Cardano verifies the Airnode's signature with Plutus builtins. Forged data fails, the real landings pass: forty-four tests out of forty-four.
-91.2	102.2	Last night our four live policies landed. The same signed answers closed them on Base, and settle the Cardano contract exactly the same way. One signature, one verdict, two chains.
+75.7	91.2	And it's not just JSON. Our Aiken escrow on Cardano checks the same Airnode signature with Plutus builtins, so the cover pays only on a signed result. Forged data fails, real landings pass: forty-four tests out of forty-four.
+91.2	102.2	Last night our first four policies landed. The same signed answers closed them on Base, and settle the Cardano contract exactly the same way. One signature, one verdict, two chains.
 102.2	111.2	Cardano can also pay for the insurance itself: the premium in tADA buys a policy on Base, and the policy records the Cardano payment.
 111.2	117.2	Agents pay per request on Cardano, for flight outcomes any contract can verify.

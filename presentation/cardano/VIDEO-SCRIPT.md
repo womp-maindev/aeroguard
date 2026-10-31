@@ -49,13 +49,13 @@ is real: our paid run on preprod, the server's response, the Aiken tests and the
 
 ### 1:16–1:31 · Clip 07 — `aiken check`, 44 of 44
 **On screen:** green PASS lines, four blocks marked "real Airnode landing".
-**EN:** "And it's not just JSON. Our Aiken contract on Cardano verifies the Airnode's signature with Plutus builtins. Forged data fails, the real landings pass — forty-four tests out of forty-four."
-**RU:** «И это не просто JSON. Наш контракт на Aiken в Cardano проверяет подпись Airnode встроенными функциями Plutus. Подделки отклоняются, реальные посадки проходят — 44 теста из 44».
+**EN:** "And it's not just JSON. Our Aiken escrow on Cardano checks the same Airnode signature with Plutus builtins, so the cover pays only on a signed result. Forged data fails, real landings pass — forty-four tests out of forty-four."
+**RU:** «И это не просто JSON. Наш escrow на Aiken в Cardano проверяет ту же подпись Airnode встроенными функциями Plutus, поэтому покрытие платится только по подписанному результату. Подделки отклоняются, реальные посадки проходят — 44 теста из 44».
 
 ### 1:31–1:42 · Clip 08 — the same verdict on two blockchains
 **On screen:** a table of 4 policies: Base `ClosedNoPayout`, Cardano "no payout".
-**EN:** "Last night our four live policies landed. The same signed answers closed them on Base — and settle the Cardano contract exactly the same way. One signature, one verdict, two chains."
-**RU:** «Вчера вечером приземлились рейсы четырёх наших живых полисов. Те же подписанные ответы закрыли их на Base и точно так же закрывают контракт на Cardano. Одна подпись, один вердикт, два блокчейна».
+**EN:** "Last night our first four policies landed. The same signed answers closed them on Base — and settle the Cardano contract exactly the same way. One signature, one verdict, two chains."
+**RU:** «Вчера вечером приземлились рейсы наших первых четырёх полисов. Те же подписанные ответы закрыли их на Base и точно так же закрывают контракт на Cardano. Одна подпись, один вердикт, два блокчейна».
 
 ### 1:42–1:51 · Clip 09 — tADA buys a policy on Base
 **On screen:** Cardano → after settlement → linked (cardanoJobRef).
