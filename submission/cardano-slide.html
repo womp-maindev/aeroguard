@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><style>
+@font-face{font-family:Kelly;src:url(KellySlab-normal.woff2)}
+@font-face{font-family:Jost;src:url(Jost-normal.woff2)}
+*{box-sizing:border-box;margin:0}
+body{width:2000px;height:1125px;background:#EEEFF3;font-family:Jost,sans-serif;color:#111827;position:relative;overflow:hidden}
+.k{position:absolute;left:146px;top:118px;letter-spacing:.18em;font-size:24px;color:#4B5563}
+h1{position:absolute;left:146px;top:170px;font-family:Kelly,serif;font-weight:400;font-size:84px;line-height:1.05;width:1700px}
+h1 b{font-weight:400;color:#2F5FD9}
+.flow{position:absolute;left:146px;top:470px;display:flex;align-items:center;gap:22px}
+.box{background:#fff;border-radius:22px;padding:26px 30px;width:330px;height:180px;display:flex;flex-direction:column;justify-content:center}
+.box .n{font-size:20px;color:#E4572E;letter-spacing:.12em;margin-bottom:8px}
+.box .t{font-size:30px;line-height:1.15}
+.box.hi{background:#2F5FD9;color:#fff}.box.hi .n{color:#BFD0FF}
+.arr{font-size:34px;color:#6B7280}
+.notes{position:absolute;left:146px;top:700px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:60px;width:1420px;font-size:28px;line-height:1.35;color:#374151}
+.notes b{color:#111827}
+.chips{position:absolute;left:146px;top:880px;display:flex;gap:18px}
+.chip{border:1.5px solid #D1D5DB;border-radius:40px;padding:12px 26px;font-size:24px;background:#F7F8FA}
+.chip i{font-style:normal;color:#16a34a;margin-right:8px}
+.tx{position:absolute;right:146px;top:690px;text-align:center;font-size:20px;color:#4B5563}
+.tx img{width:210px;height:210px;background:#fff;padding:12px;border-radius:14px;display:block;margin-bottom:10px}
+.ft{position:absolute;left:146px;bottom:52px;font-family:Kelly,serif;font-size:26px}.ft b{font-weight:400;color:#2F5FD9}
+.pg{position:absolute;right:146px;bottom:52px;font-size:24px;color:#4B5563}
+</style></head><body>
+<div class="k">CARDANO · AGENTS PAY FOR VERIFIABLE TRUTH</div>
+<h1>The agent pays only for a result<br>a contract can <b>check</b>.</h1>
+<div class="flow">
+  <div class="box"><div class="n">01 · ASK</div><div class="t">Claims agent hires our verdict agent</div></div><div class="arr">→</div>
+  <div class="box"><div class="n">02 · 402</div><div class="t">x402 on Cardano: pay 2 tADA</div></div><div class="arr">→</div>
+  <div class="box"><div class="n">03 · VERDICT</div><div class="t">+ the AeroDataBox Airnode signature</div></div><div class="arr">→</div>
+  <div class="box hi"><div class="n">04 · ESCROW</div><div class="t">Aiken escrow checks it, pays by rule</div></div>
+</div>
+<div class="notes">
+  <div><b>No proof, no charge.</b> Unknown flight → free 404. Final proofs cost more than live ones.</div>
+  <div><b>Same signature, two chains.</b> The bytes the agent buys settle FlightDelayCover on Base <i>and</i> the Aiken escrow on Cardano.</div>
+  <div><b>Plutus has no ecrecover.</b> We rebuild the signed bytes: keccak_256 + verifyEcdsaSecp256k1Signature.</div>
+</div>
+<div class="chips">
+  <div class="chip"><i>✓</i>Paid on preprod · tx e2ef922b…</div>
+  <div class="chip"><i>✓</i>44 Aiken tests on real signatures</div>
+  <div class="chip"><i>✓</i>MCP tool: any LLM agent can pay</div>
+</div>
+<div class="tx"><img src="qr-tx.svg">x402 payment on Cardanoscan</div>
+<div class="ft">Aero<b>Guard</b></div><div class="pg">4b / 6</div>
+</body></html>
