@@ -1,11 +1,13 @@
 # AeroGuard × Cardano — everything for the presentation
 
+**▶ Video (1:57, voiced): [`AeroGuard-Cardano-video.mp4`](AeroGuard-Cardano-video.mp4)**, right here in this folder.
+
 ## What's in this folder
 | File | What it is | When to use it |
 |---|---|---|
 | **`index.html`** | The slides: 10 slides with videos and QR codes | On stage. Open it, press **F** for fullscreen, use **→** to advance |
 | **`SPEAKER-NOTES.md`** | **What to say on each slide**: English text plus a Russian translation, about 2½ min | Rehearse before the pitch. **N** shows the text under the slide |
-| **[`web/media/cardano.mp4`](../../web/media/cardano.mp4)** | **The video**: 1:57, 1080p, voiced (EN) | Edit it into your video or play it if the slides won't open |
+| **[`AeroGuard-Cardano-video.mp4`](AeroGuard-Cardano-video.mp4)** | **The video**: 1:57, 1080p, voiced (EN); the same file as `web/media/cardano.mp4` | Edit it into your video or play it if the slides won't open |
 | **`VIDEO-SCRIPT.md`** | **What to say over the video**: timecodes, what is on screen, EN text, RU translation | For recording the voice-over |
 | `DEMO.md` | How to show a live payment on stage, and what to do if something breaks | 30 min before the pitch |
 | `open-presentation.command` | Mac: double-click it to open the slides | — |

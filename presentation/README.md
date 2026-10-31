@@ -14,7 +14,7 @@ Each track has its own folder with a deck, speaker notes and a demo runbook.
 | Folder | Track | Open |
 |---|---|---|
 | [`api3/`](api3/) | API3: signed AirnodeHub data settles flight-delay cover on Base | deck [`docs/SLIDES.md`](../docs/SLIDES.md) · video [`web/media/api3.mp4`](../web/media/api3.mp4) · stage: [`PITCH-RUNBOOK.md`](PITCH-RUNBOOK.md) |
-| [`cardano/`](cardano/) | Cardano: agents pay per request over x402, verified by an Aiken contract | slides `cardano/index.html` · video `../web/media/cardano.mp4` (voiced) · what to say: `cardano/SPEAKER-NOTES.md` (slides) and `cardano/VIDEO-SCRIPT.md` (video), EN + RU |
+| [`cardano/`](cardano/) | Cardano: agents pay per request over x402, verified by an Aiken contract | slides `cardano/index.html` · video `cardano/AeroGuard-Cardano-video.mp4` (voiced) · what to say: `cardano/SPEAKER-NOTES.md` (slides) and `cardano/VIDEO-SCRIPT.md` (video), EN + RU |
 
 **On stage (15:00):** [`PITCH-RUNBOOK.md`](PITCH-RUNBOOK.md): tabs to open, the 2-minute API3 and Cardano versions, short answers, and what to do if something fails. Cardano slide as an image: [`docs/img/slide-cardano.png`](../docs/img/slide-cardano.png).
 
