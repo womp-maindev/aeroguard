@@ -1,0 +1,11 @@
+0	6	Your flight lands three hours late. AeroGuard pays on its own.
+6	14	You buy cover with a signed status from the AeroDataBox Airnode on API3 AirnodeHub. After landing, a keeper buys the signed arrival over x402, the contract verifies it, and pays. Nobody files a claim.
+20	13	The contract checks the Airnode's signature, rebuilds the request hash for this exact flight and date, and only sells cover before departure.
+33	15	Our keeper decides when data is worth buying, pays five cents per signed answer, simulates the settlement, and sends it.
+48	10	Every policy is live on Base Sepolia.
+58	12	Each one closes on the Airnode's signed arrival. Two hours late or cancelled pays. Anything else closes with no payout. The data decides.
+70	13	Now let's cheat. Anyone can attack the live contract, right from the browser.
+83	12	An edited value, another flight's answer, an attacker's key, an old answer. All rejected by the real contract.
+95	14	Eighty-six tests, including the full live lifecycle of our first four policies, on their real Airnode signatures.
+109	12	And every payout rule on a local chain, in seconds.
+121	7	AeroGuard. No signature, no money moves.
