@@ -32,9 +32,9 @@
   :root {
     /* light grey sky, dark ink, one orange. planes fly in the back */
     --bg: #eef0f3; --bg2: #ffffff; --card: #ffffff; --card2: #f3f5f8; --line: #e1e5eb; --line2: #cbd1da;
-    --text: #151b26; --mute: #556071; --dim: #8a93a2;
-    --accent: #e8521c; --accent-ink: #ffffff; --accent-soft: rgba(232, 82, 28, .09);
-    --ok: #1d8a5a; --ok-soft: rgba(29, 138, 90, .1); --bad: #d0342c; --bad-soft: rgba(208, 52, 44, .07);
+    --text: #151b26; --mute: #556071; --dim: #5f6878;
+    --accent: #c13d0b; --accent-hi: #e8521c; --accent-ink: #ffffff; --accent-soft: rgba(193, 61, 11, .08);
+    --ok: #17784d; --ok-soft: rgba(23, 120, 77, .09); --bad: #d0342c; --bad-soft: rgba(208, 52, 44, .07);
     --amber: #ffb020; --blue: #2f62d6; --blue-soft: rgba(47, 98, 214, .1);
     --shadow: 0 1px 0 rgba(21, 27, 38, .04), 0 18px 40px -26px rgba(21, 27, 38, .35);
     --sans: Jost, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
@@ -58,8 +58,10 @@
   @keyframes fly-back { from { transform: translate3d(calc(100vw + 5%), 0, 0) scaleX(-1) rotate(var(--r, 0deg)); } to { transform: translate3d(-105%, var(--dy, 0px), 0) scaleX(-1) rotate(var(--r, 0deg)); } }
   @media (prefers-reduced-motion: reduce) { .sky img { animation-play-state: paused; } }
   main, footer.site { position: relative; z-index: 1; }
-  ::selection { background: rgba(232, 82, 28, .22); color: var(--text); }
+  ::selection { background: rgba(193, 61, 11, .2); color: var(--text); }
   a { color: var(--accent); text-decoration: none; } a:hover { text-decoration: underline; }
+  p a, .buys a, .e a, .why a, .empty a, li a { text-decoration: underline; text-underline-offset: 2px; text-decoration-thickness: 1px; }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   code, .mono { font-family: var(--mono); font-size: .88em; }
   .wrap { max-width: 1180px; margin: 0 auto; padding: 0 24px; }
 
@@ -72,7 +74,7 @@
   .navlinks a { color: var(--mute); } .navlinks a:hover { color: var(--text); text-decoration: none; }
   .navright { margin-left: auto; display: flex; gap: 8px; align-items: center; }
   .tag { font: 600 10.5px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--line2); color: var(--mute); white-space: nowrap; }
-  .tag.testnet { color: var(--accent); border-color: rgba(232,82,28,.45); background: var(--accent-soft); }
+  .tag.testnet { color: #a3330a; border-color: rgba(193,61,11,.45); background: var(--accent-soft); }
   .apistat { display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; color: var(--mute); white-space: nowrap; }
   .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--dim); }
   .dot.on { background: var(--ok); box-shadow: 0 0 0 4px rgba(29,138,90,.15); } .dot.off { background: var(--bad); }
@@ -81,8 +83,8 @@
   .hero { padding: 64px 0 28px; display: grid; grid-template-columns: 1.25fr .9fr; gap: 40px; align-items: center; }
   .eyebrow { font: 500 12.5px/1.3 var(--sans); letter-spacing: .24em; text-transform: uppercase; color: var(--mute); margin: 0 0 30px; padding-bottom: 12px; border-bottom: 1px dashed var(--line2); display: flex; justify-content: space-between; gap: 16px; }
   h1 { font: 400 clamp(42px, 6vw, 74px)/1.02 var(--display); letter-spacing: -.01em; margin: 0 0 14px; }
-  .hand { font: 600 26px/1.2 var(--hand); color: var(--accent); margin: 0 0 22px; transform: rotate(-1.5deg); transform-origin: left; }
-  h1 em { font-style: normal; color: var(--accent); }
+  .hand { font: 600 26px/1.2 var(--hand); color: var(--accent-hi); margin: 0 0 22px; transform: rotate(-1.5deg); transform-origin: left; }
+  h1 em { font-style: normal; color: var(--accent-hi); }
   .lede { color: var(--mute); text-shadow: 0 0 6px var(--bg), 0 0 2px var(--bg); font-size: 17px; max-width: 600px; margin: 0 0 26px; }
   .lede b { color: var(--text); font-weight: 600; }
   .ctas { display: flex; gap: 10px; flex-wrap: wrap; }
@@ -90,7 +92,7 @@
   aside.pass .bp { padding: 18px 20px 6px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: end; gap: 10px; }
   aside.pass .bp small { display: block; font: 600 10.5px var(--mono); letter-spacing: .14em; color: var(--dim); text-transform: uppercase; margin-bottom: 4px; }
   aside.pass .bp b { font: 400 30px/1 var(--display); letter-spacing: .02em; }
-  aside.pass .bp .to { text-align: right; } aside.pass .bp .to b { color: var(--accent); }
+  aside.pass .bp .to { text-align: right; } aside.pass .bp .to b { color: var(--accent-hi); }
   aside.pass .bp svg { width: 64px; height: 24px; color: var(--dim); margin-bottom: 4px; }
   .perf { position: relative; margin: 6px 0; border-top: 2px dashed var(--line2); }
   .perf::before, .perf::after { content: ""; position: absolute; top: -12px; width: 22px; height: 22px; border-radius: 50%; background: var(--bg); box-shadow: inset 0 0 0 1px var(--line); }
@@ -103,13 +105,13 @@
   .tier:last-child { border: 0; }
   .tier .k { color: var(--mute); font-size: 14px; } .tier .k b { color: var(--text); font-weight: 600; }
   .tier .v { font: 700 26px/1 var(--mono); letter-spacing: -.02em; }
-  .tier .v.z { color: var(--dim); } .tier .v.a { color: var(--accent); }
+  .tier .v.z { color: var(--dim); } .tier .v.a { color: var(--accent-hi); }
   aside.pass footer { padding: 6px 20px 18px; font-size: 12.5px; color: var(--mute); }
   aside.pass footer code { color: var(--text); word-break: break-all; }
 
   /* buttons + inputs */
   button, .btn { font: 600 14px/1 var(--sans); border-radius: 10px; padding: 11px 15px; cursor: pointer; border: 1px solid transparent; transition: .15s; white-space: nowrap; display: inline-flex; align-items: center; gap: 7px; }
-  .btn-primary { background: var(--text); color: #fff; } .btn-primary:hover { background: var(--accent); text-decoration: none; }
+  .btn-primary { background: var(--text); color: #fff; } .btn-primary:hover { background: var(--accent-hi); text-decoration: none; }
   .btn-ghost { background: rgba(255,255,255,.75); color: var(--text); border-color: var(--line2); } .btn-ghost:hover { border-color: var(--mute); text-decoration: none; }
   .btn-sm { padding: 8px 11px; font-size: 13px; border-radius: 8px; }
   button:disabled { opacity: .45; cursor: not-allowed; filter: none; }
@@ -219,7 +221,7 @@
   .mode p { min-height: 78px; } .mode .res { flex: 1; } .mode button { align-self: flex-start; }
   .mode:last-child { border-right: 0; }
   .mode .mn { font: 600 11px var(--mono); letter-spacing: .1em; color: var(--accent); text-transform: uppercase; }
-  .mode h4 { margin: 0; font: 400 19px/1.15 var(--display); }
+  .mode h3 { margin: 0; font: 400 19px/1.15 var(--display); }
   .mode p { margin: 0; color: var(--mute); font-size: 13px; }
   .res { font-size: 13px; border-radius: 9px; padding: 10px 11px; background: var(--bg2); border: 1px solid var(--line); min-height: 44px; overflow-wrap: anywhere; }
   .res .h { font: 700 11px var(--mono); letter-spacing: .1em; display: block; margin-bottom: 4px; }
@@ -238,12 +240,12 @@
   .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
   .form { display: grid; grid-template-columns: 1.2fr 1fr; gap: 12px; }
   .form .full { grid-column: 1 / -1; }
-  .cover-static h4 { margin: 0 0 10px; font: 400 21px/1.15 var(--display); }
+  .cover-static h3 { margin: 0 0 10px; font: 400 21px/1.15 var(--display); }
   .cover-static ol { margin: 0 0 14px; padding-left: 20px; color: var(--mute); font-size: 14px; display: grid; gap: 6px; }
   .cover-static ol b { color: var(--text); font-weight: 600; }
   .cover-static .buys { font-size: 13.5px; margin-bottom: 12px; color: var(--mute); }
   .finder { margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--line2); display: grid; gap: 8px; }
-  .finder h5 { margin: 0; font: 400 18px/1.2 var(--display); }
+  .finder h4 { margin: 0; font: 400 18px/1.2 var(--display); }
   .finder p { margin: 0; font-size: 13.5px; color: var(--mute); }
   .finder-row { display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; align-items: end; }
   .finder .cmd { white-space: pre-wrap; }
@@ -278,7 +280,7 @@
   footer.site { margin-top: 72px; border-top: 1px solid var(--line2); background: rgba(255,255,255,.7); backdrop-filter: blur(6px); padding: 30px 0 56px; color: var(--mute); font-size: 13px; overflow: hidden; }
   footer.site .wrap.credit { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap; margin-bottom: 22px; }
   .sig { font: 600 34px/1.1 var(--hand); color: var(--text); transform: rotate(-2deg); transform-origin: left; display: inline-block; }
-  .sig b { font-weight: 700; color: var(--accent); }
+  .sig b { font-weight: 700; color: var(--accent-hi); }
   .sig:hover { text-decoration: none; color: var(--accent); }
   .site-link { font: 500 13px var(--sans); letter-spacing: .22em; text-transform: uppercase; color: var(--text); border-bottom: 1.5px solid var(--accent); padding-bottom: 3px; }
   .site-link:hover { text-decoration: none; color: var(--accent); border-color: var(--accent); }
@@ -306,7 +308,7 @@
   .step:last-child { border-right: 0; }
   .step .sn { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
   .step .sn b { font: 600 11px var(--mono); letter-spacing: .12em; color: var(--accent); }
-  .step h4 { margin: 0; font: 400 21px/1.15 var(--display); }
+  .step h3 { margin: 0; font: 400 21px/1.15 var(--display); }
   .step p { margin: 0; color: var(--mute); font-size: 13.5px; }
   .http { font: 12.5px/1.6 var(--mono); background: var(--bg2); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; overflow-wrap: anywhere; }
   .http .st { font-weight: 700; } .http .st.c402 { color: var(--accent); } .http .st.c200 { color: var(--ok); }
@@ -554,7 +556,7 @@
       <div class="two-col">
         <div class="card pad">
           <div id="coverStatic" class="cover-static">
-            <h4>Every live policy was bought like this</h4>
+            <h3>Every live policy was bought like this</h3>
             <ol>
               <li><b>Signed schedule.</b> The keeper pays 0.05 aUSD over x402 and gets the AeroDataBox status, signed by the Airnode, ≤ 15 min old.</li>
               <li><b>Contract checks it.</b> <code>buyPolicy</code> verifies signer, request hash and freshness, accepts only a pre-departure status, and reads the scheduled arrival from the signature.</li>
@@ -562,7 +564,7 @@
             </ol>
             <div class="buys" id="buysList"></div>
             <div class="finder">
-              <h5>Cover a delayed flight</h5>
+              <h4>Cover a delayed flight</h4>
               <p>Find a flight that is already ≥ 2 h late but hasn't left yet (arrival ≥ 2 h away), check it on Flightradar, then buy from the keeper folder.</p>
               <div class="finder-row">
                 <label class="f">Flight<input id="fFlight" placeholder="LH1234" autocomplete="off" spellcheck="false" /></label>
@@ -597,8 +599,8 @@
 
     <section class="block" id="policies">
       <div class="sh"><div><span class="num">04 · POLICIES</span><h2>Live from Base Sepolia</h2><p>Read straight from the contract with <code>eth_call</code>, from your browser, every 20 s <span class="fresh" id="fresh"></span>. Click <b>Inspect</b> to check a policy's evidence against its on-chain request hashes.</p></div><a class="btn btn-ghost btn-sm" id="contractLink" href="https://sepolia.basescan.org/address/0x257054204c4Cd43846C4553eBe6D709841980a80" target="_blank" rel="noopener">Contract on Basescan ↗</a></div>
-      <div class="card scroll">
-        <table class="tbl"><thead><tr><th>#</th><th>Flight</th><th>Date</th><th>Sched. arrival</th><th>Cover</th><th>Premium</th><th>Status</th><th>Holder</th><th>Txs</th><th></th></tr></thead>
+      <div class="card scroll" tabindex="0" role="region" aria-label="Policies table">
+        <table class="tbl"><thead><tr><th>#</th><th>Flight</th><th>Date</th><th>Sched. arrival</th><th>Cover</th><th>Premium</th><th>Status</th><th>Holder</th><th>Txs</th><th><span class="sr-only">Actions</span></th></tr></thead>
         <tbody id="pol"><tr><td colspan="10"><div class="empty">Reading Base Sepolia…</div></td></tr></tbody></table>
       </div>
     </section>
@@ -1399,7 +1401,7 @@ const MODES = [
   { m: 'stale', t: 'Stale evidence', p: 'A real Airnode response, but older than the policy allows.' },
   { m: 'valid', t: 'Genuine', p: 'The real Airnode response, unchanged. Only simulated, nothing is paid.' },
 ];
-$('modes').innerHTML = MODES.map((x) => `<div class="mode"><span class="mn">${x.m}</span><h4>${x.t}</h4><p>${x.p}</p>
+$('modes').innerHTML = MODES.map((x) => `<div class="mode"><span class="mn">${x.m}</span><h3>${x.t}</h3><p>${x.p}</p>
   <button class="btn-${x.m === 'valid' ? 'primary' : 'ghost'} btn-sm" onclick="runMode('${x.m}')">${x.m === 'valid' ? 'Simulate genuine' : 'Run'}</button>
   <div class="res" id="res-${x.m}"><span class="e">Not run yet.</span></div></div>`).join('');
 
@@ -1527,11 +1529,11 @@ function renderCardano() {
   const acc = (Array.isArray(ch?.accepts) ? ch.accepts : ch?.accepts ? [ch.accepts] : []).find((a) => String(a.network).startsWith('cardano')) || null;
   const offer = acc ? { scheme: acc.scheme, network: acc.network, amount: acc.amount ?? acc.maxAmountRequired, asset: acc.asset, payTo: acc.payTo, maxTimeoutSeconds: acc.maxTimeoutSeconds } : CARDANO;
   const url = `GET /verdict?flight=${esc(flight)}&date=${esc(date)}`;
-  $('cdSrc').innerHTML = run ? (run.source === 'pasted' ? 'Source: pasted answer' : `Source: recorded run${run.recordedAt ? ' · ' + esc(String(run.recordedAt).slice(0, 16).replace('T', ' ')) + ' UTC' : ''}`)
+  $('cdSrc').innerHTML = run ? (run.source === 'pasted' ? 'Source: pasted answer' : `Source: recorded run${run.recordedAt || run.at ? ' · ' + esc(String(run.recordedAt || run.at).slice(0, 16).replace('T', ' ')) + ' UTC' : ''}`)
     : 'Source: <a href="https://github.com/womp-maindev/aeroguard/tree/main/cardano" target="_blank" rel="noopener">cardano/</a> server config';
 
   $('cd1').innerHTML = `<div class="sn"><b>01 · ASK</b><span class="badge ${acc ? 'live' : 'none'}">${S.cardano.live ? 'live' : acc ? 'recorded' : 'server config'}</span></div>
-    <h4>402 Payment Required</h4>
+    <h3>402 Payment Required</h3>
     <div class="http">${url}<br><span class="st c402">HTTP/1.1 402 Payment Required</span><br>PAYMENT-REQUIRED: x402 offer ↓</div>
     <dl class="kv"><dt>price</dt><dd class="big">${ada(offer.amount)}</dd>
       <dt>network</dt><dd>${esc(offer.network)}</dd><dt>scheme</dt><dd>${esc(offer.scheme)} · ${esc(offer.asset)}</dd>
@@ -1542,7 +1544,7 @@ function renderCardano() {
 
   const tx = res?.paidWith?.txHash;
   $('cd2').innerHTML = `<div class="sn"><b>02 · PAY</b><span class="badge ${tx ? 'live' : 'none'}">${tx ? 'paid' : 'not recorded yet'}</span></div>
-    <h4>Agent pays in tADA</h4>
+    <h3>Agent pays in tADA</h3>
     <p>The agent's wallet signs a Cardano transaction (spend cap: tADA only, ≤ 5 tADA) and retries with <code>PAYMENT-SIGNATURE</code>. It never broadcasts: the facilitator checks amount, recipient and validity window, then submits it.</p>
     ${tx ? `<dl class="kv"><dt>tx</dt><dd><a href="${esc(res.paidWith.explorer || 'https://preprod.cardanoscan.io/transaction/' + tx)}" target="_blank" rel="noopener">${esc(short(tx, 12))} ↗</a></dd><dt>network</dt><dd>${esc(res.paidWith.network || CARDANO.network)}</dd></dl>`
       : `<div class="cmd">cd cardano && npm run server
@@ -1554,7 +1556,7 @@ npm run buy -- --flight ${esc(flight)} --date ${esc(date)}</div><p class="grow">
   const delay = v.delayMinutes ?? (d.actual && d.scheduled ? Math.max(0, Math.round((isoParse(d.actual) - isoParse(d.scheduled)) / 60)) : undefined);
   const final = v.final ?? (d.status === 'Arrived' || d.status === 'Canceled');
   $('cd3').innerHTML = `<div class="sn"><b>03 · VERDICT</b><span class="badge ${res ? 'live' : 'none'}">${res ? 'HTTP 200' : 'evidence it sells'}</span></div>
-    <h4>Verdict + Airnode signature</h4>
+    <h3>Verdict + Airnode signature</h3>
     <div class="http"><span class="st c200">HTTP/1.1 200 OK</span>${tx ? '<br>PAYMENT-RESPONSE: settled' : ''}</div>
     <dl class="kv"><dt>flight</dt><dd>${esc(flight)} · ${esc(date)}</dd>
       <dt>status</dt><dd>${esc(v.status ?? d.status ?? '–')}${final ? ' · final' : ' · not final yet'}</dd>
