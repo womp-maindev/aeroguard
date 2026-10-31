@@ -264,13 +264,13 @@
   .tbl td { padding: 11px 14px; border-bottom: 1px solid var(--line); white-space: nowrap; }
   .tbl tr:last-child td { border-bottom: 0; }
   .tbl td.m { font-family: var(--mono); font-size: 12.5px; }
-  .scroll { overflow-x: auto; }
+  .scroll { overflow-x: auto; position: relative; }
   .pill { font: 600 11.5px var(--mono); padding: 4px 8px; border-radius: 6px; background: var(--card2); color: var(--mute); }
   .pill.Active { color: var(--blue); background: var(--blue-soft); }
   .pill.PaidHalf, .pill.PaidFull { color: var(--ok); background: var(--ok-soft); }
   .empty { padding: 26px 20px; color: var(--mute); font-size: 14px; text-align: center; }
   .empty code { color: var(--text); background: var(--bg2); padding: 3px 7px; border-radius: 6px; border: 1px solid var(--line); }
-  .log { font: 12.5px/1.65 var(--mono); max-height: 360px; overflow: auto; padding: 8px 0; }
+  .log { font: 12.5px/1.65 var(--mono); max-height: 560px; overflow: auto; padding: 8px 0; }
   .log .ln { padding: 3px 18px; display: grid; grid-template-columns: 70px 52px 1fr; gap: 10px; }
   .log .ln:hover { background: var(--bg2); }
   .log .ts { color: var(--dim); }
@@ -546,7 +546,7 @@
         </div>
         <div class="lab-note" id="labNote"></div>
         <div class="modes" id="modes"></div>
-        <div class="cli">Every call is an <code>eth_call</code> (a simulation). To send a real transaction with your own response: <code>cd keeper && npm run tamper -- --policy N --response your.json</code>.</div>
+        <div class="cli">Everything above is an <code>eth_call</code>: a simulation, nothing is written. To send an attack as a real transaction, use your wallet just below (or <code>cd keeper && npm run tamper -- --policy N</code>).</div>
       </div>
     </section>
 
@@ -598,7 +598,7 @@
     </section>
 
     <section class="block" id="policies">
-      <div class="sh"><div><span class="num">04 · POLICIES</span><h2>Live from Base Sepolia</h2><p>Read straight from the contract with <code>eth_call</code>, from your browser, every 20 s <span class="fresh" id="fresh"></span>. Click <b>Inspect</b> to check a policy's evidence against its on-chain request hashes.</p></div><a class="btn btn-ghost btn-sm" id="contractLink" href="https://sepolia.basescan.org/address/0x257054204c4Cd43846C4553eBe6D709841980a80" target="_blank" rel="noopener">Contract on Basescan ↗</a></div>
+      <div class="sh"><div><span class="num">04 · POLICIES</span><h2>Live from Base Sepolia</h2><p>Read straight from the contract with <code>eth_call</code>, from your browser, every 20 s<span class="fresh" id="fresh"></span>. Click <b>Inspect</b> to check a policy's evidence against its on-chain request hashes.</p></div><a class="btn btn-ghost btn-sm" id="contractLink" href="https://sepolia.basescan.org/address/0x257054204c4Cd43846C4553eBe6D709841980a80" target="_blank" rel="noopener">Contract on Basescan ↗</a></div>
       <div class="card scroll" tabindex="0" role="region" aria-label="Policies table">
         <table class="tbl"><thead><tr><th>#</th><th>Flight</th><th>Date</th><th>Sched. arrival</th><th>Cover</th><th>Premium</th><th>Status</th><th>Holder</th><th>Txs</th><th><span class="sr-only">Actions</span></th></tr></thead>
         <tbody id="pol"><tr><td colspan="10"><div class="empty">Reading Base Sepolia…</div></td></tr></tbody></table>
@@ -640,7 +640,7 @@
   <div class="wrap">
     <div>
       <p class="disclaimer">Hackathon prototype, not insurance. Testnet tokens only (aUSD on Base Sepolia); no real money moves.</p>
-      <p>Built for the TUM Blockchain &amp; AI Hackathon, API3 track. The signature proves the AeroDataBox Airnode produced exactly this data for exactly this request at this time. It does not prove AeroDataBox is right about the real world.</p>
+      <p>Built for the TUM Blockchain &amp; AI Hackathon, API3 + Cardano tracks. The signature proves the AeroDataBox Airnode produced exactly this data for exactly this request at this time. It does not prove AeroDataBox is right about the real world.</p>
     </div>
     <div>
       <p><strong>Trusted signer</strong><br /><code>0x83FE2E8F24E66520B1902C3507De4F471248f2Ec</code> (AeroDataBox Airnode)</p>
@@ -872,7 +872,7 @@ function evaluate({ resp, flight, date, maxAge, now, policy }) {
       out.delay = Math.max(0, act - sched);
     } else {
       if (Number.isFinite(ts) && ts + 86400 < sched) add('fail', 'Observed after the event', 'A cancellation must be observed no earlier than 24 h before scheduled arrival.', '', `ObservedTooEarly(${ts}, ${sched})`);
-      else add('pass', 'Observed after the event', 'Cancellation observed within 24 h of scheduled arrival.');
+      else add('pass', 'Observed after the event', d.status === 'Canceled' ? 'Cancellation observed within 24 h of scheduled arrival.' : 'Signed no earlier than 24 h before scheduled arrival, so the timing is fine.');
       out.cancelled = d.status === 'Canceled';
     }
     out.sched = sched; out.act = act;
@@ -1251,7 +1251,7 @@ function finder() {
   const f = $('fFlight').value.replace(/\s+/g, '').toUpperCase(), d = $('fDate').value || new Date().toISOString().slice(0, 10);
   const fl = f || 'XX123';
   $('fFr').href = f ? fr24(f) : 'https://www.flightradar24.com/data/flights';
-  $('fCmd').textContent = `cd keeper && npm i\nnpm run cli -- resolve --flight ${fl} --date ${d}   # must say Expected / CheckIn / Boarding\nnpm run cli -- buy --flight ${fl} --date ${d} --holder 0xYOUR_ADDRESS --coverage 1`;
+  $('fCmd').textContent = `cd keeper && npm i\n# 1. status must be Expected, CheckIn or Boarding\nnpm run cli -- resolve --flight ${fl} --date ${d}\n# 2. buy\nnpm run cli -- buy --flight ${fl} --date ${d} --holder 0xYOUR_ADDRESS --coverage 1`;
 }
 $('fDate').value = new Date().toISOString().slice(0, 10);
 ['fFlight', 'fDate'].forEach((id) => $(id).addEventListener('input', finder));
@@ -1275,7 +1275,7 @@ function diffPolicies(prev, next) {
     }
   }
 }
-setInterval(() => { if (S.readAt) $('fresh').textContent = `· updated ${Math.round((Date.now() - S.readAt) / 1000)} s ago`; }, 1000);
+setInterval(() => { if (S.readAt) $('fresh').textContent = ` · updated ${Math.round((Date.now() - S.readAt) / 1000)} s ago`; }, 1000);
 
 // --- policies + stats
 const settleTx = () => {
@@ -1387,9 +1387,12 @@ function renderLog() {
     return;
   }
   const last = runs[runs.length - 1];
+  // runs where nothing was due only add noise: count them, show the ones that did something
+  const busy = runs.filter((r) => (r.log ?? []).some((l) => !/nothing due/.test(l.msg)));
+  const quiet = runs.length - busy.length;
   $('logCount').textContent = `${runs.length} runs`;
   $('logSrc').innerHTML = `Last run ${esc(String(last.finishedAt || last.startedAt || '').slice(0, 16).replace('T', ' '))} UTC · ${S.keeperSnap ? 'snapshot shipped with the page' : 'live from the keeper runs'}`;
-  $('logBody').innerHTML = runs.slice().reverse().slice(0, 30).map((run) => `<div class="run">${esc(String(run.startedAt || '').slice(5, 16).replace('T', ' '))} UTC <span>${esc(run.event === 'schedule' ? 'scheduled' : run.event === 'workflow_dispatch' ? 'manual' : run.event || '')}</span>${run.url ? `<a href="${esc(run.url)}" target="_blank" rel="noopener">run ↗</a>` : ''}</div>`
+  $('logBody').innerHTML = (quiet ? `<div class="run"><span>${quiet} run${quiet > 1 ? 's' : ''} with nothing due not shown</span></div>` : '') + busy.slice().reverse().slice(0, 30).map((run) => `<div class="run">${esc(String(run.startedAt || '').slice(5, 16).replace('T', ' '))} UTC <span>${esc(run.event === 'schedule' ? 'scheduled' : run.event === 'workflow_dispatch' ? 'manual' : run.event || '')}</span>${run.url ? `<a href="${esc(run.url)}" target="_blank" rel="noopener">run ↗</a>` : ''}</div>`
     + ((run.log ?? []).length ? run.log.map(logLine).join('') : '<div class="ln"><span></span><span></span><span class="ts">nothing logged</span></div>')).join('');
 }
 
