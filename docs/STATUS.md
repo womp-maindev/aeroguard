@@ -1,6 +1,6 @@
 # Status — Fri 30 Oct 2026, 22:40 CET (final handoff before the night)
 
-Tracks: **one project, two tracks** (confirmed by the organizers): **API3 "Any API in your contract"** (€2,000, this repo's oracle/keeper work) + **Cardano** (Masumi/Sokosumi payment for policies, handled in the Cardano session; on-chain link = `cardanoJobRef` per policy).
+Tracks: **one project, two tracks** (confirmed by the organizers): **API3 "Any API in your contract"** (€2,000, this repo's oracle/keeper work) + **Cardano** (x402 in tADA on preprod: `GET /verdict` sells signed verdicts, `GET /policy` sells Base cover and writes `cardanoJobRef = keccak256("cardano:<payment tx>")`; Aiken cover verifies the same Airnode signature; see `cardano/README.md`).
 
 ## Live (Base Sepolia, chain 84532)
 - FlightDelayCover `0x257054204c4Cd43846C4553eBe6D709841980a80` (Sourcify-verified). Owner/keeper wallet `0xd9b446FbC743f2D592b8699fbfC80443af00Be24`.
