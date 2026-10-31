@@ -5,6 +5,10 @@ Everything in the Cardano track, newest first. Times are UTC, 30–31 Oct 2026. 
 only the short "Cardano" section in the root `README.md`, `docs/DEVFOLIO-cardano.md` and the dashboard file
 `web/data/cardano-run.json`.
 
+## 31 Oct — one copy of the full video
+- The full cut lives only in `presentation/cardano/aeroguard-cardano-full.mp4`, which the deck uses; the 5.9 MB copy in
+  `cardano/video/` is removed, links point to the one copy, and `npm run video` writes the full cut there.
+
 ## 31 Oct — Windows paths, judge in 60 seconds, numbers checked
 - **Windows:** every `new URL(…, import.meta.url).pathname` is now `fileURLToPath(…)`. On Windows the old form gave
   `/C:/…` paths, which broke the evidence, log and test paths. Linux: 53/53.

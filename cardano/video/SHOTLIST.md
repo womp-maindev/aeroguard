@@ -1,6 +1,6 @@
 # AeroGuard × Cardano — video clips
 
-1920×1080, 30 fps, H.264, **no audio** (lay your voice-over on top). `aeroguard-cardano-full.mp4` = all ten clips in order (1:57).
+1920×1080, 30 fps, H.264, **no audio** (lay your voice-over on top). [`aeroguard-cardano-full.mp4`](../../presentation/cardano/aeroguard-cardano-full.mp4) (next to the slides) = all ten clips in order (1:57).
 Everything shown is real: the terminal replays use the exact output of the paid run on 30 Oct 2026 23:16 UTC (tx `e2ef922b…`),
 the response is the real JSON, the Aiken results are a real `aiken check` (44/44), the dashboard is the real page.
 

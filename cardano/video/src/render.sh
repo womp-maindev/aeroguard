@@ -18,6 +18,6 @@ i=7
 for c in aiken chains policy outro; do node capture.cjs $c "$OUT/$(printf %02d $i)-$c.mp4"; i=$((i+1)); done
 cd "$OUT"
 ls [0-9]*.mp4 | sed "s/^/file '/; s/$/'/" > list.txt
-ffmpeg -loglevel error -y -f concat -safe 0 -i list.txt -c:v libx264 -crf 18 -pix_fmt yuv420p -r 30 -movflags +faststart aeroguard-cardano-full.mp4
+ffmpeg -loglevel error -y -f concat -safe 0 -i list.txt -c:v libx264 -crf 18 -pix_fmt yuv420p -r 30 -movflags +faststart ../../presentation/cardano/aeroguard-cardano-full.mp4
 rm list.txt
-echo "rendered into cardano/video/"
+echo "rendered into cardano/video/ (full cut: presentation/cardano/aeroguard-cardano-full.mp4)"
