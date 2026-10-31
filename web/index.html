@@ -58,6 +58,7 @@
   @keyframes fly-back { from { transform: translate3d(calc(100vw + 5%), 0, 0) scaleX(-1) rotate(var(--r, 0deg)); } to { transform: translate3d(-105%, var(--dy, 0px), 0) scaleX(-1) rotate(var(--r, 0deg)); } }
   @media (prefers-reduced-motion: reduce) { .sky img { animation-play-state: paused; } }
   main, footer.site { position: relative; z-index: 1; }
+  main { overflow-x: clip; }
   ::selection { background: rgba(193, 61, 11, .2); color: var(--text); }
   a { color: var(--accent); text-decoration: none; } a:hover { text-decoration: underline; }
   p a, .buys a, .e a, .why a, .empty a, li a { text-decoration: underline; text-underline-offset: 2px; text-decoration-thickness: 1px; }
@@ -71,7 +72,7 @@
   .brand { display: flex; align-items: center; gap: 9px; font: 400 19px/1 var(--display); color: var(--text); }
   .brand svg { width: 22px; height: 22px; }
   .navlinks { display: flex; gap: 16px; margin-left: 10px; font-size: 13.5px; }
-  .navlinks a { color: var(--mute); } .navlinks a:hover { color: var(--text); text-decoration: none; }
+  .navlinks a { color: var(--mute); white-space: nowrap; } .navlinks a:hover { color: var(--text); text-decoration: none; }
   .navright { margin-left: auto; display: flex; gap: 8px; align-items: center; }
   .tag { font: 600 10.5px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--line2); color: var(--mute); white-space: nowrap; }
   .tag.testnet { color: #a3330a; border-color: rgba(193,61,11,.45); background: var(--accent-soft); }
@@ -249,6 +250,9 @@
   .pitch-x { position: absolute; top: 18px; right: 18px; border-radius: 50%; width: 40px; height: 40px; justify-content: center; padding: 0; background: var(--card); border: 1px solid var(--line2); }
   body.pitching { overflow: hidden; }
   @media (max-width: 900px) { .pitch { grid-template-columns: 1fr; } .pitch-qr { display: none; } .pitch-stats { grid-template-columns: 1fr 1fr 1fr; } }
+  /* planes never cross the hero text: a soft patch of sky colour behind it */
+  .hero > div:first-child { position: relative; z-index: 0; }
+  .hero > div:first-child::before { content: ""; position: absolute; inset: -24px -36px; z-index: -1; background: var(--bg); border-radius: 48px; filter: blur(18px); }
   /* try to cheat (pitch) */
   .cheat { display: flex; gap: 20px; align-items: center; justify-content: space-between; padding: 20px; margin-bottom: 16px; }
   .cheat-main { display: grid; gap: 10px; flex: 1; min-width: 0; }
@@ -374,6 +378,7 @@
   details.paste > div { padding: 0 18px 16px; display: grid; gap: 8px; }
   details.paste textarea { min-height: 120px; font-size: 12px; }
 
+  @media (max-width: 1200px) { .tag.api3 { display: none; } }
   @media (max-width: 1020px) {
     .hero, .insp, .two-col, footer.site .wrap { grid-template-columns: 1fr; }
     .modes { grid-template-columns: 1fr 1fr; } .mode { border-bottom: 1px solid var(--line); }
@@ -697,13 +702,13 @@
 <section class="pitch" id="pitchView" hidden aria-label="Pitch view">
   <button class="pitch-x" type="button" onclick="closePitch()" aria-label="Close pitch view">✕</button>
   <div class="pitch-main">
-    <p class="eyebrow"><span>AeroGuard · API3 + Cardano</span><span>Live · Base Sepolia</span></p>
+    <p class="eyebrow"><span>AeroGuard · API3 + Cardano</span><span id="pLive">Live · Base Sepolia</span></p>
     <h1>Your flight is late.<br /><em>You're already paid.</em></h1>
     <p class="pitch-lede">Pays only on flight data signed by the AeroDataBox Airnode. Nobody can fake it. Try.</p>
     <div class="pitch-stats">
-      <div><b id="pPol">–</b><span>policies on-chain</span></div>
-      <div><b id="pSet">–</b><span>settled by the keeper</span></div>
-      <div><b id="pBlk">0</b><span>forgeries blocked here</span></div>
+      <div><b id="pPol">…</b><span id="pPolL">policies on-chain</span></div>
+      <div><b id="pSet">…</b><span id="pSetL">settled by the keeper</span></div>
+      <div><b id="pBlk">4 / 4</b><span id="pBlkL">forgeries blocked in the last live run</span></div>
     </div>
     <div class="pitch-go"><button class="btn-primary" type="button" onclick="cheat()">Try to steal from this contract</button><div class="pitch-out" id="pOut"></div></div>
     <p class="next-up" id="pNext"></p>
@@ -1348,7 +1353,7 @@ const post = (p, body) => j(p, { method: 'POST', headers: { 'content-type': 'app
 function setStatus() {
   const on = S.chain === true;
   $('apidot').className = 'dot ' + (S.chain == null ? '' : on ? 'on' : 'off');
-  $('apitxt').textContent = S.chain == null ? 'connecting…' : on ? `Live · ${NETWORK || rpcHost()}` + (S.online ? ' + keeper' : '') : 'Chain unreachable';
+  $('apitxt').textContent = S.chain == null ? 'connecting…' : on ? `Live · ${NETWORK || rpcHost()}` + (S.online ? ' + keeper' : '') : `Chain unreachable${snapshotStats() ? ` · snapshot ${snapshotStats().at}` : ''}`;
   document.querySelector('.tag.testnet').textContent = `Testnet · ${NETWORK || rpcHost()}`;
   $('apistat').title = on ? `Reading ${CONTRACT} via ${rpcHost()} (eth_call, no key)${S.online ? `; keeper API at ${API || location.origin}` : ''}`
     : `Could not reach ${RPCS.join(' or ')}. The inspector still works offline.`;
@@ -1412,10 +1417,41 @@ function renderNext(ps) {
   el.hidden = false;
   el.innerHTML = `<span class="pulse"></span>Next to settle: <b>#${esc(p.id)} ${esc(p.flight)}</b> ${when}. ${act.length > 1 ? `${act.length - 1} more after it. ` : ''}A delay of 2 h+ pays 50%, 3 h+ or a cancellation 100%, straight to the holder.`;
 }
+// chain unreachable (venue wifi, blocked rpc): counts from the keeper snapshot, which logs every policy it knows
+function snapshotStats() {
+  const runs = S.keeper?.runs ?? [];
+  if (!runs.length) return null;
+  const ids = new Set(), settled = new Map();
+  for (const r of runs) for (const l of r.log ?? []) {
+    const id = /^policy #(\d+)/.exec(l.msg)?.[1];
+    if (id) ids.add(id);
+    const st = /^policy #(\d+) settled \w+.*?payout ([\d.]+) aUSD/.exec(l.msg);
+    if (st) settled.set(st[1], Number(st[2]));
+  }
+  const at = new Date(S.keeper.updatedAt || runs[runs.length - 1].finishedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+  return { policies: ids.size, settled: settled.size, paid: [...settled.values()].reduce((a, b) => a + b, 0), at };
+}
+function applySnapshot() {
+  if (S.chain !== false || S.policies.length) return;
+  const sn = snapshotStats();
+  if (!sn) return;
+  $('sPol').textContent = sn.policies; $('sAct').textContent = sn.policies - sn.settled;
+  $('sPaid').textContent = sn.paid.toLocaleString('en', { maximumFractionDigits: 2 });
+  $('nextUp').hidden = false;
+  $('nextUp').innerHTML = `Base Sepolia isn't reachable from this network, so these numbers come from the keeper's snapshot of ${esc(sn.at)}. The Inspector works offline.`;
+  renderPitch([]);
+  setStatus();
+}
 function renderPitch(ps) {
   if ($('pitchView').hidden) return;
-  $('pPol').textContent = ps.length;
-  $('pSet').textContent = ps.filter((p) => Number(p.status) > 1).length;
+  const sn = !ps.length && S.chain === false ? snapshotStats() : null;
+  $('pPol').textContent = sn ? sn.policies : ps.length || '…';
+  $('pSet').textContent = sn ? sn.settled : ps.length ? ps.filter((p) => Number(p.status) > 1).length : '…';
+  $('pPolL').textContent = sn ? `policies on-chain · snapshot ${sn.at}` : 'policies on-chain';
+  $('pSetL').textContent = sn ? `settled by the keeper · snapshot ${sn.at}` : 'settled by the keeper';
+  // nothing run here yet: show the last live run (31 Oct, policy #11, eth_call against the deployed contract)
+  if (!S.blocked) { $('pBlk').textContent = '4 / 4'; $('pBlkL').textContent = 'forgeries blocked in the last live run'; }
+  $('pLive').textContent = sn ? `Snapshot · ${sn.at}` : S.chain ? 'Live · Base Sepolia' : 'Base Sepolia';
   $('pNext').innerHTML = $('nextUp').innerHTML;
 }
 function openPitch() { $('pitchView').hidden = false; document.body.classList.add('pitching'); renderPitch(S.policies); }
@@ -1469,6 +1505,7 @@ async function refreshChain() {
       $('pol').innerHTML = `<tr><td colspan="10">${msg}</td></tr>`;
       $('tPolicy').innerHTML = '<option value="">Chain unreachable</option>';
     }
+    applySnapshot();
   }
   setStatus();
   render();
@@ -1510,6 +1547,7 @@ async function refreshKeeper() {
   if (S.keeper) S.evidence = (S.keeper.evidence ?? []).filter((x) => x && x.requestHash && x.signature && typeof x.data === 'string');
   setStatus();
   renderLog();
+  applySnapshot();
   if (S.policies.length) renderPolicies(S.policies, S.free);
   $('fetchBtn').disabled = !S.online && !S.evidence.length;
 }
@@ -1659,7 +1697,7 @@ async function cheat() {
   const blocked = modes.filter((m) => $(`res-${m}`).classList.contains('blk'));
   const why = modes.map((m) => $(`res-${m}`).querySelector('.t')?.textContent || 'skipped');
   out.className = 'cheat-out ' + (blocked.length === modes.length ? 'all' : '');
-  S.blocked = (S.blocked || 0) + blocked.length; $('pBlk').textContent = S.blocked;
+  S.blocked = (S.blocked || 0) + blocked.length; $('pBlk').textContent = S.blocked; $('pBlkL').textContent = 'forgeries blocked here, live';
   out.innerHTML = `<div class="score">🛡 ${blocked.length} / ${modes.length} BLOCKED</div><div class="why">${why.map(esc).join(' · ')}</div><div class="pol">policy #${esc(p.id)} ${esc(p.flight)} · ${esc(p.statusName)} · details below</div>`;
   $('pOut').innerHTML = out.innerHTML.replace(' · details below', '');
 }
