@@ -165,7 +165,7 @@ sh live-cover.sh open EI352 2026-10-31 7          # a flight landing today; its 
 sh live-cover.sh settle EI352 2026-10-31 <openTx> # after landing: import the keeper's signed answer, pay for it, settle
 ```
 The buyer wallet pays and also funds the cover, and the holder is the seller address. The signed answer may be up to 24 h
-old when it settles. Every tx goes to [`COVER-EVIDENCE.md`](COVER-EVIDENCE.md). If the flight has not landed in time,
+old when it settles. Every tx goes to `COVER-EVIDENCE.md`, which the first live run creates (live run: pending). If the flight has not landed in time,
 anyone can settle later, and the insurer can `npm run cover -- reclaim --open <openTx>` after the 48 h deadline.
 
 ## Test without network or funds
