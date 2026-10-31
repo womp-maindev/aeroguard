@@ -18,7 +18,7 @@ Flight delays are common, and getting compensation is slow. A traveller fills in
 - **An autonomous keeper** (`keeper/`). It pays for signed data over **x402** (0.05 aUSD per call), decides when a lookup is worth its cost, and settles: nobody files or approves a claim. It runs as a plain `npm run keeper` loop or as passes in GitHub Actions (scheduled best-effort; on 30 Oct GitHub's scheduler did not fire for the new workflow, so those passes were started by hand). Anyone can run it, because `settle` gives the caller no special power.
 - **Private policies.** Commit–reveal hides which flight is insured until settlement.
 - **A judge toolkit.** A tamper CLI runs forgeries against the deployed contract, a dashboard has an in-browser Security Inspector, and a local rehearsal needs no funds.
-- **Live on testnet with real data.** 4 policies on real flights from Munich on 30 Oct 2026, each bought with a real signed AeroDataBox proof.
+- **Live on testnet with real data.** 11 policies on real flights, each bought with a real signed AeroDataBox proof: #1–#4 on 30 Oct (all settled by the keeper), #5–#11 on 31 Oct, settling on pitch day.
 
 ## Why AeroGuard
 
