@@ -4,6 +4,8 @@
 
 Tone: confident, concrete, no hype. One idea per slide. Large numbers, short sentences. Brand: light "sky" background with drifting paper planes, graphite text, orange accent (#E4572E), blue highlight (#2F5FD9). Fonts: Kelly Slab (headings), Jost (body).
 
+Title slide footer: Team: **Mihail** <sub>(WompSolutions)</sub> · **Eskender Assefa**
+
 ---
 
 ## 1 · The problem, and why it still isn't solved
@@ -152,3 +154,5 @@ AeroDataBox ──signs──▶ API3 Airnode (AirnodeHub)
 - Live site: https://womp-maindev.github.io/aeroguard/#cardano
 - Video (2:20): https://womp-maindev.github.io/aeroguard/media/cardano.mp4
 - Paid tx: https://preprod.cardanoscan.io/transaction/e2ef922be71ba61da9431f1a5f56f4c56f5d61348c4945194cf390dd0acd7864
+
+Team: **Mihail** <sub>(WompSolutions)</sub> · **Eskender Assefa**
