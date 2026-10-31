@@ -44,7 +44,7 @@ facilitator runs in the server process (no keys, no funds); set `FACILITATOR_URL
   without evidence gets a free 404, never a charge.
 - **Quota-safe.** Evidence comes from disk only (`evidence/`, then `keeper/.cache/`); this service never calls the Airnode.
   It resells what the keeper already bought: `npm run import-evidence -- keeper.json` imports the keeper's published
-  answers (`keeper-data` branch) after checking each signature. Today's catalog: live answers for all four policies
+  answers (`keeper-data` branch) after checking each signature. Today's catalog: live answers for the four policies of 30 Oct
   (IB1314, LH1816, EI357, BA955); the newest answer per request wins.
 - **On-chain anchor** (`ANCHOR=true`, seller wallet needs ≥ 2 tADA from the faucet): after each sale the seller writes the sold proof into Cardano tx metadata (label
   674 message + label 8402 proof bytes), so the evidence is findable on Cardano itself.
@@ -132,8 +132,8 @@ npm run cover -- reclaim --open <openTx>                         # after the dea
 Every build runs the validator locally with Aiken's UPLC evaluator (`@evolution-sdk/aiken-uplc`), so a transaction the
 script would reject is never submitted.
 
-**One signed answer, the same verdict on two chains, for all four live policies.** The keeper's signed `Arrived`
-answers settled every live EVM policy; the very same signatures, checked with Plutus builtins, settle an Aiken cover the
+**One signed answer, the same verdict on two chains, for the four policies of 30 Oct.** The keeper's signed `Arrived`
+answers settled policies #1–#4 on Base; the very same signatures, checked with Plutus builtins, settle an Aiken cover the
 same way, and paying the holder with them is refused (`onchain/lib/aeroguard/real_final_*_test.ak`, generated from
 `evidence/`; the TS lifecycle tests build and execute each settlement transaction).
 

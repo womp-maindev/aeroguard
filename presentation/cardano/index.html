@@ -107,7 +107,7 @@ These five evidence fields go unchanged into a contract.">
 <!-- 6 -->
 <section class="slide" data-video data-notes="And it's verified on Cardano itself. Our Aiken contract is a flight-cover UTxO.
 Plutus has no ecrecover, so we rebuild the exact signed bytes and use the secp256k1 builtin.
-Edited data, another signer, a stale answer — all fail. 44 tests pass, including the real landings of our four live policies.">
+Edited data, another signer, a stale answer — all fail. 44 tests pass, including the real landings of our first four policies (30 Oct).">
   <div class="kicker">Verified on Cardano</div>
   <h2>An Aiken contract checks the Airnode signature</h2>
   <div class="cols v">
@@ -117,7 +117,7 @@ Edited data, another signer, a stale answer — all fail. 44 tests pass, includi
 </section>
 
 <!-- 7 -->
-<section class="slide" data-notes="This is my favourite slide. Last night our four live policies landed.
+<section class="slide" data-notes="This is my favourite slide. Last night our first four policies landed.
 The keeper bought the signed answers and settled them on Base — none was late enough, so no payout.
 We took the very same signatures to Cardano: the Aiken contract reaches exactly the same verdict, and refuses to pay the holder.
 One signed answer, the same result on two chains.">
