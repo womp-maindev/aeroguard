@@ -1,5 +1,6 @@
 // pnpm cli <command>   — see README "Commands"
 import { readFileSync, writeFileSync } from 'node:fs';
+import { pathToFileURL } from 'node:url';
 import { decodeFunctionData, formatEther, formatGwei, type Hex, hexToString, keccak256, toHex } from 'viem';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import type { SignedResponse } from './airnode-v2.ts';
@@ -166,4 +167,5 @@ const main = async () => {
   }
 };
 
-if (import.meta.url === `file://${process.argv[1]}`) main().catch((e) => (console.error(revertReason(e)), process.exit(1)));
+// pathToFileURL, not `file://${argv[1]}`: on Windows the path is C:... and the URL file:///C:/..., so they never matched
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) main().catch((e) => (console.error(revertReason(e)), process.exit(1)));
