@@ -9,7 +9,7 @@
 # The key is read from the environment only; it is never written anywhere.
 set -e
 cd "$(dirname "$0")"
-VIDEO=../../../web/media/cardano.mp4  # only its picture is used; the voice is replaced
+VIDEO=${VIDEO:-../../../cardano/video/aeroguard-cardano-full.mp4}  # the silent full cut; lines.tsv follows its timings
 OUT=../aeroguard-cardano-full-voiced.mp4
 VOICE=${VOICE:-Samantha}
 RATE=${RATE:-175}
