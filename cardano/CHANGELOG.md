@@ -5,6 +5,13 @@ Everything in the Cardano track, newest first. Times are UTC, 30–31 Oct 2026. 
 only the short "Cardano" section in the root `README.md`, `docs/DEVFOLIO-cardano.md` and the dashboard file
 `web/data/cardano-run.json`.
 
+## 31 Oct — presentation: video and what to say, in one place
+- `presentation/cardano/aeroguard-cardano-full.mp4`: the full video now sits next to the slides.
+- `presentation/cardano/VIDEO-SCRIPT.md`: what to say over the video, block by block with timecodes. Each block has
+  what is on screen, the English line to read and a Russian translation.
+- `presentation/cardano/SPEAKER-NOTES.md`: the English text for each slide, now with a Russian translation.
+- `presentation/cardano/README.md`: a table of which file is for what, and how to update the local copy.
+
 ## 31 Oct — presentation
 - **New folder [`presentation/`](../presentation/)**, with the Cardano deck in [`presentation/cardano/`](../presentation/cardano/):
   - `index.html`: a 10-slide offline deck (16:9). The real paid run, the response and `aiken check` play as embedded
