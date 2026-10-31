@@ -1,0 +1,10 @@
+0	6	AeroGuard on Cardano: agents pay per request for flight outcomes any contract can verify.
+6	20	The agent asks our server. It answers 402: pay in tADA. The wallet signs a Cardano transaction, the facilitator puts it on chain, and the agent gets the verdict plus the Airnode's signature, which any contract can check.
+20	45.7	This is a real run on Cardano preprod. Preflight checks the keys and the balance. The server asks for two tADA. The wallet signs, but never broadcasts; the facilitator does. After one block, about forty seconds, sped up here, we get the verdict for flight IB1314: arrived, signed by the AeroDataBox Airnode. The transaction hash is our receipt.
+45.7	56.7	What the agent gets back: the verdict, landed twenty-five minutes early. The proof, the Airnode's signature over exactly this data. And the receipt, the Cardano payment that bought it.
+56.7	63.7	Two tADA for one verdict. No account, no API key. You can check it on Cardanoscan.
+63.7	75.7	Our dashboard shows the same exchange in three steps: the 402 offer, the payment, and the signed verdict.
+75.7	91.2	And it's not just JSON. Our Aiken contract on Cardano verifies the Airnode's signature with Plutus builtins. Forged data fails, the real landings pass: forty-four tests out of forty-four.
+91.2	102.2	Last night our four live policies landed. The same signed answers closed them on Base, and settle the Cardano contract exactly the same way. One signature, one verdict, two chains.
+102.2	111.2	Cardano can also pay for the insurance itself: the premium in tADA buys a policy on Base, and the policy records the Cardano payment.
+111.2	117.2	Agents pay per request on Cardano, for flight outcomes any contract can verify.
