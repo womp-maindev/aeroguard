@@ -53,7 +53,7 @@ FlightDelayCover
   │         simulates settle, then sends it. The payout always goes to the stored holder.
 ```
 
-The contract builds the AirnodeHub request hash itself, `keccak256(JSON.stringify([operation, sortedParams, sortedProjection]))`, from the policy's own flight and date. Even the agent that sold the policy cannot settle it with data about another flight, day or projection. A real AirnodeHub capture is checked byte for byte in Solidity ([`Fixture_RealAeroDataBoxCapture`](https://github.com/womp-maindev/aeroguard/blob/main/contracts/test/Fixtures.t.sol#L105)).
+The contract builds the AirnodeHub request hash itself, `keccak256(JSON.stringify([operation, sortedParams, sortedProjection]))`, from the policy's own flight and date. Even the agent that sold the policy cannot settle it with data about another flight, day or projection. A real AirnodeHub capture is checked byte for byte in Solidity ([`Fixture_RealAeroDataBoxCapture`](https://github.com/womp-maindev/aeroguard/blob/main/contracts/test/Fixtures.t.sol#L111)).
 
 Two small projections keep the signed payload tiny:
 - **arrival** `{actual, scheduled, status}`: proves the delay;
@@ -131,7 +131,7 @@ Full analysis, with assumptions, the worst case and sources: [docs/BUSINESS.md](
 
 ## Links
 - Evidence for every policy, signed response and x402 payment: https://github.com/womp-maindev/aeroguard/blob/main/docs/EVIDENCE.md
-- All 4 policies settled by the keeper on Airnode-signed "Arrived" responses (every flight landed early or < 2 h late → no payout, premiums stay in the pool): #1 https://sepolia.basescan.org/tx/0xf0aa5db2e08a9b9aa7298c92853642b39d7ff330fe3e42cd8b441aa136246b44 · #2 https://sepolia.basescan.org/tx/0x5270aa58d63db79af041e74bb40115a801381f28caca028d90c285280594c535 · #3 https://sepolia.basescan.org/tx/0x5a5e4fc750464b0f4043aa2318da55705ae0eb94603adf17d417068de4f2ff9a · #4 https://sepolia.basescan.org/tx/0x973e29d8195ce6bfe7bde0b749b308cfe1e8200e2465c849810a0a01dd01c7ee
+- Policies #1–#4 (30 Oct) settled by the keeper on Airnode-signed "Arrived" responses (every flight landed early or < 2 h late → no payout, premiums stay in the pool): #1 https://sepolia.basescan.org/tx/0xf0aa5db2e08a9b9aa7298c92853642b39d7ff330fe3e42cd8b441aa136246b44 · #2 https://sepolia.basescan.org/tx/0x5270aa58d63db79af041e74bb40115a801381f28caca028d90c285280594c535 · #3 https://sepolia.basescan.org/tx/0x5a5e4fc750464b0f4043aa2318da55705ae0eb94603adf17d417068de4f2ff9a · #4 https://sepolia.basescan.org/tx/0x973e29d8195ce6bfe7bde0b749b308cfe1e8200e2465c849810a0a01dd01c7ee
 - Repo: https://github.com/womp-maindev/aeroguard
 - Contract: https://sepolia.basescan.org/address/0x257054204c4Cd43846C4553eBe6D709841980a80
 - x402 payment for signed data: https://sepolia.basescan.org/tx/0x76d334da55c86bbf61d37762f8ee843f4920bc874477a82d06852247b4e2054f

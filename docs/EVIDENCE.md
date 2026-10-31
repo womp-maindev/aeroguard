@@ -59,5 +59,5 @@ Simulated with `eth_call`, no transaction. The full table is in [README → Tamp
 
 ## Replays in Solidity
 
-- [`LiveReplay.t.sol`](../contracts/test/LiveReplay.t.sol) buys all four policies through the real `buyPolicy` with their real proofs, and for #1 reproduces `NotFinal(Expected)` and `Stale(1793378516)`. With the keeper's settlement responses (`<FLIGHT>-settlement.json`) it reproduces each on-chain outcome and payout (part of the 86 forge tests).
+- [`LiveReplay.t.sol`](../contracts/test/LiveReplay.t.sol) buys policies #1–#4 (30 Oct) through the real `buyPolicy` with their real proofs, and for #1 reproduces `NotFinal(Expected)` and `Stale(1793378516)`. With the keeper's settlement responses (`<FLIGHT>-settlement.json`) it reproduces each on-chain outcome and payout (part of the 86 forge tests).
 - [`Fixtures.t.sol`](../contracts/test/Fixtures.t.sol) shows that a real LH400 capture (x402 [0x76d334da…](https://sepolia.basescan.org/tx/0x76d334da55c86bbf61d37762f8ee843f4920bc874477a82d06852247b4e2054f)) recovers to the Airnode and that its request hash matches the contract's derivation byte for byte.

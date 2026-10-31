@@ -30,7 +30,7 @@ About 280 words, so it fits at a calm pace. Have the screen ready as in [Run of 
 | Live evidence: purchases, settlements, x402 receipts on Base Sepolia | **Authenticity.** The real AeroDataBox Airnode signed it, the deployed contract accepted it, real money moved | "These are real policies on real flights, settled from real Airnode signatures." |
 | Tamper lab (`eth_call`), or **Send it for real** (real transactions) | **The qualifier.** Real responses that were edited, too old, for another request or from the wrong signer are rejected by the deployed contract | "A real Airnode response, one value changed: rejected." |
 | **Local rehearsal** | **Completeness.** Every payout rule, the late-purchase guard, keeper autonomy and expiry, in 20 seconds | "Same contract and keeper, local chain, test signer, fast-forwarded clock, so you can see every outcome." |
-| Foundry tests (86) | **Edge cases.** Every boundary and attack, a real Airnode capture byte for byte, all 4 live policies replayed | "Every rejection has a test, and the live policies are replayed in Solidity." |
+| Foundry tests (86) | **Edge cases.** Every boundary and attack, a real Airnode capture byte for byte, policies #1–#4 (30 Oct) replayed | "Every rejection has a test, and the live policies are replayed in Solidity." |
 
 The rehearsal is a flight simulator next to the real flight: same controls, scenarios we cannot wait for. Never present it as the tamper test, because the track asks for **real** responses.
 

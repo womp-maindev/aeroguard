@@ -32,15 +32,15 @@ Parametric flight-delay cover that settles itself. A smart contract pays out **o
 | genuine, but for another flight / date / projection | `WrongRequest` | [`Tamper3_RejectOtherRequest`](contracts/test/FlightDelayCover.t.sol#L151) |
 | signed by any other key | `NotSignedByAirnode` | [`Tamper4_RejectUnexpectedSigner`](contracts/test/FlightDelayCover.t.sol#L162) |
 | cover bought for a flight already delayed / landed | `NotBuyable` | [`Buy_RejectOutcomeAlreadyKnown`](contracts/test/FlightDelayCover.t.sol#L287) |
-| on-chain request hash ≠ AirnodeHub's | — | [`RequestHashMatchesAirnodeHubScheme`](contracts/test/FlightDelayCover.t.sol#L82) · [`Fixture_RealAeroDataBoxCapture`](contracts/test/Fixtures.t.sol#L105) (real Airnode signature) |
-| all 4 live policies replayed on their **real** Airnode signatures (real `buyPolicy` + `settle`, no test signer; proofs read back from the purchase calldata) | `NotFinal(Expected)`, `Stale(1793378516)` as on-chain | [`LiveReplay.t.sol`](contracts/test/LiveReplay.t.sol) |
+| on-chain request hash ≠ AirnodeHub's | — | [`RequestHashMatchesAirnodeHubScheme`](contracts/test/FlightDelayCover.t.sol#L82) · [`Fixture_RealAeroDataBoxCapture`](contracts/test/Fixtures.t.sol#L111) (real Airnode signature) |
+| policies #1–#4 (30 Oct) replayed on their **real** Airnode signatures (real `buyPolicy` + `settle`, no test signer; proofs read back from the purchase calldata) | `NotFinal(Expected)`, `Stale(1793378516)` as on-chain | [`LiveReplay.t.sol`](contracts/test/LiveReplay.t.sol) |
 
 The same forgeries were also run against the **deployed** contract with a real Airnode response: see the [tamper table](#tamper-test-for-judges).
 
 **3 · Run it yourself (90 s, no keys, no funds).**
 ```bash
 git clone --recurse-submodules https://github.com/womp-maindev/aeroguard && cd aeroguard
-cd contracts && forge test                       # 86 tests, incl. all 4 live policies replayed, purchase to settlement, on their real Airnode signatures
+cd contracts && forge test                       # 86 tests, incl. policies #1–#4 (30 Oct) replayed, purchase to settlement, on their real Airnode signatures
 cd ../keeper && npm ci && npm test
 anvil --chain-id 84532 & npm run rehearse        # local deploy, 5 signed purchases, 4 attacks + valid, keeper settles all
 ```
@@ -162,7 +162,7 @@ Node ≥ 22.18 and [Foundry](https://getfoundry.sh).
 git clone --recurse-submodules https://github.com/womp-maindev/aeroguard && cd aeroguard
 cp .env.example .env                    # set KEEPER_PK (Base Sepolia ETH + aUSD)
 
-cd contracts && forge test              # 86 tests incl. the full live lifecycle of all 4 policies
+cd contracts && forge test              # 86 tests incl. the full live lifecycle of policies #1–#4 (30 Oct)
 forge script script/Deploy.s.sol --rpc-url $BASE_SEPOLIA_RPC --broadcast --private-key $DEPLOYER_PK
 
 cd ../keeper && npm i
@@ -187,7 +187,7 @@ In PowerShell, put `REHEARSE=on` and `FLIGHT_COVER_ADDRESS=…` in `.env` instea
 Open <http://localhost:8787> and find **Local rehearsal → Run the full rehearsal**. The API starts a fresh anvil on `:8545` and runs the same script. The page shows the phases, the purchases, every attack with the contract's answer, the keeper's settlements and the expiry, then links to the rehearsal chain in the same dashboard. `REHEARSE=on` starts processes, so use it on your own laptop only. It answers pages on `localhost` only, runs one fixed script, keeps private keys out of that script's environment, and refuses to run if something else already serves `:8545`.
 
 ### What the rehearsal proves, and what it doesn't
-It shows a whole day of AeroGuard compressed into 20 seconds. The **same contract and the same keeper code** run on a private local chain where two things are under our control. The **clock** jumps from 06:00 (buying) to 22:00 (landed) to three days later. And a **local test key** stands in for the Airnode, so any outcome can be produced on demand. Real flights can't be fast-forwarded, and all four live policies happened to close with no payout. Think of a flight simulator next to the real flight.
+It shows a whole day of AeroGuard compressed into 20 seconds. The **same contract and the same keeper code** run on a private local chain where two things are under our control. The **clock** jumps from 06:00 (buying) to 22:00 (landed) to three days later. And a **local test key** stands in for the Airnode, so any outcome can be produced on demand. Real flights can't be fast-forwarded, and policies #1–#4 (30 Oct) happened to close with no payout. Think of a flight simulator next to the real flight.
 
 | It proves | How |
 |---|---|
@@ -203,7 +203,7 @@ It shows a whole day of AeroGuard compressed into 20 seconds. The **same contrac
 | Evidence | Shows |
 |---|---|
 | [Live on Base Sepolia](#live-evidence-base-sepolia-real-aerodatabox-data) | **authenticity**: the real Airnode signature, real x402 payments, the deployed contract, the tamper test with a real response, real settlements |
-| Foundry tests (86) | **edge cases**: every boundary and attack, a real Airnode capture checked byte for byte, all 4 live policies replayed |
+| Foundry tests (86) | **edge cases**: every boundary and attack, a real Airnode capture checked byte for byte, policies #1–#4 (30 Oct) replayed |
 | Local rehearsal | **completeness**: the whole lifecycle and every outcome, in 20 seconds, on demand |
 
 So the rehearsal is not the qualifying tamper test: the track asks for **real** responses (edited, too old, for another request, wrong signer), which the live evidence and the dashboard's tamper lab provide.
