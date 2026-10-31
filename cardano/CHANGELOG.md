@@ -5,6 +5,10 @@ Everything in the Cardano track, newest first. Times are UTC, 30–31 Oct 2026. 
 only the short "Cardano" section in the root `README.md`, `docs/DEVFOLIO-cardano.md` and the dashboard file
 `web/data/cardano-run.json`.
 
+## 31 Oct — receipts say early or late
+- `EVIDENCE.md` rows now show the signed offset ("25 min early", "11 min late") instead of a delay clamped to "+0 min".
+  The first row is corrected: IB1314 landed 25 min early.
+
 ## 31 Oct — the Aiken cover live on preprod in one command
 - **`sh live-cover.sh now`** pays 2 tADA over x402 for a final verdict (LH1816) and opens a 5 tADA Aiken cover. It
   then settles the cover with that same verdict body: the script checks the Airnode signature on chain. Every tx goes

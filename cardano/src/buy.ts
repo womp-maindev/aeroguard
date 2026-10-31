@@ -7,10 +7,18 @@ import { blockfrost, env, payingFetch, txLink, walletFor } from './cardano.ts';
 
 export const EVIDENCE_MD = new URL('../EVIDENCE.md', import.meta.url);
 
-export const recordEvidence = (body: { flight: string; date: string; verdict: { status: string; delayMinutes?: number } }, tx: string, file: URL | string = EVIDENCE_MD) => {
+/** "25 min early" / "11 min late" / "on time" from the signed times; undefined while there is no actual time. */
+export const offsetOf = (v: { scheduled?: string; actual?: string }) => {
+  if (!v.scheduled || !v.actual) return undefined;
+  const min = Math.round((Date.parse(v.actual.replace(' ', 'T')) - Date.parse(v.scheduled.replace(' ', 'T'))) / 60000);
+  return min === 0 ? 'on time' : `${Math.abs(min)} min ${min < 0 ? 'early' : 'late'}`;
+};
+
+export const recordEvidence = (body: { flight: string; date: string; verdict: { status: string; scheduled?: string; actual?: string } }, tx: string, file: URL | string = EVIDENCE_MD) => {
   const v = body.verdict;
+  const offset = offsetOf(v);
   appendFileSync(file,
-    `| ${new Date().toISOString().slice(0, 16).replace('T', ' ')} UTC | ${body.flight} ${body.date} | ${v.status}${v.delayMinutes !== undefined ? `, +${v.delayMinutes} min` : ''} | [${tx.slice(0, 16)}…](${txLink(tx)}) |\n`);
+    `| ${new Date().toISOString().slice(0, 16).replace('T', ' ')} UTC | ${body.flight} ${body.date} | ${v.status}${offset ? `, ${offset}` : ''} | [${tx.slice(0, 16)}…](${txLink(tx)}) |\n`);
 };
 
 /** The unpaid request: what the server asks for (the 402 offer), for people watching the exchange. */
