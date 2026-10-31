@@ -1,5 +1,6 @@
 // One command for the qualifying run: preflight, start the paid endpoint, pay for one verdict on Cardano preprod,
 // record the tx in EVIDENCE.md and print the Cardanoscan link. `npm run qualify [-- --flight IB1314 --date 2026-10-30]`
+import { fileURLToPath } from 'node:url';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import type { AddressInfo } from 'node:net';
 import { dirname } from 'node:path';
@@ -22,7 +23,7 @@ if (!printChecks(await preflight(process.env, { baseUrl: BLOCKFROST_URL, flight:
 
 console.log('\n2/4 starting the paid endpoint (in-process facilitator over Blockfrost)');
 // Overridable so the test run does not touch the committed evidence.
-const sales = new SalesLog(process.env.SALES_LOG || new URL('../evidence/sales.jsonl', import.meta.url).pathname);
+const sales = new SalesLog(process.env.SALES_LOG || fileURLToPath(new URL('../evidence/sales.jsonl', import.meta.url)));
 const app = await createApp({ facilitator: localFacilitator(blockfrost()), payTo: sellerAddress(), sales });
 const server = app.listen(0, '127.0.0.1');
 await new Promise<void>((r) => server.once('listening', r));
@@ -36,7 +37,7 @@ try {
   const { body, tx } = await buyVerdict({ server: origin, flight: values.flight!, date: values.date!, pay: payingFetch(wallet) });
   recordEvidence(body, tx, process.env.EVIDENCE_MD || undefined);
   // The dashboard's Cardano panel shows a recorded run from web/data/cardano-run.json ({ challenge, response }).
-  const runFile = process.env.RUN_JSON || new URL('../../web/data/cardano-run.json', import.meta.url).pathname;
+  const runFile = process.env.RUN_JSON || fileURLToPath(new URL('../../web/data/cardano-run.json', import.meta.url));
   mkdirSync(dirname(runFile), { recursive: true });
   writeFileSync(runFile, JSON.stringify({ challenge, response: body, tx, explorer: txLink(tx), at: new Date().toISOString() }, null, 2) + '\n');
   console.log(`\n4/4 done: ${body.flight} ${body.date} → ${body.verdict.status}; Airnode signer ${body.verify.signerRecovered}`);

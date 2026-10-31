@@ -1,5 +1,6 @@
 // A claims agent: it reads the free catalog, buys only the verdicts it needs within a budget, pays per request on
 // Cardano and decides each claim by the same rule as FlightDelayCover. Every decision carries a proof and a receipt.
+import { fileURLToPath } from 'node:url';
 import { readFileSync } from 'node:fs';
 import { parseArgs } from 'node:util';
 import { decodePaymentResponseHeader } from '@x402/fetch';
@@ -69,7 +70,7 @@ if (import.meta.filename === process.argv[1]) {
   const { values } = parseArgs({
     options: {
       server: { type: 'string', default: process.env.SERVER_URL || 'http://localhost:4021' },
-      claims: { type: 'string', default: new URL('../claims.json', import.meta.url).pathname },
+      claims: { type: 'string', default: fileURLToPath(new URL('../claims.json', import.meta.url)) },
       budget: { type: 'string', default: process.env.AGENT_BUDGET_LOVELACE || '10000000' },
       'include-live': { type: 'boolean', default: false },
     },

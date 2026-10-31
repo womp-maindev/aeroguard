@@ -1,6 +1,7 @@
 // tADA buys a FlightDelayCover policy on Base: priced from the contract quote, bought only after the Cardano payment
 // settles, linked both ways through cardanoJobRef = keccak256("cardano:<tx>"). The Base side is a recording stand-in here;
 // the live desk is the keeper's own cover() (tested in keeper/ and the anvil rehearsal).
+import { fileURLToPath } from 'node:url';
 import assert from 'node:assert/strict';
 import { test, type TestContext } from 'node:test';
 import { decodePaymentRequiredHeader } from '@x402/core/http';
@@ -135,7 +136,7 @@ test('npm run buy-policy: pay, then follow the order until the Base policy exist
 });
 
 test('flights in the past or already past the gate are refused before payment', async (t) => {
-  const { origin } = await setup(t, false, false, { dirs: [new URL('../evidence/', import.meta.url).pathname] });
+  const { origin } = await setup(t, false, false, { dirs: [fileURLToPath(new URL('../evidence/', import.meta.url))] });
   assert.equal((await fetch(`${origin}/policy?flight=LH1234&date=2020-01-01&holder=${HOLDER}&coverage=500000`)).status, 409);
   // The keeper's latest signed answer for IB1314 is past the gate (en route / approaching / landed).
   const res = await fetch(`${origin}/policy?flight=IB1314&date=2026-10-30&holder=${HOLDER}&coverage=500000`);

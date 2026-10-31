@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url';
 import assert from 'node:assert/strict';
 import { mkdtempSync, readdirSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -7,7 +8,7 @@ import type { SignedResponse } from '../../keeper/src/airnode-v2.ts';
 import { importEvidence } from './import-evidence.ts';
 import { findEvidence, listEvidence, tierOf } from './verdict.ts';
 
-const EVIDENCE = new URL('../evidence/', import.meta.url).pathname;
+const EVIDENCE = fileURLToPath(new URL('../evidence/', import.meta.url));
 const real = readdirSync(EVIDENCE).filter((f) => f.endsWith('.json')).map((f) => JSON.parse(readFileSync(join(EVIDENCE, f), 'utf8')) as SignedResponse);
 const flights = JSON.parse(readFileSync(new URL('../claims.json', import.meta.url), 'utf8'));
 

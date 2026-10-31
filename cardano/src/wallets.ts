@@ -1,9 +1,10 @@
 // Creates cardano/.env with a fresh buyer and seller preprod wallet (never committed), then prints what to fund.
+import { fileURLToPath } from 'node:url';
 import { appendFileSync, existsSync, readFileSync } from 'node:fs';
 import { PrivateKey } from '@evolution-sdk/evolution';
 import { walletFor } from './cardano.ts';
 
-const file = new URL('../.env', import.meta.url).pathname;
+const file = fileURLToPath(new URL('../.env', import.meta.url));
 const current = existsSync(file) ? readFileSync(file, 'utf8') : '';
 const read = (name: string) => current.match(new RegExp(`^${name}="?([^"\\n]*)"?$`, 'm'))?.[1]?.trim();
 
