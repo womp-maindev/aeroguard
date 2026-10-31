@@ -415,7 +415,7 @@
         <p class="lede">An autonomous keeper sells the cover and settles it. The contract pays <b>only</b> on AeroDataBox data signed by its API3 Airnode: right flight, right date, fresh, final, never reused. Don't trust us. <b>Verify a signed response yourself, right here in your browser.</b></p>
         <div class="ctas">
           <a class="btn btn-primary" href="#inspector" onclick="setTimeout(loadFixture, 350)">Open the security inspector →</a>
-          <a class="btn btn-ghost" href="#lab">Attack the live contract</a>
+          <a class="btn btn-ghost" href="#lab" onclick="setTimeout(cheat, 450)">Try to steal from this contract</a>
         </div>
       </div>
       <aside class="pass" aria-label="Payout rules">
@@ -1100,7 +1100,7 @@ let NETWORK = QS.get('rpc') ? null : 'Base Sepolia';
 let IS_LIVE = CONTRACT.toLowerCase() === LIVE_CONTRACT.toLowerCase() && !QS.get('rpc');
 const KEEPER_JSON = QS.get('keeper') || 'https://raw.githubusercontent.com/womp-maindev/aeroguard/keeper-data/keeper.json';
 const ACTIONS_URL = 'https://github.com/womp-maindev/aeroguard/actions/workflows/keeper.yml';
-// buy txs of the 4 live policies (from the readme)
+// buy txs of the live policies (docs/EVIDENCE.md)
 const LIVE_BOUGHT_TX = {
   1: '0xbfd3ae73074ff63a3ef5f7e56b211d1ffb7223e2db944d0cc38ed069d1958b8d', 2: '0x7e71c55b970b96fb1588ddde1da029060d805c9b87691280ca2504098d4e69d2',
   3: '0x2aeed6010ced165f66c26ea0f34e7068421a327cac0c6375d72ef7b794f41672', 4: '0x7e675d8f94946db1d02a40c1eff87ac5a0ca29b65730751cf0d902d767d2b0d1',
@@ -1411,7 +1411,8 @@ async function refreshKeeper() {
   }
   // fresh file from the keeper-data branch first, else the snapshot that ships with the page (private repo / offline)
   S.keeperSnap = false;
-  for (const [url, snap] of [[KEEPER_JSON, false], ['data/keeper.json', true]]) {
+  if (location.protocol === 'file:' && (await fileData())?.keeper) { S.keeper = (await fileData()).keeper; S.keeperSnap = true; S.keeperErr = null; }
+  else for (const [url, snap] of [[KEEPER_JSON, false], ['data/keeper.json', true]]) {
     try {
       const r = await fetch(url, { cache: 'no-cache' });
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
@@ -1668,7 +1669,14 @@ $('cdPaste').addEventListener('input', () => {
   } catch (e) { $('cdPasteMsg').textContent = `Not a paid /verdict answer yet: ${e.message}`; }
   renderCardano();
 });
+// opened from disk: fetch() can't read data/*.json, but a script tag can load data/bundle.js
+let fileDataP;
+const fileData = () => (fileDataP ??= new Promise((ok) => {
+  const t = document.createElement('script'); t.src = 'data/bundle.js';
+  t.onload = () => ok(window.AG_DATA || null); t.onerror = () => ok(null); document.head.appendChild(t);
+}));
 async function loadCardano() {
+  if (location.protocol === 'file:') { const d = await fileData(); if (d?.cardano?.response?.evidence) S.cardano.run = d.cardano; renderCardano(); return; }
   try { const r = await fetch('data/cardano-run.json', { cache: 'no-cache' }); if (r.ok) { const x = await r.json(); if (x?.response?.evidence) S.cardano.run = x; } } catch {}
   renderCardano();
 }

@@ -34,7 +34,9 @@ jobs:
         with:
           ref: main
       - name: bake in the latest keeper.json
-        run: git fetch -q --depth=1 origin keeper-data && git show FETCH_HEAD:keeper.json > web/data/keeper.json || echo "no keeper-data yet, keeping the committed snapshot"
+        run: |
+          git fetch -q --depth=1 origin keeper-data && git show FETCH_HEAD:keeper.json > web/data/keeper.json || echo "no keeper-data yet, keeping the committed snapshot"
+          node .github/scripts/data-bundle.cjs
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
