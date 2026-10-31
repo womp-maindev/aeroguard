@@ -2,7 +2,7 @@
 
 AeroGuard is **one project entered in two tracks: API3 and Cardano** (confirmed by the organizers). This is the API3 version of the pitch: the oracle, the contract and the keeper. Say it in one sentence at the start so the API3 judges know the Cardano part exists and is judged separately.
 
-About 280 words, so it fits at a calm pace. Have the screen ready: dashboard on `http://localhost:8787`, Basescan tab with the contract, a terminal in `keeper/`.
+About 280 words, so it fits at a calm pace. Have the screen ready as in [Run of show](#run-of-show-one-setup-every-proof): dashboard on `http://localhost:8787` (keeper API with `REHEARSE=on`, rehearsal already run once), Basescan tab with the contract, a terminal in `keeper/`.
 
 ## Script
 
@@ -15,15 +15,29 @@ About 280 words, so it fits at a calm pace. Have the screen ready: dashboard on 
 **0:45 — The API3 part (35 s)** *(show the contract's request-hash code, then the policy #1 purchase tx)*
 > The signed data is the whole decision. The contract rebuilds the AirnodeHub request hash itself from the policy's flight and date, so a genuine response about a different flight does not count. We use signed data at both ends. To buy cover, you attach a fresh signed status saying the flight hasn't left yet, and the scheduled arrival is read from that signature. So nobody insures a flight that is already late, and nobody lies about the schedule.
 
-**1:20 — Proof (30 s)** *(README "Live evidence" → a settlement tx, then the tamper table; terminal already showing `npm run rehearse` output)*
-> These are four real policies on last night's flights from Munich, bought with signed proofs. Our keeper settled them; nobody filed a claim. Here is a payout. Before landing, we attacked policy #1 on the deployed contract with a real Airnode response. Edit one value: NotSignedByAirnode. Another flight: WrongRequest. An attacker key: rejected. A genuine but old response: Stale. And here is the same run locally, in two seconds: only the valid, final response pays.
+**1:20 — Proof (35 s)** *(README "Live evidence" → a settlement tx, then the dashboard's tamper lab; end on the dashboard's **Local rehearsal** section, already run)*
+> Four real policies on last night's flights from Munich, bought with signed proofs and settled by our keeper. Nobody filed a claim. This one landed early, so the signed arrival closed it with no payout. Now we attack the deployed contract with a real Airnode response. Edit one value: NotSignedByAirnode. Another flight: WrongRequest. An attacker's key: rejected. Too old: Stale. None of last night's flights was two hours late, so here is the same contract on a local chain with a test signer and a fast clock: three hours late pays all, two hours pays half, a cancellation pays all.
 
-> Live, use the dashboard's tamper lab rather than `npm run tamper`: it runs the four forgeries as `eth_call`s from the browser against the deployed contract, no key, and its **Reopen** option (a state override for that call) lets the oracle checks run even on a policy that is already settled. `npm run tamper` on a settled policy stops at `NotActive` first. Backup: `anvil --chain-id 84532 & npm run rehearse`.
+> Live, use the dashboard's tamper lab rather than `npm run tamper`: it runs the four forgeries as `eth_call`s from the browser against the deployed contract, no key, and its **Reopen** option (a state override for that call) lets the oracle checks run even on a policy that is already settled. `npm run tamper` on a settled policy stops at `NotActive` first. If policy B is still Active, the **Send it for real** panel under the tamper lab sends the same forgeries as real transactions from a wallet instead, and each one is mined as a failed transaction on Basescan. Backup for the rehearsal: `anvil --chain-id 84532 & npm run rehearse` in the terminal.
 
-**1:50 — Close (10 s)**
+**1:55 — Close (5 s)**
 > Same contract shape works for rail, weather or any event an Airnode can sign. Thank you.
 
+## What each demo proves (say it before a judge asks)
+
+| On screen | Proves | Say |
+|---|---|---|
+| Live evidence: purchases, settlements, x402 receipts on Base Sepolia | **Authenticity.** The real AeroDataBox Airnode signed it, the deployed contract accepted it, real money moved | "These are real policies on real flights, settled from real Airnode signatures." |
+| Tamper lab (`eth_call`), or **Send it for real** (real transactions) | **The qualifier.** Real responses that were edited, too old, for another request or from the wrong signer are rejected by the deployed contract | "A real Airnode response, one value changed: rejected." |
+| **Local rehearsal** | **Completeness.** Every payout rule, the late-purchase guard, keeper autonomy and expiry, in 20 seconds | "Same contract and keeper, local chain, test signer, fast-forwarded clock, so you can see every outcome." |
+| Foundry tests (86) | **Edge cases.** Every boundary and attack, a real Airnode capture byte for byte, all 4 live policies replayed | "Every rejection has a test, and the live policies are replayed in Solidity." |
+
+The rehearsal is a flight simulator next to the real flight: same controls, scenarios we cannot wait for. Never present it as the tamper test, because the track asks for **real** responses.
+
 ## Q&A
+
+**"Isn't the local rehearsal just signing its own data?"**
+Yes, on purpose, and only there. It runs the same contract and keeper on a throwaway chain whose trusted signer is a local test key, so we can produce every outcome and fast-forward the clock. The live contract trusts only the AeroDataBox Airnode and rejects every rehearsal response with `NotSignedByAirnode`. Authenticity is shown on the live chain, completeness in the rehearsal, edge cases in the Foundry tests.
 
 **"Why trust AeroDataBox / the Airnode?"**
 The signature proves the AeroDataBox Airnode returned exactly this data for exactly this request at this time. It does not prove AeroDataBox is right about the world, and we say so. We reduce the risk in three ways: we only pay on a final status (`Arrived` or `Canceled`), the response must be signed after the landing it reports, and it must be fresh. The next step is 2-of-2 agreement with a second Airnode, but we could not find a second flight source on AirnodeHub.
@@ -57,6 +71,44 @@ Same project, two tracks, confirmed by the organizers. On Cardano a traveller or
 
 **"Why Base Sepolia, why x402?"**
 AirnodeHub's x402 payments use aUSD on Base Sepolia, so the data and the contract sit on the same chain. With x402, an autonomous agent pays per call without an API key or an account, and it needs no ETH for the payment, because the facilitator submits the transfer. That is what a keeper needs.
+
+## Run of show: one setup, every proof
+
+**One process serves everything.** With the keeper wallet in `.env` (`KEEPER_PK`, `FLIGHT_COVER_ADDRESS`, `KEEPER=off`), start the API with the rehearsal switched on:
+```bash
+cd keeper && REHEARSE=on npm run api      # http://localhost:8787
+```
+In PowerShell, or to save typing, put `REHEARSE=on` in `.env` instead; `npm run api` reads it.
+The page reads the live contract on Base Sepolia, **Cover me** buys live with the keeper wallet, and **Local rehearsal** runs on its own throwaway anvil on `:8545` with no keys, so it never touches the live contract. Do not start anvil yourself: the rehearsal starts its own.
+
+**Morning (by 12:00)**
+1. Buy **policy B**: a flight landing after the video is recorded, at least 2 h after purchase. Use the dashboard **Cover me**, or `npm run cli -- buy …`. B serves both the real-transaction tamper shot (6A in `docs/VIDEO.md`) and, if timed right, the on-stage purchase.
+2. Run `npm run cli -- proof <B's buyPolicy tx> > B-proof.json`. From 1 h after buying, it shows `Stale` when sent.
+3. Record the video (`docs/VIDEO.md`).
+
+**14:30, before the pitch**
+1. `npm run cli -- status`: the keeper has ≥ 0.1 aUSD and gas, and the pool `free` ≥ the cover you will buy.
+2. Start the API as above and open http://localhost:8787. Click **Run the full rehearsal** once, so its result is already on screen; a reload keeps it.
+3. Tabs: README "Live evidence" · Basescan contract · the dashboard. Connect the browser wallet in **Send it for real** if policy B is still Active.
+
+**During the pitch (2 min)**
+
+| Time | Screen | Proof |
+|---|---|---|
+| 0:00–0:45 | Title, then the dashboard header | problem and product |
+| 0:45–1:20 | Editor: `requestHashFor` → Basescan policy #1 purchase tx | signed data at both ends |
+| 1:20–1:35 | README Live evidence → one settlement tx | the valid case, live |
+| 1:35–1:45 | Tamper lab: **Run the 4 attacks** (or **Send it for real** on B) | the qualifier, with real responses |
+| 1:45–1:55 | Local rehearsal results: the payout table | every payout rule |
+| 1:55–2:00 | Close | — |
+
+Optional, only if the morning dry run worked: the live purchase on stage (below), about 20 s. Take that time from the rehearsal segment.
+
+## No laptop? Everything from the phone
+- **Dashboard**: https://womp-maindev.github.io/aeroguard/ (once the repo is public and the Pages workflow has run). Inspector and tamper lab run in the phone's browser: `eth_call`s to the deployed contract, no key, no paid lookups.
+- **Live purchase**: send "купи LH1234@2026-10-31" in the Claude chat (the API3 session dispatches the `Buy policies` workflow, ~30 s, answers with the Basescan link), or GitHub → Actions → Buy policies → Run workflow. The key stays in the GitHub secret.
+- **Keeper**: runs from GitHub Actions, triggered by the API3 session; nothing to start.
+- **Evidence**: `docs/EVIDENCE.md` on GitHub has every purchase, proof, x402 receipt and settlement.
 
 ## Live purchase on stage (optional, ~20 s)
 

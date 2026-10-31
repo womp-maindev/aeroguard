@@ -8,7 +8,7 @@
 Nobody files a claim and nobody approves one.
 
 ```
-forge test --use /usr/local/bin/solc --offline            # 59 pass, incl. the full live lifecycle of all 4 policies
+forge test --use /usr/local/bin/solc --offline            # 86 pass: 59 + 27 hardening (Hardening.t.sol), incl. the full live lifecycle of all 4 policies
 forge test --use /usr/local/bin/solc --offline --gas-report
 forge coverage --use /usr/local/bin/solc --offline --ir-minimum --report summary
 ```
@@ -99,7 +99,7 @@ Coverage: `FlightDelayCover.sol` has 98.8% line and 86.8% branch coverage.
 - `sample-signed-arrival.json` is **synthetic** (signed with the test key `0xA11CE`). It tests the loader and settles end to end.
 - `aerodatabox-arrival.json` is a **real** AirnodeHub capture. Drop it in and the test checks the following: the signer recovers to `0x83FE…f2Ec`, `requestHash == requestHashFor(flight, date, kind == "arrival")`, and one edited byte is rejected. If the status is final, it also opens a policy through a test-only `CoverHarness` (which skips the purchase proof, since a captured settlement response has no matching purchase response) and settles it end to end. The test is skipped while the file is missing. `data` must be the exact signed string.
 
-## Tests (59)
+## Tests (86)
 
 - Payout and happy paths: `RequestHashMatchesAirnodeHubScheme`, `FullPayoutAfter3hDelay`, `HalfPayoutAfter2hDelay`, `NoPayoutWhenOnTime`, `FullPayoutWhenCancelled`, and `testFuzz_PayoutTiers` (1000 runs).
 - API3 tamper tests: `Tamper1_RejectEditedValue`, `Tamper2_RejectTooOld`, `Tamper3_RejectOtherRequest`, `Tamper4_RejectUnexpectedSigner`.
