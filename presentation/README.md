@@ -2,12 +2,12 @@
 
 🎤 **Full 3-min speech for each track (with timecodes and what to click): [`PITCH-3MIN.md`](PITCH-3MIN.md)**
 
-▶ **Videos in this folder:** [API3 track (2:15)](api3/AeroGuard-API3-video.mp4) · [Overview, both tracks (1:47)](AeroGuard-overview-video.mp4) · Cardano track (2:04): [`cardano/AeroGuard-Cardano-video.mp4`](cardano/AeroGuard-Cardano-video.mp4)
+▶ **Videos in this folder:** [API3 track (2:29)](api3/AeroGuard-API3-video.mp4) · [Overview, both tracks (1:47)](AeroGuard-overview-video.mp4) · Cardano track (2:04): [`cardano/AeroGuard-Cardano-video.mp4`](cardano/AeroGuard-Cardano-video.mp4)
 
 📝 **Cardano submission texts:** [narrative, 6 sections](cardano/UPDATED-cardano-narrative.md) · [3-min pitch for two speakers](cardano/UPDATED-cardano-pitch-2-speakers.md)
 
 ## 🎬 Videos
-- **API3 track (2:15):** [`../web/media/api3.mp4`](../web/media/api3.mp4)
+- **API3 track (2:29):** [`../web/media/api3.mp4`](../web/media/api3.mp4)
 - **Cardano track (2:04):** [`../web/media/cardano.mp4`](../web/media/cardano.mp4)
 - **Overview, both tracks (1:47):** [`../web/media/demo.mp4`](../web/media/demo.mp4)
 

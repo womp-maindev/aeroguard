@@ -9,7 +9,7 @@ and clips 5 and 7 are the live dashboard reading Base Sepolia (recorded in GitHu
 Re-render after new settlements: Actions → **Render API3 video** → Run workflow (`.github/workflows/video.yml`: fresh `forge test`, fresh anvil rehearsal,
 the keeper's latest log, live dashboard; commits the clips here). Locally: `sh video/src/render.sh` (dashboard clips need `LIVE=1` and the Base Sepolia RPC).
 
-The voiced cut (2:15, CFR 30 fps, 0.3 s fades at every cut, 0.5 s held first frame) is [`web/media/api3.mp4`](../web/media/api3.mp4). `src/assemble.sh` rebuilds the silent full cut locally (not committed, to keep the repo small).
+The voiced cut (2:29: these 12 clips plus Business case / ROI / USP and Limits / Next cards before the outro) is [`web/media/api3.mp4`](../web/media/api3.mp4). `src/assemble.sh` rebuilds the silent full cut locally (not committed, to keep the repo small).
 
 | # | Clip | Start (s) | Length (s) |
 |---|---|---|---|

@@ -14,7 +14,7 @@ Seven policies on today's flights were bought overnight with the keeper wallet (
 | 8 | LH1810 | 10:00Z (11:00 CET) | 11:30 |
 | 5 | LH1866 | 10:20Z (11:20 CET) | 11:50 |
 | 6 | LH2472 | 10:25Z (11:25 CET) | 11:55 |
-| 10 | LH1868 | 12:15Z (13:15 CET) | 13:45 |
+| 10 | LH1868 | 12:29Z (13:15 CET) | 13:45 |
 | 11 | LH2476 | 15:50Z (16:50 CET) | 17:20 |
 | 9 | LH1814 | 16:35Z (17:35 CET) | 18:05 |
 
