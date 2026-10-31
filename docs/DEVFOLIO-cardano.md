@@ -16,7 +16,7 @@ contract. Insurers and claim services end up rebuilding the same trusted-oracle 
 
 ## What we built
 `GET /verdict?flight=IB1314&date=2026-10-30` on Cardano preprod via x402:
-1. The unpaid request returns HTTP 402: 1 tADA for a pre-departure proof, 2 tADA for a final arrival proof (tUSDM also
+1. The unpaid request returns HTTP 402: 1 tADA while the flight's latest signed answer is not final, 2 tADA once it is (tUSDM also
    offered). Discovery is free: `/flights`, `/sales`, `/.well-known/x402`; unknown flights get a free 404.
 2. The agent's wallet builds and signs a Cardano transaction (spend-capped: tADA only, max 5 tADA per request) and
    retries with `PAYMENT-SIGNATURE`; it never broadcasts.
@@ -65,8 +65,19 @@ a final one 2 tADA.
 
 **Paid on Cardano preprod:** an agent paid 2 tADA over x402 for the final IB1314 verdict, tx [`e2ef922b…`](https://preprod.cardanoscan.io/transaction/e2ef922be71ba61da9431f1a5f56f4c56f5d61348c4945194cf390dd0acd7864) (all paid requests: [`cardano/EVIDENCE.md`](../cardano/EVIDENCE.md)). Code in [`cardano/`](../cardano/).
 
+## What runs live vs. what is tested offline
+| Part | Status |
+|---|---|
+| x402 paid `GET /verdict` on Cardano preprod | **live**: tx `e2ef922b…` (2 tADA, final IB1314 verdict), recorded in `cardano/EVIDENCE.md` |
+| Signed evidence | **real**: AeroDataBox Airnode answers bought by our keeper; four final landings settled the live Base policies |
+| Aiken flight cover | **tested**: 44 `aiken check` tests incl. the real signatures; off-chain transactions executed locally with Aiken's UPLC evaluator; not deployed on preprod |
+| `GET /policy` (tADA buys a Base policy) | **tested offline** (8 tests); not run live |
+| Metadata anchor (`ANCHOR=true`) | **tested offline**; not run live |
+| MCP tools for LLM agents | **tested** in-process and over stdio; for a live demo with Claude Desktop see `presentation/cardano/DEMO.md` |
+| Tests | `cardano`: 53/53 · `aiken check`: 44/44 |
+
 ## Business case
-- Pay per answer, no account: a claims agent pays ~0.2–1 ADA per verdict on mainnet, only for flights it needs.
+- Pay per answer, no account: a claims agent pays per verdict (preprod: 1–2 tADA; mainnet pricing to be set), only for flights it needs.
 - Margin: one upstream signed lookup (cached) is resold to many buyers; a final arrival never changes, so the cost
   is paid once and every later sale is margin.
 - Customers: EU261 claim firms, travel insurers, corporate travel tools, and agent
@@ -86,8 +97,9 @@ a final one 2 tADA.
 1. Mainnet: switch `cardano:preprod` → `cardano:mainnet`, price in ADA or USDM (the SDK supports native tokens).
 2. Hosted facilitator instead of the in-process one; deeper `l1Confirmations` for larger payments.
 3. List the endpoint as a Masumi agent so other agents discover and hire it; add the arrival proof feed from our keeper.
-4. Deploy the Aiken flight cover on preprod/mainnet with an off-chain builder for buy/settle/reclaim, a pool of
-   covers per insurer, and an LP vault; the same validator pays out on the same proof the agents buy.
+4. Deploy the Aiken flight cover on preprod, then mainnet, with a pool of covers per insurer and an LP vault. The validator
+   and its off-chain open / settle / reclaim are built and tested (executed locally with Aiken's UPLC evaluator) but not
+   deployed yet.
 
 ## Video
 Ready-made clips (1080p, no sound) in [`cardano/video/`](../cardano/video/); timings and voice-over ideas in [`SHOTLIST.md`](../cardano/video/SHOTLIST.md).
@@ -100,5 +112,5 @@ Ready-made clips (1080p, no sound) in [`cardano/video/`](../cardano/video/); tim
 > Its wallet signs a Cardano transaction, capped at five ADA, and retries. The facilitator checks it and puts it on
 > preprod. **[tx hash + Cardanoscan link; cut to Cardanoscan page]**
 > Back comes the verdict and the Airnode's signature — the same proof our Aiken contract checks on Cardano with
-> Plutus' secp256k1 builtin. **[aiken check: 23 passed]**
+> Plutus' secp256k1 builtin. **[aiken check: 44 passed]**
 > Agents pay per request on Cardano for flight outcomes any contract can verify."
