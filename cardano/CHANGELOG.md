@@ -5,6 +5,11 @@ Everything in the Cardano track, newest first. Times are UTC, 30–31 Oct 2026. 
 only the short "Cardano" section in the root `README.md`, `docs/DEVFOLIO-cardano.md` and the dashboard file
 `web/data/cardano-run.json`.
 
+## 31 Oct — the voiced video is the only full cut
+- `web/media/cardano.mp4` is the full cut, voiced with `voiceover/lines.tsv`. The silent copy in
+  `presentation/cardano/` is removed (−6 MB), and every link points to the voiced one.
+- `npm run video` writes its silent full cut to `cardano/video/`, which is git-ignored.
+
 ## 31 Oct — one copy of the full video
 - The full cut lives only in `presentation/cardano/aeroguard-cardano-full.mp4`, which the deck uses; the 5.9 MB copy in
   `cardano/video/` is removed, links point to the one copy, and `npm run video` writes the full cut there.
