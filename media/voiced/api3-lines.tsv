@@ -6,6 +6,6 @@
 58	12	Each one closes on the Airnode's signed arrival. Two hours late or cancelled pays. Anything else closes with no payout. The data decides.
 70	13	Now let's cheat. Anyone can attack the live contract, right from the browser.
 83	12	An edited value, another flight's answer, an attacker's key, an old answer. All rejected by the real contract.
-95	14	Eighty-six tests, including the full live lifecycle of our first four policies, on their real Airnode signatures.
+95	14	Ninety-four tests, including the full live lifecycle of our policies, replayed on their real Airnode signatures.
 109	12	And every payout rule on a local chain, in seconds.
 121	7	AeroGuard. No signature, no money moves.
