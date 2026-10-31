@@ -5,6 +5,11 @@ Everything in the Cardano track, newest first. Times are UTC, 30–31 Oct 2026. 
 only the short "Cardano" section in the root `README.md`, `docs/DEVFOLIO-cardano.md` and the dashboard file
 `web/data/cardano-run.json`.
 
+## 31 Oct — the voiced 2:04 cut is live
+- `web/media/cardano.mp4` and `presentation/cardano/AeroGuard-Cardano-video.mp4` are now the new cut, voiced from the
+  shifted `lines.tsv` (2:04, 12.5 MB). The silent 16.7 MB render is no longer committed. Durations in the docs and on
+  the site are updated.
+
 ## 31 Oct — voice-over follows the new cut
 - `voiceover/lines.tsv` is shifted to the new timings: the title runs from 0.5 s, and every later line starts 6.5 s
   later. A new line runs over the live site clip (6.5–12.5 s). `make-voiced-video.sh` now voices the silent cut in
