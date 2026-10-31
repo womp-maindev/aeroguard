@@ -824,7 +824,8 @@ function evaluate({ resp, flight, date, maxAge, now, policy }) {
 
   // policy still open?
   if (policy) {
-    if (Number(policy.status) !== 1) add('fail', 'Policy is open', `Policy #${policy.id} is ${policy.statusName}. Settled and expired policies cannot pay again.`, '', `NotActive(${policy.id})`);
+    // a closed policy stops settle() at NotActive before anything else. show that as a note and still judge the evidence
+    if (Number(policy.status) !== 1) { out.closed = policy; add('info', 'Policy is still open', `Policy #${policy.id} is already ${policy.statusName}, so the live contract stops at NotActive before the checks below. They show what this evidence itself would get.`); }
     else add('pass', 'Policy is open', `Policy #${policy.id} is Active and waiting for evidence.`);
   }
 
@@ -956,13 +957,14 @@ function render() {
   if (r.revert) {
     const p = parseReason(r.revert);
     v.className = 'verdict revert';
-    v.innerHTML = `<div class="big">Rejected: ${esc(titleOf(r.revert).toLowerCase())}</div><div class="why">${esc(explain(r.revert) || (p ? p.name : r.revert))}</div><div class="why"><code class="rev" title="${esc(r.revert)}">${esc(shortCode(r.revert))}</code></div>`;
+    v.innerHTML = `<div class="big">Rejected: ${esc(titleOf(r.revert).toLowerCase())}</div><div class="why">${esc(explain(r.revert) || (p ? p.name : r.revert))}</div><div class="why"><code class="rev" title="${esc(r.revert)}">${esc(shortCode(r.revert))}</code></div>${r.closed ? `<div class="why">And policy #${esc(r.closed.id)} is already ${esc(r.closed.statusName)} anyway.</div>` : ''}`;
   } else {
     const amt = cov != null ? ` · ${(cov * r.tier) / 100} aUSD` : '';
     v.className = 'verdict pay';
     v.innerHTML = r.tier
       ? `<div class="big">Would pay ${r.tier}%${amt}</div><div class="why">${r.cancelled ? 'Cancelled flight' : `${Math.floor(r.delay / 60)} min late`}. Every check passes, so <code>settle()</code> pays the holder directly. Nobody approves it.</div>`
       : `<div class="big">Would settle: no payout</div><div class="why">Genuine evidence, but ${Math.floor((r.delay || 0) / 60)} min is under the 120 min threshold. The policy closes as ClosedNoPayout.</div>`;
+    if (r.closed) v.innerHTML += `<div class="why">Policy #${esc(r.closed.id)} is already ${esc(r.closed.statusName)} on-chain, so this can't settle it again.</div>`;
   }
 
   const fx = r.signer && r.signer === DEMO_SIGNER;
@@ -1423,7 +1425,7 @@ async function refreshKeeper() {
   if (S.policies.length) renderPolicies(S.policies, S.free);
   $('fetchBtn').disabled = !S.online && !S.evidence.length;
 }
-const logLine = (l) => `<div class="ln"><span class="ts">${esc(String(l.at).slice(11, 19))}</span><span class="lv ${esc(l.level)}">${esc(l.level)}</span><span>${esc(l.msg)} ${l.link && /^https:/.test(l.link) ? `<a target="_blank" rel="noopener" href="${esc(l.link)}">basescan ↗</a>` : ''}</span></div>`;
+const logLine = (l) => `<div class="ln"><span class="ts">${esc(String(l.at).slice(11, 19))}</span><span class="lv ${esc(l.level)}">${esc(l.level)}</span><span>${esc(l.msg)} ${l.link && /^https:/.test(l.link) ? `<a target="_blank" rel="noopener" href="${esc(l.link)}" style="white-space:nowrap">basescan ↗</a>` : ''}</span></div>`;
 function renderLog() {
   const runs = S.keeper?.runs ?? [];
   if (S.online && S.apiLog.length) {

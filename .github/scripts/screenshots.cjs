@@ -11,7 +11,10 @@ const open = async (b, w, h, hash = '') => {
   await pg.addStyleTag({ content: 'html { scroll-behavior: auto !important; } .toasts { display: none; }' });
   return pg;
 };
-const shot = async (pg, sel, file) => { const el = await pg.$(sel); await el.scrollIntoViewIfNeeded(); await pg.waitForTimeout(400); await el.screenshot({ path: `${OUT}/${file}` }); };
+const shot = async (pg, sel, file) => {
+  await pg.addStyleTag({ content: 'nav { position: static !important; }' }); // the sticky bar would sit on top of the element
+  const el = await pg.$(sel); await el.scrollIntoViewIfNeeded(); await pg.waitForTimeout(400); await el.screenshot({ path: `${OUT}/${file}` });
+};
 
 (async () => {
   require('fs').mkdirSync(OUT, { recursive: true });
