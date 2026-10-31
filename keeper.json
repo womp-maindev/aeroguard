@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-10-31T10:57:49.668Z",
+  "updatedAt": "2026-10-31T12:48:11.971Z",
   "contract": "0x257054204c4Cd43846C4553eBe6D709841980a80",
   "runs": [
     {
@@ -462,6 +462,41 @@
           "msg": "policy #11 LH2476: nothing due, next check ≥ 12:50Z"
         }
       ]
+    },
+    {
+      "startedAt": "2026-10-31T12:48:06.270Z",
+      "finishedAt": "2026-10-31T12:48:11.971Z",
+      "event": "workflow_dispatch",
+      "url": "https://github.com/womp-maindev/aeroguard/actions/runs/41202683287",
+      "log": [
+        {
+          "at": "2026-10-31T12:48:06.270Z",
+          "level": "info",
+          "msg": "policy #9 LH1814: nothing due, next check ≥ 13:35Z"
+        },
+        {
+          "at": "2026-10-31T12:48:06.271Z",
+          "level": "info",
+          "msg": "policy #10: LH1868 2026-10-31 sched 12:15Z, check 1/20"
+        },
+        {
+          "at": "2026-10-31T12:48:08.206Z",
+          "level": "pay",
+          "msg": "bought signed arrival for LH1868 via x402",
+          "link": "https://sepolia.basescan.org/tx/0x9dd9e75ab7782aacb0bf872d946f880e642d58b623e5685a0fb7fc98203e3dc6"
+        },
+        {
+          "at": "2026-10-31T12:48:09.094Z",
+          "level": "chain",
+          "msg": "policy #10 settled ClosedNoPayout: Arrived, 10 min late, payout 0 aUSD",
+          "link": "https://sepolia.basescan.org/tx/0x27d73eabca5eb040a0bb771ab3ae7a9f7f21d33724e57f7315ff4898d0599ab6"
+        },
+        {
+          "at": "2026-10-31T12:48:09.094Z",
+          "level": "info",
+          "msg": "policy #11 LH2476: nothing due, next check ≥ 12:50Z"
+        }
+      ]
     }
   ],
   "evidence": [
@@ -690,6 +725,23 @@
       "outcome": "ClosedNoPayout",
       "payout": 0,
       "delayMinutes": 0
+    },
+    {
+      "airnode": "0x83FE2E8F24E66520B1902C3507De4F471248f2Ec",
+      "requestHash": "0xcb1c0a52e4b3b38dce61a62c95b45782a99bfe582160932c044ad1504c9b29f1",
+      "timestamp": 1793450887,
+      "data": "{\"actual\":\"2026-10-31 12:25Z\",\"scheduled\":\"2026-10-31 12:15Z\",\"status\":\"Arrived\"}",
+      "signature": "0x7f4965e7684a95176d77133dbd057cffc0b2148f333e60ac68d3ba00ed9798165b2369e7a6c356c866a21a5f9ead5f50a3f5ef65860b494c8eaf05097b8515001c",
+      "fetchedAt": 1793450888,
+      "paymentTx": "0x9dd9e75ab7782aacb0bf872d946f880e642d58b623e5685a0fb7fc98203e3dc6",
+      "policyId": 10,
+      "flight": "LH1868",
+      "date": "2026-10-31",
+      "kind": "arrival",
+      "settleTx": "0x27d73eabca5eb040a0bb771ab3ae7a9f7f21d33724e57f7315ff4898d0599ab6",
+      "outcome": "ClosedNoPayout",
+      "payout": 0,
+      "delayMinutes": 10
     }
   ]
 }
