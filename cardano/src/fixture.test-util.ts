@@ -1,5 +1,6 @@
 // A local stand-in for Blockfrost preprod, after cardano-foundation/x402-cardano-demo tests/provider-fixture.ts.
 // Real signing, real transactions; only the chain is local. Funds and phrases are fictional.
+import { fileURLToPath } from 'node:url';
 import { readFileSync } from 'node:fs';
 import type { AddressInfo } from 'node:net';
 import type { TestContext } from 'node:test';
@@ -11,7 +12,7 @@ export const BUYER = 'abandon abandon abandon abandon abandon abandon abandon ab
 export const SELLER = 'test test test test test test test test test test test junk';
 
 // Tests sell a fixed evidence set (the live IB1314 pre-departure proof), so new evidence never changes their answers.
-export const PINNED_EVIDENCE = [new URL('../test-evidence/', import.meta.url).pathname];
+export const PINNED_EVIDENCE = [fileURLToPath(new URL('../test-evidence/', import.meta.url))];
 
 export const listen = async (app: express.Express, t: TestContext) => {
   const server = app.listen(0, '127.0.0.1');

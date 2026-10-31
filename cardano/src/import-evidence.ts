@@ -4,6 +4,7 @@
 //
 //   git fetch origin keeper-data && git show origin/keeper-data:keeper.json > /tmp/keeper.json
 //   npm run import-evidence -- /tmp/keeper.json
+import { fileURLToPath } from 'node:url';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { recoverSigner, type SignedResponse } from '../../keeper/src/airnode-v2.ts';
 import { AERODATABOX_AIRNODE, type Kind, requestHashFor } from '../../keeper/src/flight.ts';
@@ -38,7 +39,7 @@ if (import.meta.filename === process.argv[1]) {
   if (!source) throw new Error('Usage: npm run import-evidence -- <keeper.json>');
   const keeper = JSON.parse(readFileSync(source, 'utf8')) as { evidence: SignedResponse[] };
   const flights = JSON.parse(readFileSync(new URL('../claims.json', import.meta.url), 'utf8')) as Claimable[];
-  const { saved, skipped } = await importEvidence(keeper.evidence, flights, new URL('../evidence', import.meta.url).pathname);
+  const { saved, skipped } = await importEvidence(keeper.evidence, flights, fileURLToPath(new URL('../evidence', import.meta.url)));
   for (const s of saved) console.log(`+ ${s}`);
   for (const s of skipped) console.log(`- ${s}`);
   console.log(`${saved.length} new, ${skipped.length} skipped`);

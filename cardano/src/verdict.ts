@@ -1,5 +1,6 @@
 // AeroGuard's flight verdict, built only from signed AeroDataBox Airnode responses that are already on disk.
 // The AeroDataBox quota is shared by every team, so this service never calls the Airnode itself.
+import { fileURLToPath } from 'node:url';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { recoverSigner, type SignedResponse } from '../../keeper/src/airnode-v2.ts';
@@ -10,8 +11,8 @@ export const COVER = { chain: 'base-sepolia', chainId: 84532, address: '0x257054
 
 // Committed evidence first, then whatever the keeper has cached locally.
 export const EVIDENCE_DIRS = process.env.EVIDENCE_DIR ? [process.env.EVIDENCE_DIR] : [
-  new URL('../evidence/', import.meta.url).pathname,
-  new URL('../../keeper/.cache/', import.meta.url).pathname,
+  fileURLToPath(new URL('../evidence/', import.meta.url)),
+  fileURLToPath(new URL('../../keeper/.cache/', import.meta.url)),
 ];
 
 // Committed evidence files also carry `flight` and `date`, so /flights can list them.

@@ -5,6 +5,14 @@ Everything in the Cardano track, newest first. Times are UTC, 30–31 Oct 2026. 
 only the short "Cardano" section in the root `README.md`, `docs/DEVFOLIO-cardano.md` and the dashboard file
 `web/data/cardano-run.json`.
 
+## 31 Oct — Windows paths, judge in 60 seconds, numbers checked
+- **Windows:** every `new URL(…, import.meta.url).pathname` is now `fileURLToPath(…)`. On Windows the old form gave
+  `/C:/…` paths, which broke the evidence, log and test paths. Linux: 53/53.
+- **`cardano/README.md`:** "Judge in 60 seconds (no wallet)": the Cardanoscan tx, the dashboard's Cardano panel, the
+  video, the offline tests.
+- **Numbers checked against the code:** `GET /policy` has 11 offline tests (was "8"). The deck says "1–2 tADA per
+  verdict" (was "~1 ADA"). All 10 slides render at 1920×1080 with no overflow.
+
 ## 31 Oct — deck: escrow and "an agent hires an agent"
 - Slide 6 says the Aiken cover is an escrow that pays only on a signed result. Slide 9 has a new card: the claims agent
   hires our verdict agent, pays only for a final proof whose signature checks, and an unknown flight is a free 404.

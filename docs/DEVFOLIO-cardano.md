@@ -76,7 +76,7 @@ a final one 2 tADA.
 | x402 paid `GET /verdict` on Cardano preprod | **live**: tx `e2ef922b…` (2 tADA, final IB1314 verdict), recorded in `cardano/EVIDENCE.md` |
 | Signed evidence | **real**: AeroDataBox Airnode answers bought by our keeper; four final landings settled the live Base policies |
 | Aiken flight cover | **tested**: 44 `aiken check` tests incl. the real signatures; off-chain transactions executed locally with Aiken's UPLC evaluator. Live on preprod with one command, `sh cardano/live-cover.sh now`: pay for a verdict over x402, open a cover, settle it with that verdict. Its txs go to `cardano/COVER-EVIDENCE.md` |
-| `GET /policy` (tADA buys a Base policy) | **tested offline** (8 tests); not run live |
+| `GET /policy` (tADA buys a Base policy) | **tested offline** (11 tests); not run live |
 | Metadata anchor (`ANCHOR=true`) | **tested offline**; not run live |
 | MCP tools for LLM agents | **tested** in-process and over stdio; for a live demo with Claude Desktop see `presentation/cardano/DEMO.md` |
 | Tests | `cardano`: 53/53 · `aiken check`: 44/44 |

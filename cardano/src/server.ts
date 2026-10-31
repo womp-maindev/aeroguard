@@ -317,10 +317,10 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const url = process.env.FACILITATOR_URL?.trim();
   const facilitator = url ? new HTTPFacilitatorClient({ url, timeoutMs: 120_000 }) : localFacilitator(blockfrost());
   const payTo = sellerAddress();
-  const sales = new SalesLog(new URL('../evidence/sales.jsonl', import.meta.url).pathname);
+  const sales = new SalesLog(fileURLToPath(new URL('../evidence/sales.jsonl', import.meta.url)));
   const onSale = process.env.ANCHOR === 'true' ? (await import('./anchor.ts')).anchorSale : undefined;
   const desk = process.env.KEEPER_PK && process.env.FLIGHT_COVER_ADDRESS ? await keeperDesk() : undefined;
-  const orders = new OrdersLog(new URL('../evidence/orders.jsonl', import.meta.url).pathname);
+  const orders = new OrdersLog(fileURLToPath(new URL('../evidence/orders.jsonl', import.meta.url)));
   const app = await createApp({ facilitator, payTo, sales, onSale, desk, orders, l1Confirmations: Number(process.env.L1_CONFIRMATIONS ?? 0), usdmAsset: process.env.USDM_ASSET?.trim() });
   const port = Number(process.env.PORT || 4021);
   app.listen(port, () => console.log(`AeroGuard x402 (Cardano preprod): http://localhost:${port}/verdict?flight=IB1314&date=2026-10-30  payTo ${payTo}${onSale ? '  (anchoring sales on chain)' : ''}${desk ? '  (selling Base policies for tADA)' : ''}`));

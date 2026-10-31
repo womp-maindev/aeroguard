@@ -5,6 +5,7 @@
 //   npm run cover -- settle  --open <txHash> --verdict verdict.json     (the JSON body GET /verdict returned)
 //   npm run cover -- reclaim --open <txHash>
 //   npm run cover -- list
+import { fileURLToPath } from 'node:url';
 import { appendFileSync, existsSync, readFileSync } from 'node:fs';
 import { parseArgs } from 'node:util';
 import { Address, Client, preprod } from '@evolution-sdk/evolution';
@@ -15,7 +16,7 @@ import { coverAddress, coverUtxo, keyHashOf, openCover, type Outcome, type Polic
 import { AERODATABOX_AIRNODE_PUBKEY, payoutOf } from './onchain.ts';
 import { findEvidence } from './verdict.ts';
 
-const LOG = process.env.COVERS_LOG || new URL('../evidence/covers.jsonl', import.meta.url).pathname;
+const LOG = process.env.COVERS_LOG || fileURLToPath(new URL('../evidence/covers.jsonl', import.meta.url));
 const json = (v: unknown) => JSON.stringify(v, (_k, x) => (typeof x === 'bigint' ? x.toString() : x));
 
 interface Opened { openTx: string; flight: string; date: string; policy: Record<keyof Policy, string> }
