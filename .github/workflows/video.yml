@@ -1,6 +1,6 @@
 name: Render API3 video
 
-# Re-renders video/ (the API3-track clips + aeroguard-api3-full.mp4) from real data only:
+# Re-renders video/ (the API3-track clips) and the voiced cut web/media/api3.mp4 from real data only:
 # a fresh `forge test`, a fresh anvil rehearsal, the keeper's published log (keeper-data) and the LIVE dashboard
 # reading Base Sepolia with eth_calls. No keys, no AeroDataBox calls. Commits the clips to main.
 on:
@@ -46,13 +46,21 @@ jobs:
           cd video/src && npm init -y > /dev/null && npm i --silent playwright@1.48.2 && npx playwright install --with-deps chromium > /dev/null
       - name: Render (live dashboard included)
         run: LIVE=1 sh video/src/render.sh
+      - name: Put the voice-over back on (web/media/api3.mp4 keeps its audio; clip lengths are fixed)
+        run: |
+          d=$(ffprobe -v error -show_entries format=duration -of csv=p=0 video/aeroguard-api3-full.mp4); echo "new cut: $d s"
+          ffmpeg -loglevel error -y -i video/aeroguard-api3-full.mp4 -i web/media/api3.mp4 -map 0:v -map 1:a -c:v copy -c:a copy -shortest -movflags +faststart /tmp/api3.mp4
+          mv /tmp/api3.mp4 web/media/api3.mp4
       - uses: actions/upload-artifact@v4
         with:
           name: aeroguard-api3-video
-          path: video/*.mp4
+          path: |
+            video/*.mp4
+            web/media/api3.mp4
       - name: Commit to main
         run: |
+          rm -f video/aeroguard-api3-full.mp4   # the voiced cut in web/media/api3.mp4 is the one to watch
           git config user.name womp-maindev && git config user.email 226526968+womp-maindev@users.noreply.github.com
-          git add video/*.mp4 video/src/forge-test.txt video/src/rehearse.txt
+          git add video/[0-9]*.mp4 web/media/api3.mp4 video/src/forge-test.txt video/src/rehearse.txt
           git commit -qm "video: re-rendered API3 clips from live data ($(date -u +%H:%MZ))" || exit 0
           for i in 1 2 3; do git pull -q --rebase origin main && git push -q origin HEAD:main && break; sleep 5; done

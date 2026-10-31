@@ -27,7 +27,7 @@ const ease = (x) => (x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2);
     await p.click('#runAll');
     await p.waitForTimeout(9000); // the four eth_calls to the live contract
     const y1 = y0 + 560;
-    dur = 12; y = (t) => y0 + (y1 - y0) * ease(clamp((t - 2) / 6));
+    dur = 13; y = (t) => y0 + (y1 - y0) * ease(clamp((t - 2) / 6));
   }
   for (let i = 0; i < dur * fps; i++) {
     await p.evaluate((v) => scrollTo(0, v), y(i / fps));

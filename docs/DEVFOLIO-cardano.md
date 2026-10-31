@@ -107,6 +107,8 @@ a final one 2 tADA.
    deployed yet.
 
 ## Video
+**Cardano track video (1:57, voiced):** https://github.com/womp-maindev/aeroguard/blob/main/web/media/cardano.mp4 (also https://womp-maindev.github.io/aeroguard/media/cardano.mp4). Overview of both tracks (1:47): https://github.com/womp-maindev/aeroguard/blob/main/web/media/demo.mp4
+
 Ready-made clips (1080p, no sound) in [`cardano/video/`](../cardano/video/); timings and voice-over ideas in [`SHOTLIST.md`](../cardano/video/SHOTLIST.md).
 
 ## Video segment (≈30 s)

@@ -1,13 +1,13 @@
 # AeroGuard × API3 — video clips
 
-1920×1080, 30 fps, H.264, **no audio** (lay your voice-over on top). `aeroguard-api3-full.mp4` = all eleven clips in order (2:08).
+1920×1080, 30 fps, H.264, no audio. The voiced cut of all eleven clips (2:08) is [`web/media/api3.mp4`](../web/media/api3.mp4); clip lengths are fixed so the voice stays in sync after a re-render.
 Everything shown is real: the signed proof is policy #1's AirnodeHub response, the keeper terminal replays the keeper's published log
 ([`keeper-data/keeper.json`](https://github.com/womp-maindev/aeroguard/blob/keeper-data/keeper.json)), the test and rehearsal terminals replay a real
 `forge test` and `npm run rehearse` output ([`src/forge-test.txt`](src/forge-test.txt), [`src/rehearse.txt`](src/rehearse.txt)), the tamper table holds the live contract's answers,
 and clips 5 and 7 are the live dashboard reading Base Sepolia (recorded in GitHub Actions; this render uses the 31 Oct 05:00Z recording, the "Render API3 video" workflow records them fresh).
 
 Re-render after new settlements: Actions → **Render API3 video** → Run workflow (`.github/workflows/video.yml`: fresh `forge test`, fresh anvil rehearsal,
-the keeper's latest log, live dashboard; commits the clips here). Locally: `sh video/src/render.sh` (dashboard clips need `LIVE=1` and the Base Sepolia RPC).
+the keeper's latest log, live dashboard; commits the clips here and puts the voice-over back on `web/media/api3.mp4`). Locally: `sh video/src/render.sh` (dashboard clips need `LIVE=1` and the Base Sepolia RPC).
 
 | # | File | Length | What it shows | Voice-over idea (EN) |
 |---|---|---|---|---|

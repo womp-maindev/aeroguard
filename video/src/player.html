@@ -69,6 +69,8 @@ function terminal(t, title, items, maxLines, caption, tag) {
 
 // --------------------------------------------------------------- scenes
 const S = {};
+// Fixed clip lengths, so the voice-over track (web/media/api3.mp4) stays in sync after a re-render with more data.
+function fit(items, end, dur) { const k = Math.min(1, (dur - 2.5) / end); items.forEach((it) => { it.at *= k; }); return { items, dur }; }
 const o = (t, a, d = 0.6) => `opacity:${fade(t, a, d)};transform:translateY(${(1 - fade(t, a, d)) * 20}px)`;
 const short = (h, n = 10) => h ? h.slice(0, n) + '…' : '';
 const AIRNODE = '0x83FE2E8F24E66520B1902C3507De4F471248f2Ec';
@@ -134,7 +136,7 @@ const KEEP = (() => {
     }
     at += 0.4;
   }
-  return { items, dur: Math.max(14, at + 3) };
+  return fit(items, at, 14.8);
 })();
 S.keeper = { dur: KEEP.dur, render(t) {
   terminal(t, 'keeper — the published log (keeper-data/keeper.json)', KEEP.items, 19,
@@ -180,7 +182,7 @@ const FORGE = (() => {
     else if (f.k === 'res') { items.push({ at, html: `<span class="dim">${esc(f.s)}</span>` }); at += 0.3; }
     else { items.push({ at: at + 0.3, html: `\n<span class="ok bold">${esc(f.s)}</span>` }); at += 0.3; }
   }
-  return { items, dur: at + 3.5 };
+  return fit(items, at + 0.3, 14.3);
 })();
 S.tests = { dur: FORGE.dur, render(t) {
   terminal(t, 'contracts — forge test', FORGE.items, 20,
@@ -195,7 +197,7 @@ const REH = (() => {
     items.push({ at, html: `<span class="${cls}">${esc(l.length > 118 ? l.slice(0, 115) + '…' : l)}</span>` });
     at += /settled|tamper|REHEARSAL/.test(l) ? 0.45 : 0.16;
   }
-  return { items, dur: at + 3 };
+  return fit(items, at, 12.1);
 })();
 S.rehearsal = { dur: REH.dur, render(t) {
   const cap = t < REH.dur * 0.45 ? '<b>Every payout rule</b>, on a local chain with a test signer and a fast clock'

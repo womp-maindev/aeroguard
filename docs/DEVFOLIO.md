@@ -139,5 +139,5 @@ Full analysis, with assumptions, the worst case and sources: [docs/BUSINESS.md](
 - Policy #1 purchase with a signed proof: https://sepolia.basescan.org/tx/0xbfd3ae73074ff63a3ef5f7e56b211d1ffb7223e2db944d0cc38ed069d1958b8d
 - Keeper runs: https://github.com/womp-maindev/aeroguard/actions/workflows/keeper.yml
 - Threat model: [`contracts/README.md`](https://github.com/womp-maindev/aeroguard/blob/main/contracts/README.md#threat-model)
-- Demo video (1:47, voiced, both tracks): https://github.com/womp-maindev/aeroguard/blob/main/web/media/demo.mp4 (also served at https://womp-maindev.github.io/aeroguard/media/demo.mp4)
-- API3 deep-dive (2:08, clips from real data, no audio): https://github.com/womp-maindev/aeroguard/blob/main/video/aeroguard-api3-full.mp4 · Cardano (1:57): https://github.com/womp-maindev/aeroguard/blob/main/cardano/video/aeroguard-cardano-full.mp4
+- **Video (API3 track, 2:08, voiced):** https://github.com/womp-maindev/aeroguard/blob/main/web/media/api3.mp4 (also https://womp-maindev.github.io/aeroguard/media/api3.mp4)
+- Overview of both tracks (1:47): https://github.com/womp-maindev/aeroguard/blob/main/web/media/demo.mp4
