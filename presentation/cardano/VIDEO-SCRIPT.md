@@ -3,6 +3,14 @@
 **The video:** [`aeroguard-cardano-full.mp4`](aeroguard-cardano-full.mp4) in this folder. It runs 1:57, 1080p, with no sound.
 Separate clips for editing are in [`../../cardano/video/`](../../cardano/video/), numbered 01–10.
 
+**The voiced video in one command:** [`voiceover/make-voiced-video.sh`](voiceover/make-voiced-video.sh) builds
+`aeroguard-cardano-full-voiced.mp4` with these EN lines placed on their timecodes:
+```bash
+cd presentation/cardano/voiceover && ELEVENLABS_API_KEY=sk_... sh make-voiced-video.sh
+```
+Without a key it uses the Mac's built-in voice (`say`). With your own recording: `sh make-voiced-video.sh my-voice.m4a`.
+It needs ffmpeg (`brew install ffmpeg`).
+
 **How to record:** play the video and read the **EN** line for each block in time with the picture. That is about
 2.5 words per second, a calm pace. **RU** is the translation, so you know what you are saying. Everything on screen
 is real: our paid run on preprod, the server's response, the Aiken tests and the live landings.
@@ -11,8 +19,8 @@ is real: our paid run on preprod, the server's response, the Aiken tests and the
 
 ### 0:00–0:06 · Clip 01 — title
 **On screen:** "Agents pay per request for flight outcomes".
-**EN:** "AeroGuard on Cardano: AI agents pay per request for flight outcomes — and any smart contract can verify the answer."
-**RU:** «AeroGuard на Cardano: ИИ-агенты платят за каждый запрос о результате рейса, и любой смарт-контракт может проверить ответ».
+**EN:** "AeroGuard on Cardano: agents pay per request for flight outcomes any contract can verify."
+**RU:** «AeroGuard на Cardano: агенты платят за каждый запрос о результате рейса, который может проверить любой контракт».
 
 ### 0:06–0:20 · Clip 02 — architecture (steps light up)
 **On screen:** the diagram; a frame moves agent → server → Cardano → evidence → contracts.
