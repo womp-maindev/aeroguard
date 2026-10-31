@@ -1,0 +1,99 @@
+# Changelog — AeroGuard on Cardano
+
+Everything in the Cardano track, newest first. Times are UTC, 30–31 Oct 2026. Branch `claude/magical-feynman-qda2d7`,
+[PR #1](https://github.com/womp-maindev/aeroguard/pull/1). The Cardano work lives in `cardano/`. Outside it, it touches
+only the short "Cardano" section in the root `README.md`, `docs/DEVFOLIO-cardano.md` and the dashboard file
+`web/data/cardano-run.json`.
+
+## 31 Oct — presentation
+- **New folder [`presentation/`](../presentation/)**, with the Cardano deck in [`presentation/cardano/`](../presentation/cardano/):
+  - `index.html`: a 10-slide offline deck (16:9). The real paid run, the response and `aiken check` play as embedded
+    videos, and two QR codes link to the Cardanoscan tx and to the code. Keys: ←/→, F fullscreen, N speaker notes.
+  - `SPEAKER-NOTES.md`: what to say on each slide, about 2½ min.
+  - `DEMO.md`: a live-demo runbook with a rehearsal, the window layout, what to say while it waits and a fallback plan.
+  - `open-presentation.command`: double-click on a Mac.
+  - `media/`: WebM fallbacks for the slide videos.
+
+## 31 Oct — video
+- **Video clips** in [`video/`](video/): ten 1080p30 clips without sound, plus the full cut
+  `aeroguard-cardano-full.mp4` (1:57) and [`video/SHOTLIST.md`](video/SHOTLIST.md) (timings, a suggested English
+  voice-over, a ~45 s short cut). Every clip shows real data: the paid preprod run, its JSON response, `aiken check`,
+  the dashboard, and the four live landings.
+- **Reproducible:** `npm run video` (or `sh video/src/render.sh`) re-renders every clip frame by frame from
+  `web/data/cardano-run.json` and `video/src/aiken-check.json`. It needs ffmpeg and Playwright's Chromium.
+
+## 30 Oct 23:16 — qualification: first paid request on Cardano preprod
+- **Real x402 payment:** 2 tADA for the final IB1314 verdict, tx
+  [`e2ef922b…`](https://preprod.cardanoscan.io/transaction/e2ef922be71ba61da9431f1a5f56f4c56f5d61348c4945194cf390dd0acd7864).
+  Settled after 44 s; the verdict was signed by Airnode `0x83FE…F2Ec`.
+- **Recorded in** [`EVIDENCE.md`](EVIDENCE.md), `evidence/sales.jsonl` and `web/data/cardano-run.json`. The dashboard's
+  Cardano panel now shows this run.
+- `npm run qualify` also writes `web/data/cardano-run.json` (`{ challenge, response }`), the format the dashboard reads.
+- Linked from the root README, `cardano/README.md`, the Devfolio text and the plan.
+
+## 30 Oct 22:47 — all four live landings, the same verdict on two chains
+- The keeper's signed `Arrived` answers for IB1314, LH1816, EI357 and BA955 are imported from `keeper-data`.
+- **Same outcome on both chains:** they closed policies #1–#4 on Base as `ClosedNoPayout`. The same signatures settle the
+  Aiken cover the same way (no payout, cover back to the insurer), and a payout to the holder is refused.
+- **Generated tests:** `npm run vectors` writes one Aiken test module per flight
+  (`onchain/lib/aeroguard/real_final_<flight>_test.ak`), and the TS lifecycle test builds and executes each settlement
+  transaction. 44 Aiken tests, 53 TS tests.
+
+## 30 Oct 21:49–21:58 — Cardano pays for cover on Base; code-review fixes
+- **`GET /policy`:** a premium in tADA buys a `FlightDelayCover` policy on Base Sepolia.
+  - The price comes from the contract's own `quote` (demo rate 1 aUSD = 10 tADA, at least 1 tADA).
+  - The purchase runs only after the Cardano payment settles, with `cardanoJobRef = keccak256("cardano:<tx>")`.
+  - Order status is free at `/orders/:tx`.
+  - Tools: `npm run buy-policy`, `npm run server:policies`, MCP tool `buy_flight_cover`.
+- **Review fixes:**
+  - One payment can never buy two policies: the order is recorded before any `await`.
+  - Every failure after payment is recorded as `refundDue`: an RPC error, a restart mid-purchase, or a quote that moved.
+  - Past dates and flights already past the gate get a free 409 before payment.
+  - The idempotency key is unambiguous.
+  - The sales and orders logs read their file once at start.
+- **Aiken freshness, as in `FlightDelayCover`:** the settle window must lie within `[signed at, signed at + max_age]`
+  (Stale, FromTheFuture), and an arrival answer must be signed after the landing it reports (ObservedTooEarly).
+  `max_age` is a policy field.
+  - New script hash `107d6818…`, preprod address `addr_test1wqg866…`.
+  - reclaim works right after the deadline; `cover open` refuses covers too small for a half payout.
+
+## 30 Oct 21:20–21:39 — real data, demo polish
+- **Live answers:** the service resells the keeper's live Airnode answers. `npm run import-evidence` checks each signature
+  before saving, and the newest answer per request wins.
+- **Pricing:** 1 tADA while a flight is live, 2 tADA once the answer is final.
+- **Real arrival signature in Aiken:** a real arrival-format signature (IB1314 `EnRoute`) verifies, relabelling it as
+  `Arrived` breaks it, and an en-route answer cannot settle.
+- **Demo output:** `buy` and `qualify` print the decoded 402 offer before paying.
+- **Docs:** architecture diagram (`docs/architecture.svg`) and a judge quickstart.
+- **Anchor fix:** the anchor transaction pays only the fee, and `preflight` checks the seller's balance when
+  `ANCHOR=true`.
+- **Branch:** `main` is merged into the branch with no conflicts.
+
+## 30 Oct 20:58–21:03 — the cover lifecycle and one-command qualification
+- **Off-chain open / settle / reclaim for the Aiken cover.** Every build runs the validator locally with Aiken's UPLC
+  evaluator (`@evolution-sdk/aiken-uplc`, PlutusV3 cost model).
+- **x402 → contract:** the verdict body an agent buys is exactly the settle redeemer (`npm run cover -- settle`).
+- **`npm run qualify`:** preflight, start the endpoint, pay, record the evidence. It is tested as a separate process.
+- **`npm run preflight`:** checks the key's network, both wallets, the evidence and the balance, with a fix for each
+  failure.
+
+## 30 Oct 20:44–20:52 — server hardening, agents, Aiken contract
+- **Payments:** one transaction buys one operation; replaying it returns the same answer. `confirmExpiry` keeps a
+  Blockfrost outage from expiring a payment.
+- **Server:** sales log, tUSDM option, free discovery (`/flights`, `/sales`, `/.well-known/x402`), and an optional
+  on-chain metadata anchor (labels 674 / 8402).
+- **Agents:** a claims agent (budget, free catalog check, the same decision rule as the contract) and MCP tools.
+- **Aiken flight cover** (Plutus V3):
+  - Checks the Airnode's secp256k1 signature with `keccak_256` and `verifyEcdsaSecp256k1Signature`, rebuilding the
+    signed bytes from typed fields.
+  - Pays out by `FlightDelayCover`'s rule.
+  - Payout outputs are tagged with the spent input (no double satisfaction).
+- **Plutus-primitive model:** `src/onchain.ts` recovers the Airnode key from its live signature and pins it in tests.
+
+## 30 Oct 17:26 — first version
+- **Paid endpoint:** `GET /verdict?flight=&date=` on `cardano:preprod` with `@x402/express` and `@x402/cardano` 2.26.0
+  (`exact` scheme, Blockfrost) and an in-process facilitator. The response is the AeroGuard verdict plus the
+  Airnode-signed evidence.
+- **Tools:** buyer script with a spend cap, wallet and balance helpers.
+- **Tests:** offline e2e tests on a local Blockfrost fixture.
+- **Plan and docs:** development plan ([`PLAN.md`](PLAN.md)) and the Devfolio text.

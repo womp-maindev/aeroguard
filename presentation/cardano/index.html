@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AeroGuard × Cardano</title>
+<style>
+@font-face { font-family: Jost; src: url(../../web/fonts/Jost-normal.woff2); }
+@font-face { font-family: KellySlab; src: url(../../web/fonts/KellySlab-normal.woff2); }
+:root { --bg: #0b1020; --panel: #0f1830; --line: #2d3d66; --text: #e6edf7; --muted: #a9bbd9; --accent: #7fb3ff; --gold: #ffd166; --ok: #3fb950; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; background: var(--bg); color: var(--text); font-family: Jost, system-ui, sans-serif; overflow: hidden; }
+/* 16:9 stage scaled to the window */
+#deck { position: absolute; width: 1920px; height: 1080px; left: 50%; top: 50%; transform-origin: center; }
+.slide { position: absolute; inset: 0; padding: 90px 120px; display: none; flex-direction: column;
+  background: radial-gradient(1200px 700px at 15% 0%, #16234a 0%, var(--bg) 60%); }
+.slide.on { display: flex; }
+.kicker { font-size: 28px; letter-spacing: 6px; text-transform: uppercase; color: var(--accent); }
+h1 { font-family: KellySlab, serif; font-weight: normal; font-size: 104px; line-height: 1.05; margin: 18px 0 26px; }
+h2 { font-family: KellySlab, serif; font-weight: normal; font-size: 68px; line-height: 1.1; margin: 10px 0 34px; }
+p, li { font-size: 38px; line-height: 1.45; color: var(--muted); }
+li { margin: 10px 0 10px 40px; } b, strong { color: var(--text); font-weight: 600; }
+.mono { font-family: 'DejaVu Sans Mono', ui-monospace, Menlo, monospace; }
+.pills { margin-top: 40px; } .pill { display: inline-block; margin: 0 14px 14px 0; padding: 12px 26px; border-radius: 999px; border: 2px solid var(--line); font-size: 28px; color: var(--muted); }
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: start; }
+.cols.v { grid-template-columns: 1.45fr 1fr; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 26px; padding: 40px 46px; }
+.card h3 { font-size: 26px; letter-spacing: 4px; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; font-weight: 500; }
+.card p { font-size: 38px; }
+video { width: 100%; border-radius: 22px; border: 1px solid var(--line); background: #000; display: block; }
+.big { font-family: KellySlab, serif; font-size: 160px; line-height: 1; color: var(--gold); }
+.qr { width: 260px; height: 260px; background: #fff; border-radius: 18px; padding: 10px; }
+table { border-collapse: collapse; width: 100%; font-size: 32px; }
+th { text-align: left; color: var(--accent); font-size: 22px; letter-spacing: 3px; text-transform: uppercase; padding: 0 16px 16px; border-bottom: 2px solid var(--line); font-weight: 500; }
+td { padding: 20px 16px; border-bottom: 1px solid #1e2a49; } .ok { color: var(--ok); } .gold { color: var(--gold); } .dim { color: #7d8aa3; }
+.foot { position: absolute; left: 120px; right: 120px; bottom: 40px; display: flex; justify-content: space-between; font-size: 22px; color: #6f7f9f; }
+#notes { position: fixed; left: 0; right: 0; bottom: 0; max-height: 40vh; overflow: auto; background: rgba(8,12,24,.96); border-top: 2px solid var(--line);
+  padding: 18px 28px; font-size: 18px; line-height: 1.5; color: var(--text); display: none; z-index: 10; white-space: pre-wrap; }
+#help { position: fixed; right: 14px; top: 10px; font-size: 13px; color: #56627c; z-index: 11; }
+</style>
+</head>
+<body>
+<div id="help">← → slides · F fullscreen · N speaker notes</div>
+<div id="deck">
+
+<!-- 1 -->
+<section class="slide" data-notes="Hi, we're AeroGuard. This is the Cardano part of our project.
+In one line: AI agents pay per request on Cardano for flight outcomes, and the answer is a signed proof that any smart contract can check — not just a JSON you have to trust.">
+  <div class="kicker" style="margin-top:120px">AeroGuard · Cardano track</div>
+  <h1>Agents pay per request<br>for flight outcomes<br>any contract can verify</h1>
+  <p>An Airnode-signed flight verdict, paid in tADA over x402, verified on Cardano by an Aiken contract and on Base by FlightDelayCover.</p>
+  <div class="pills"><span class="pill">x402 · exact</span><span class="pill">Cardano preprod</span><span class="pill">Aiken · Plutus V3</span><span class="pill">AeroDataBox Airnode (API3)</span></div>
+</section>
+
+<!-- 2 -->
+<section class="slide" data-notes="The problem. Flight data is sold as monthly plans with API keys — an autonomous agent can't sign up, and a one-off check costs a subscription.
+And even if you get the data, it's just JSON: a contract can't move money on it, because anybody could fake '4 hours late'.
+Insurers and claim services all rebuild the same trusted back office.">
+  <div class="kicker">The problem</div>
+  <h2>Flight data can't move money</h2>
+  <div class="cols">
+    <div class="card"><h3>For agents</h3><p>Flight APIs want <b>accounts, API keys, monthly plans</b>. An autonomous agent can't sign up — and one check shouldn't cost a subscription.</p></div>
+    <div class="card"><h3>For contracts</h3><p>The answer is <b>just JSON</b>. Whoever relays it can change it, so no contract can pay out on it. Every insurer rebuilds the same trusted oracle.</p></div>
+  </div>
+</section>
+
+<!-- 3 -->
+<section class="slide" data-notes="How it works, left to right.
+The agent asks our endpoint. It answers HTTP 402: pay two tADA.
+The agent's wallet signs a Cardano transaction — it never broadcasts it — and retries.
+The facilitator checks amount, recipient and validity window and puts it on Cardano.
+The agent gets the verdict plus the AeroDataBox Airnode's signature. That signature is the point: any contract can verify it — our Aiken contract on Cardano, our FlightDelayCover on Base.">
+  <div class="kicker">How it works</div>
+  <h2>402 → pay on Cardano → signed answer</h2>
+  <img src="../../cardano/docs/architecture.svg" style="width:1540px;max-width:100%;height:auto;align-self:center;background:#fff;border-radius:22px;padding:10px">
+</section>
+
+<!-- 4 -->
+<section class="slide" data-video data-notes="This is a real run on Cardano preprod, last night at 23:16 UTC.
+Preflight checks keys and balance. The server offers: pay two tADA. The wallet signs, the transaction lands in a block after 44 seconds — sped up here — and we get the verdict for IB1314: arrived, signed by the AeroDataBox Airnode.
+The QR code opens the transaction on Cardanoscan.">
+  <div class="kicker">Live proof · Cardano preprod</div>
+  <h2>A real paid request</h2>
+  <div class="cols v">
+    <video muted playsinline loop><source src="../../cardano/video/03-qualify.mp4" type="video/mp4"><source src="media/03-qualify.webm" type="video/webm"></video>
+    <div>
+      <div class="card"><h3>Paid</h3><div class="big">2 tADA</div><p style="margin-top:14px">for the final IB1314 verdict · 30 Oct 2026, 23:16 UTC</p>
+        <p class="mono" style="font-size:22px;margin-top:16px;color:var(--gold);word-break:break-all">tx e2ef922be71ba61da9431f1a5f56f4c56f5d61348c4945194cf390dd0acd7864</p></div>
+      <div style="display:flex;gap:26px;align-items:center;margin-top:30px"><img class="qr" src="img/qr-tx.svg"><p style="font-size:28px">Scan: the transaction<br>on Cardanoscan</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 5 -->
+<section class="slide" data-video data-notes="What the agent gets back: the verdict — arrived 21:00, 25 minutes early, so no payout —
+then the proof: the Airnode address, the request hash and the signature,
+and the receipt: the Cardano payment that bought it.
+These five evidence fields go unchanged into a contract.">
+  <div class="kicker">What the agent gets</div>
+  <h2>Verdict + proof + receipt</h2>
+  <div class="cols v">
+    <video muted playsinline loop><source src="../../cardano/video/04-response.mp4" type="video/mp4"><source src="media/04-response.webm" type="video/webm"></video>
+    <div class="card"><h3>Not just JSON</h3><p><b>verdict</b> — status, delay, final<br><br><b>evidence</b> — the AeroDataBox Airnode's signature over exactly this data<br><br><b>paidWith</b> — the Cardano tx that bought it<br><br>No account, no API key. Unknown flights get a free 404.</p></div>
+  </div>
+</section>
+
+<!-- 6 -->
+<section class="slide" data-video data-notes="And it's verified on Cardano itself. Our Aiken contract is a flight-cover UTxO.
+Plutus has no ecrecover, so we rebuild the exact signed bytes and use the secp256k1 builtin.
+Edited data, another signer, a stale answer — all fail. 44 tests pass, including the real landings of our four live policies.">
+  <div class="kicker">Verified on Cardano</div>
+  <h2>An Aiken contract checks the Airnode signature</h2>
+  <div class="cols v">
+    <video muted playsinline loop><source src="../../cardano/video/07-aiken.mp4" type="video/mp4"><source src="media/07-aiken.webm" type="video/webm"></video>
+    <div class="card"><h3>flight_cover · Plutus V3</h3><p><b>keccak_256 + verifyEcdsaSecp256k1Signature</b> on the bytes the Airnode signed<br><br>Pays like FlightDelayCover: <b>≥ 180 min or cancelled → full, ≥ 120 → half</b><br><br>Forgeries, stale answers and double satisfaction fail<br><br><b class="gold">44 / 44 tests</b></p></div>
+  </div>
+</section>
+
+<!-- 7 -->
+<section class="slide" data-notes="This is my favourite slide. Last night our four live policies landed.
+The keeper bought the signed answers and settled them on Base — none was late enough, so no payout.
+We took the very same signatures to Cardano: the Aiken contract reaches exactly the same verdict, and refuses to pay the holder.
+One signed answer, the same result on two chains.">
+  <div class="kicker">Real landings · 30 Oct 2026</div>
+  <h2>One signed answer, the same verdict on two chains</h2>
+  <table>
+    <tr><th>Policy</th><th>Signed landing</th><th>Base · FlightDelayCover</th><th>Cardano · Aiken cover</th></tr>
+    <tr><td><b>#1 IB1314</b> <span class="dim">MUC→MAD</span></td><td>21:00Z · 25 min early</td><td class="ok">ClosedNoPayout</td><td class="ok">no payout · refunds insurer</td></tr>
+    <tr><td><b>#2 LH1816</b> <span class="dim">MUC→BCN</span></td><td>22:06Z · 11 min late</td><td class="ok">ClosedNoPayout</td><td class="ok">no payout · refunds insurer</td></tr>
+    <tr><td><b>#3 EI357</b> <span class="dim">MUC→DUB</span></td><td>21:26Z · 29 min early</td><td class="ok">ClosedNoPayout</td><td class="ok">no payout · refunds insurer</td></tr>
+    <tr><td><b>#4 BA955</b> <span class="dim">MUC→LHR</span></td><td>21:47Z · 3 min early</td><td class="ok">ClosedNoPayout</td><td class="ok">no payout · refunds insurer</td></tr>
+  </table>
+  <p style="margin-top:36px">Threshold is 120 min — nobody was late enough. <b>Both contracts agree, from the same signature.</b></p>
+</section>
+
+<!-- 8 -->
+<section class="slide" data-notes="Cardano can also pay for the cover itself. An agent pays the premium in tADA, priced from the contract's own quote.
+Only after the Cardano payment is final, the server buys the policy on Base and writes the Cardano transaction into the policy, so both chains point to each other.
+No settled payment, no policy. If the purchase fails, it's recorded as a refund. This part is tested offline.">
+  <div class="kicker">Cross-chain</div>
+  <h2>Pay the premium in tADA, get cover on Base</h2>
+  <div class="cols" style="grid-template-columns:1fr 1fr 1fr;gap:34px">
+    <div class="card"><h3>1 · Cardano</h3><p>Agent pays the premium in <b>tADA</b> over x402 — priced from the contract's quote</p></div>
+    <div class="card"><h3>2 · after settlement</h3><p>Server buys a <b>FlightDelayCover</b> policy on Base Sepolia with a fresh signed proof</p></div>
+    <div class="card"><h3>3 · linked</h3><p class="mono" style="font-size:26px">cardanoJobRef =<br>keccak256(<br>"cardano:&lt;tx&gt;")</p></div>
+  </div>
+  <p style="margin-top:34px">No settled payment, no policy · failures recorded as refund due · <span class="dim">tested offline (8 tests)</span></p>
+</section>
+
+<!-- 9 -->
+<section class="slide" data-notes="Who pays for this? Claims agents for EU261 delay compensation, travel insurers, corporate travel tools, and agent marketplaces like Masumi.
+They pay per answer, only for the flights they need. A final arrival never changes, so we buy the signed lookup once and every later sale is margin.">
+  <div class="kicker">Business case</div>
+  <h2>Pay per answer, sell the same proof many times</h2>
+  <div class="cols">
+    <div class="card"><h3>Who pays</h3><p>EU261 claim agents · travel insurers · corporate travel tools · agent marketplaces (Masumi)</p></div>
+    <div class="card"><h3>Why it works</h3><p>No account, ~1 ADA per verdict. A final answer never changes: <b>buy the signed lookup once, every later sale is margin.</b></p></div>
+  </div>
+</section>
+
+<!-- 10 -->
+<section class="slide" data-notes="Next: mainnet with ADA or USDM, a hosted facilitator, listing as a Masumi agent, and deploying the Aiken cover with a pool of policies.
+Thank you — the QR code goes to the code; everything you saw is in the repository, including the tests.">
+  <div class="kicker">Next · Thank you</div>
+  <h2>Agents pay per request on Cardano<br>for flight outcomes any contract can verify.</h2>
+  <div class="cols" style="grid-template-columns:1.4fr 1fr">
+    <div class="card"><h3>Real-use path</h3><p>Mainnet in ADA / USDM · hosted facilitator · list as a Masumi agent · deploy the Aiken cover with an insurer pool</p></div>
+    <div style="display:flex;gap:26px;align-items:center"><img class="qr" src="img/qr-repo.svg"><p style="font-size:26px">github.com/<br>womp-maindev/<br>aeroguard<br><span class="dim">→ cardano/</span></p></div>
+  </div>
+</section>
+
+</div>
+<div id="notes"></div>
+<script>
+const slides = [...document.querySelectorAll('.slide')];
+const deck = document.getElementById('deck');
+const notes = document.getElementById('notes');
+let i = Math.max(0, Math.min(slides.length - 1, (parseInt(location.hash.slice(1), 10) || 1) - 1));
+const fit = () => { const s = Math.min(innerWidth / 1920, innerHeight / 1080); deck.style.transform = `translate(-50%, -50%) scale(${s})`; };
+const show = () => {
+  slides.forEach((el, k) => {
+    el.classList.toggle('on', k === i);
+    const v = el.querySelector('video');
+    if (v) { if (k === i) { v.currentTime = 0; v.play().catch(() => {}); } else v.pause(); }
+  });
+  slides.forEach((el) => el.querySelector('.foot')?.remove());
+  const f = document.createElement('div'); f.className = 'foot';
+  f.innerHTML = `<span>AeroGuard × Cardano</span><span>${i + 1} / ${slides.length}</span>`; slides[i].appendChild(f);
+  notes.textContent = `Slide ${i + 1} — say:\n` + (slides[i].dataset.notes || '');
+  history.replaceState(null, '', `#${i + 1}`);
+};
+addEventListener('resize', fit);
+addEventListener('hashchange', () => { const n = (parseInt(location.hash.slice(1), 10) || 1) - 1; if (n !== i && n >= 0 && n < slides.length) { i = n; show(); } });
+addEventListener('keydown', (e) => {
+  if (['ArrowRight', 'PageDown', ' ', 'Enter'].includes(e.key)) i = Math.min(slides.length - 1, i + 1);
+  else if (['ArrowLeft', 'PageUp', 'Backspace'].includes(e.key)) i = Math.max(0, i - 1);
+  else if (e.key === 'Home') i = 0; else if (e.key === 'End') i = slides.length - 1;
+  else if (e.key.toLowerCase() === 'f') { document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen(); return; }
+  else if (e.key.toLowerCase() === 'n') { notes.style.display = notes.style.display === 'block' ? 'none' : 'block'; return; }
+  else return;
+  e.preventDefault(); show();
+});
+addEventListener('click', (e) => { if (e.target.closest('video')) return; i = e.clientX > innerWidth / 3 ? Math.min(slides.length - 1, i + 1) : Math.max(0, i - 1); show(); });
+fit(); show();
+</script>
+</body>
+</html>

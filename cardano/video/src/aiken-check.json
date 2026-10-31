@@ -1,0 +1,381 @@
+{
+ "modules": [
+  {
+   "name": "aeroguard/cover_test",
+   "tests": [
+    {
+     "title": "real_airnode_data_is_rebuilt_byte_for_byte",
+     "status": "pass",
+     "execution_units": {
+      "mem": 21228,
+      "cpu": 5722683
+     }
+    },
+    {
+     "title": "real_airnode_signature_verifies",
+     "status": "pass",
+     "execution_units": {
+      "mem": 33667,
+      "cpu": 59302881
+     }
+    },
+    {
+     "title": "tamper_edited_status_fails",
+     "status": "pass",
+     "execution_units": {
+      "mem": 34968,
+      "cpu": 59586930
+     }
+    },
+    {
+     "title": "tamper_other_request_fails",
+     "status": "pass",
+     "execution_units": {
+      "mem": 34968,
+      "cpu": 59586930
+     }
+    },
+    {
+     "title": "tamper_other_timestamp_fails",
+     "status": "pass",
+     "execution_units": {
+      "mem": 34968,
+      "cpu": 59586930
+     }
+    },
+    {
+     "title": "tamper_other_signer_fails",
+     "status": "pass",
+     "execution_units": {
+      "mem": 34968,
+      "cpu": 59586930
+     }
+    },
+    {
+     "title": "minutes_of_matches_unix_time",
+     "status": "pass",
+     "execution_units": {
+      "mem": 408011,
+      "cpu": 114461841
+     }
+    },
+    {
+     "title": "minutes_of_rejects_garbage",
+     "status": "pass",
+     "execution_units": {
+      "mem": 137,
+      "cpu": 439843
+     }
+    },
+    {
+     "title": "payout_rule",
+     "status": "pass",
+     "execution_units": {
+      "mem": 851406,
+      "cpu": 244318429
+     }
+    },
+    {
+     "title": "delayed_200_min_pays_holder_in_full",
+     "status": "pass",
+     "execution_units": {
+      "mem": 572388,
+      "cpu": 219992671
+     }
+    },
+    {
+     "title": "full_payout_short_paid_fails",
+     "status": "pass",
+     "execution_units": {
+      "mem": 593078,
+      "cpu": 226937065
+     }
+    },
+    {
+     "title": "delayed_130_min_splits_cover",
+     "status": "pass",
+     "execution_units": {
+      "mem": 642617,
+      "cpu": 247336376
+     }
+    },
+    {
+     "title": "delayed_30_min_returns_cover_to_insurer",
+     "status": "pass",
+     "execution_units": {
+      "mem": 576026,
+      "cpu": 221026984
+     }
+    },
+    {
+     "title": "delayed_30_min_cannot_pay_holder",
+     "status": "pass",
+     "execution_units": {
+      "mem": 554595,
+      "cpu": 212575253
+     }
+    },
+    {
+     "title": "canceled_pays_holder_in_full",
+     "status": "pass",
+     "execution_units": {
+      "mem": 145857,
+      "cpu": 99169842
+     }
+    },
+    {
+     "title": "claimed_delay_with_edited_actual_fails",
+     "status": "pass",
+     "execution_units": {
+      "mem": 248504,
+      "cpu": 125032895
+     }
+    },
+    {
+     "title": "proof_from_another_key_fails",
+     "status": "pass",
+     "execution_units": {
+      "mem": 248504,
+      "cpu": 125032895
+     }
+    },
+    {
+     "title": "real_pre_departure_proof_cannot_settle",
+     "status": "pass",
+     "execution_units": {
+      "mem": 119517,
+      "cpu": 87816558
+     }
+    },
+    {
+     "title": "insurer_reclaims_after_deadline",
+     "status": "pass",
+     "execution_units": {
+      "mem": 49889,
+      "cpu": 16629972
+     }
+    },
+    {
+     "title": "insurer_cannot_reclaim_before_deadline",
+     "status": "pass",
+     "execution_units": {
+      "mem": 42248,
+      "cpu": 13964129
+     }
+    },
+    {
+     "title": "stranger_cannot_reclaim",
+     "status": "pass",
+     "execution_units": {
+      "mem": 52154,
+      "cpu": 17272678
+     }
+    },
+    {
+     "title": "untagged_payout_does_not_count",
+     "status": "pass",
+     "execution_units": {
+      "mem": 552818,
+      "cpu": 213233260
+     }
+    },
+    {
+     "title": "one_payout_cannot_settle_two_policies",
+     "status": "pass",
+     "execution_units": {
+      "mem": 1096213,
+      "cpu": 425440912
+     }
+    },
+    {
+     "title": "real_airnode_arrival_signature_verifies",
+     "status": "pass",
+     "execution_units": {
+      "mem": 47808,
+      "cpu": 63583537
+     }
+    },
+    {
+     "title": "real_airnode_arrival_relabelled_as_arrived_fails",
+     "status": "pass",
+     "execution_units": {
+      "mem": 48909,
+      "cpu": 63835586
+     }
+    },
+    {
+     "title": "real_airnode_en_route_cannot_settle",
+     "status": "pass",
+     "execution_units": {
+      "mem": 206031,
+      "cpu": 62162081
+     }
+    },
+    {
+     "title": "fresh_answer_settles",
+     "status": "pass",
+     "execution_units": {
+      "mem": 572388,
+      "cpu": 219992671
+     }
+    },
+    {
+     "title": "stale_answer_fails",
+     "status": "pass",
+     "execution_units": {
+      "mem": 64951,
+      "cpu": 21634148
+     }
+    },
+    {
+     "title": "answer_from_the_future_fails",
+     "status": "pass",
+     "execution_units": {
+      "mem": 44436,
+      "cpu": 17094851
+     }
+    },
+    {
+     "title": "unbounded_validity_fails",
+     "status": "pass",
+     "execution_units": {
+      "mem": 42827,
+      "cpu": 12895656
+     }
+    },
+    {
+     "title": "answer_signed_before_the_landing_it_reports_fails",
+     "status": "pass",
+     "execution_units": {
+      "mem": 205583,
+      "cpu": 61107800
+     }
+    },
+    {
+     "title": "early_answer_signature_itself_is_valid",
+     "status": "pass",
+     "execution_units": {
+      "mem": 47808,
+      "cpu": 63583537
+     }
+    }
+   ]
+  },
+  {
+   "name": "aeroguard/real_final_ba955_test",
+   "tests": [
+    {
+     "title": "real_final_signature_verifies",
+     "status": "pass",
+     "execution_units": {
+      "mem": 47808,
+      "cpu": 63583537
+     }
+    },
+    {
+     "title": "real_final_settles_by_the_rule",
+     "status": "pass",
+     "execution_units": {
+      "mem": 564824,
+      "cpu": 217753313
+     }
+    },
+    {
+     "title": "real_final_wrong_payout_fails",
+     "status": "pass",
+     "execution_units": {
+      "mem": 543393,
+      "cpu": 209301582
+     }
+    }
+   ]
+  },
+  {
+   "name": "aeroguard/real_final_ei357_test",
+   "tests": [
+    {
+     "title": "real_final_signature_verifies",
+     "status": "pass",
+     "execution_units": {
+      "mem": 47808,
+      "cpu": 63583537
+     }
+    },
+    {
+     "title": "real_final_settles_by_the_rule",
+     "status": "pass",
+     "execution_units": {
+      "mem": 564824,
+      "cpu": 217753313
+     }
+    },
+    {
+     "title": "real_final_wrong_payout_fails",
+     "status": "pass",
+     "execution_units": {
+      "mem": 543393,
+      "cpu": 209301582
+     }
+    }
+   ]
+  },
+  {
+   "name": "aeroguard/real_final_ib1314_test",
+   "tests": [
+    {
+     "title": "real_final_signature_verifies",
+     "status": "pass",
+     "execution_units": {
+      "mem": 47808,
+      "cpu": 63583537
+     }
+    },
+    {
+     "title": "real_final_settles_by_the_rule",
+     "status": "pass",
+     "execution_units": {
+      "mem": 564824,
+      "cpu": 217753313
+     }
+    },
+    {
+     "title": "real_final_wrong_payout_fails",
+     "status": "pass",
+     "execution_units": {
+      "mem": 543393,
+      "cpu": 209301582
+     }
+    }
+   ]
+  },
+  {
+   "name": "aeroguard/real_final_lh1816_test",
+   "tests": [
+    {
+     "title": "real_final_signature_verifies",
+     "status": "pass",
+     "execution_units": {
+      "mem": 47808,
+      "cpu": 63583537
+     }
+    },
+    {
+     "title": "real_final_settles_by_the_rule",
+     "status": "pass",
+     "execution_units": {
+      "mem": 564824,
+      "cpu": 217753313
+     }
+    },
+    {
+     "title": "real_final_wrong_payout_fails",
+     "status": "pass",
+     "execution_units": {
+      "mem": 543393,
+      "cpu": 209301582
+     }
+    }
+   ]
+  }
+ ]
+}

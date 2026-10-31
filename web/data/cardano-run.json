@@ -1,0 +1,94 @@
+{
+  "challenge": {
+    "x402Version": 2,
+    "error": "Payment required",
+    "resource": {
+      "url": "http://127.0.0.1:62326/verdict?flight=IB1314&date=2026-10-30",
+      "description": "AeroGuard flight verdict with an Airnode-signed proof any contract can verify",
+      "mimeType": "application/json"
+    },
+    "accepts": [
+      {
+        "scheme": "exact",
+        "network": "cardano:preprod",
+        "amount": "2000000",
+        "asset": "lovelace",
+        "payTo": "addr_test1qr339vze7f68wcqe84c4dlsnsnwscns9q0pw29yq9crrnn0dpcerx5e9w5864wvreywu832nje343l07m0q0hj8ujsuq69xdet",
+        "maxTimeoutSeconds": 600,
+        "extra": {
+          "areFeesSponsored": false,
+          "confirmationPolicy": {
+            "l1Confirmations": 0
+          }
+        }
+      },
+      {
+        "scheme": "exact",
+        "network": "cardano:preprod",
+        "amount": "100000",
+        "asset": "e675b46e4d2242c991a8932a99db3044e80515ae14b4c4ccf6b3f4c9.0014df10745553444d",
+        "payTo": "addr_test1qr339vze7f68wcqe84c4dlsnsnwscns9q0pw29yq9crrnn0dpcerx5e9w5864wvreywu832nje343l07m0q0hj8ujsuq69xdet",
+        "maxTimeoutSeconds": 600,
+        "extra": {
+          "areFeesSponsored": false,
+          "confirmationPolicy": {
+            "l1Confirmations": 0
+          }
+        }
+      }
+    ]
+  },
+  "response": {
+    "flight": "IB1314",
+    "date": "2026-10-30",
+    "kind": "arrival",
+    "verdict": {
+      "actual": "2026-10-30 21:00Z",
+      "scheduled": "2026-10-30 21:25Z",
+      "status": "Arrived",
+      "delayMinutes": 0,
+      "cancelled": false,
+      "final": true
+    },
+    "evidence": {
+      "airnode": "0x83FE2E8F24E66520B1902C3507De4F471248f2Ec",
+      "requestHash": "0x4bf6755e32c0231b2f3dd9861b9e30ccf5e701e08e32dfda39137b78095023d0",
+      "timestamp": 1793397513,
+      "data": "{\"actual\":\"2026-10-30 21:00Z\",\"scheduled\":\"2026-10-30 21:25Z\",\"status\":\"Arrived\"}",
+      "signature": "0x8497f39767330901cdec705059be29a1f2b94ff00b51fc1faa44b29338a0e5a2737944973e9428fd6a5c831f414b4780fbca2e6f356e0740c3b8d42174418df91b"
+    },
+    "request": {
+      "operation": "flightStatusOnDate",
+      "parameters": {
+        "searchBy": "number",
+        "searchParam": "IB1314",
+        "dateLocal": "2026-10-30"
+      },
+      "responseProjection": {
+        "actual": "/0/arrival/revisedTime/utc",
+        "scheduled": "/0/arrival/scheduledTime/utc",
+        "status": "/0/status"
+      }
+    },
+    "verify": {
+      "rule": "ecrecover(toEthSignedMessageHash(keccak256(abi.encodePacked(requestHash, timestamp, data)))) == airnode",
+      "signerRecovered": "0x83FE2E8F24E66520B1902C3507De4F471248f2Ec",
+      "contract": {
+        "chain": "base-sepolia",
+        "chainId": 84532,
+        "address": "0x257054204c4Cd43846C4553eBe6D709841980a80"
+      },
+      "evidenceBoughtOnBaseSepolia": "0xaaa74d0e408f5558f14e71f43b7a37b6e37764d454d0425291f7dfb7b36e2104"
+    },
+    "paidWith": {
+      "network": "cardano:preprod",
+      "txHash": "e2ef922be71ba61da9431f1a5f56f4c56f5d61348c4945194cf390dd0acd7864",
+      "explorer": "https://preprod.cardanoscan.io/transaction/e2ef922be71ba61da9431f1a5f56f4c56f5d61348c4945194cf390dd0acd7864",
+      "amount": "2000000",
+      "asset": "lovelace"
+    }
+  },
+  "tx": "e2ef922be71ba61da9431f1a5f56f4c56f5d61348c4945194cf390dd0acd7864",
+  "explorer": "https://preprod.cardanoscan.io/transaction/e2ef922be71ba61da9431f1a5f56f4c56f5d61348c4945194cf390dd0acd7864",
+  "at": "2026-10-30T23:16:55.629Z"
+}

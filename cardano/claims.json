@@ -1,0 +1,6 @@
+[
+  { "flight": "IB1314", "date": "2026-10-30", "ref": "policy-1" },
+  { "flight": "LH1816", "date": "2026-10-30", "ref": "policy-2" },
+  { "flight": "EI357", "date": "2026-10-30", "ref": "policy-3" },
+  { "flight": "BA955", "date": "2026-10-30", "ref": "policy-4" }
+]

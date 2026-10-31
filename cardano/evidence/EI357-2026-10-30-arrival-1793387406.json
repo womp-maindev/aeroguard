@@ -1,0 +1,11 @@
+{
+  "flight": "EI357",
+  "date": "2026-10-30",
+  "airnode": "0x83FE2E8F24E66520B1902C3507De4F471248f2Ec",
+  "requestHash": "0xd3f90b5fe594b9518a3f4448c3c94c786d3ba4c5ec784bf8e54491f45ac077cd",
+  "timestamp": "1793387406",
+  "data": "{\"actual\":\"2026-10-30 21:55Z\",\"scheduled\":\"2026-10-30 21:55Z\",\"status\":\"Boarding\"}",
+  "signature": "0x9531f0793616d91750d315cdb9c40d1f187a03f7ab98f5dbd2e28afb2dd0cbc4754afcd34b54e071b8b5ca529736569fbb5f75596a222a201dc13220e83ebda61c",
+  "fetchedAt": 1793387407,
+  "paymentTx": "0x6d3aa8080ae7ee561108ea9795ed06c5051732368858b5460b01848bffe78efc"
+}

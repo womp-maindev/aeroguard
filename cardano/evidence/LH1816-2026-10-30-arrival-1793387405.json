@@ -1,0 +1,11 @@
+{
+  "flight": "LH1816",
+  "date": "2026-10-30",
+  "airnode": "0x83FE2E8F24E66520B1902C3507De4F471248f2Ec",
+  "requestHash": "0xc5cce0ffb09d9ba038ac37b1fc0753e50b6571fd177410dfbbc25208858ce2c9",
+  "timestamp": "1793387405",
+  "data": "{\"actual\":\"2026-10-30 21:45Z\",\"scheduled\":\"2026-10-30 21:55Z\",\"status\":\"CheckIn\"}",
+  "signature": "0x0668eca1b7f265acf56bfcedffcd3134fd11c0ef40657beedeb526d3f1ea6ddd6b5306b9c7b85b74bec7be90ccaf0aeda055ede31a90537d476abf8832b387101c",
+  "fetchedAt": 1793387405,
+  "paymentTx": "0xf3568783791c945e20e5c7a5ecccb21c1d3a061fe613593021f83b4412d88e0d"
+}
