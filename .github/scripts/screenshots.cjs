@@ -46,10 +46,13 @@ const shot = async (pg, sel, file) => {
   console.log('pitch:', await pg.evaluate(() => ['pPol', 'pSet', 'pBlk'].map((i) => document.getElementById(i).textContent).join(' / ')));
   await pg.close();
   pg = await open(b, 1440, 900);
-  const media = await pg.evaluate(async () => { const r = await fetch('media/demo.mp4', { method: 'HEAD' }); return `${r.status} ${r.headers.get('content-type')} ${r.headers.get('content-length')}`; });
+  const media = await pg.evaluate(async () => (await Promise.all(['demo', 'api3', 'cardano'].map(async (n) => { const r = await fetch(`media/${n}.mp4`, { method: 'HEAD' }); return `${n} ${r.status} ${r.headers.get('content-type')} ${r.headers.get('content-length')}`; }))).join(' | '));
   const og = await pg.evaluate(() => [...document.querySelectorAll('meta[property^="og:"]')].map((m) => `${m.getAttribute('property')}=${m.content}`).join(' | '));
   const ogUrl = await pg.evaluate(() => document.querySelector('meta[property="og:image"]').content);
   const ogImg = await pg.evaluate(async (u) => { try { return (await fetch(u, { method: 'HEAD' })).status; } catch (e) { return String(e); } }, ogUrl);
   console.log('video:', media); console.log('og:', og); console.log('og:image fetch:', ogImg);
+  pg = await open(b, 1440, 900, '#videos');
+  await shot(pg, '#videos', 'videos.png');
+  await pg.close();
   await b.close();
 })().catch((e) => { console.error(e); process.exit(1); });
