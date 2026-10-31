@@ -56,6 +56,7 @@ Then run `web/start.bat` (Windows) or `bash web/start.command` (Mac). Later upda
 |---|---|
 | Top right | green dot **Live · Base Sepolia** (the page reads the real contract straight from your browser) |
 | *Policies* | the live policies (IB1314, LH1816, EI357, BA955) with status and Basescan links |
+| *Tamper lab* → big button **Try to steal from this contract** | a big green **🛡 4 / 4 BLOCKED** (it picks a live policy with a real signed proof). On the projector, the QR next to it opens the same thing on a phone |
 | *Tamper lab* → **Run the 4 attacks** | 4 × **REVERTED**: `NotSignedByAirnode`, `WrongRequest`, `NotSignedByAirnode`, `Stale` |
 | *Tamper lab* → **Simulate genuine** (policy #1) | `NotFinal(Expected)`: its proof is a pre-departure status, so it can't pay |
 | *Inspector* → **Load real Airnode proof** | ✅ *Signed by the AeroDataBox Airnode*; then change one digit in `data` → ❌ |
@@ -86,6 +87,8 @@ plus the Airnode signature → **Open in Inspector** to verify it yourself.
 with a link to womp.solutions.
 
 **Mobile.** Checked at 390 px (iPhone): buttons stacked and equal width, no sideways scrolling.
+
+**Pitch mode.** "Try to steal from this contract": one button, four forgeries on a live policy, a big 4 / 4 BLOCKED. QR for the slides: `docs/img/qr-try-to-cheat.png`. Live screenshots for the README and Devfolio are in `docs/img/` (taken by the *Dashboard screenshots* workflow against Base Sepolia).
 
 **Sharing.** Link preview image (`og.png`), favicon, Devfolio cover 1200×630 (`web/img/devfolio-cover.png`) and
 screenshots in `web/img/`.

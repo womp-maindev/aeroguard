@@ -2,10 +2,12 @@
 
 [![CI](https://github.com/womp-maindev/aeroguard/actions/workflows/ci.yml/badge.svg)](https://github.com/womp-maindev/aeroguard/actions/workflows/ci.yml) [![Keeper](https://github.com/womp-maindev/aeroguard/actions/workflows/keeper.yml/badge.svg)](https://github.com/womp-maindev/aeroguard/actions/workflows/keeper.yml)
 
+**60-second tour:** [▶ live dashboard](https://womp-maindev.github.io/aeroguard/) · 🎬 video: link after upload · [🧾 every policy, signature and tx](docs/EVIDENCE.md) · [🛡 try to cheat the contract](https://womp-maindev.github.io/aeroguard/#lab)
+
 | Security Inspector: the real AirnodeHub-signed proof for policy #1, checked in the browser | Tamper lab: 4 forgeries, 4 reverts |
 |---|---|
 | [![Security Inspector](docs/img/inspector.png)](docs/img/inspector.png) | [![Tamper lab](docs/img/tamper-lab.png)](docs/img/tamper-lab.png) |
-| Signer recovers to the AeroDataBox Airnode, the request hash matches IB1314 on 30 Oct, and the evidence is rejected as `Stale(1793378516)` / `NotFinal(Expected)`: the same answer the live contract gave. | Captured on the local anvil rehearsal (`npm run rehearse`, fixture signer). The page header names Base Sepolia, but these reverts are local; the live results are in the [tamper table](#tamper-test-for-judges). |
+| Signer recovers to the AeroDataBox Airnode, the request hash matches IB1314 on 30 Oct, and the evidence is rejected as `Stale(1793378516)` / `NotFinal(Expected)`: the same answer the live contract gave. | Captured live against the deployed contract on Base Sepolia: the four forgeries go to `settle()` as `eth_call` (nothing written) on policy #11, starting from its real signed purchase proof. All four are blocked by the real bytecode. |
 
 Parametric flight-delay cover that settles itself. A smart contract pays out **only** on flight data signed by the **AeroDataBox Airnode on API3 AirnodeHub**, and an autonomous keeper buys that data over **x402** and settles policies on-chain without anyone filing a claim.
 
@@ -18,7 +20,7 @@ Parametric flight-delay cover that settles itself. A smart contract pays out **o
 | Contract deployed on Base Sepolia, source verified | [`0x2570…0a80` on Basescan](https://sepolia.basescan.org/address/0x257054204c4Cd43846C4553eBe6D709841980a80) |
 | The keeper pays for signed AeroDataBox data over x402 (0.05 aUSD per call) | [payment tx 0x76d334da…](https://sepolia.basescan.org/tx/0x76d334da55c86bbf61d37762f8ee843f4920bc874477a82d06852247b4e2054f) |
 | Cover can only be bought with a fresh signed pre-departure status | [policy #1 purchase tx](https://sepolia.basescan.org/tx/0xbfd3ae73074ff63a3ef5f7e56b211d1ffb7223e2db944d0cc38ed069d1958b8d), with [its signed proof](keeper/fixtures/IB1314-status-proof.json) paid in [tx 0x544a7241…](https://sepolia.basescan.org/tx/0x544a72416958438be7181af6dc96111ea7d0e6544d63e7ac869faac28671dad2) |
-| 4 real policies on real flights of 30 Oct 2026 | [#1](https://sepolia.basescan.org/tx/0xbfd3ae73074ff63a3ef5f7e56b211d1ffb7223e2db944d0cc38ed069d1958b8d) · [#2](https://sepolia.basescan.org/tx/0x7e71c55b970b96fb1588ddde1da029060d805c9b87691280ca2504098d4e69d2) · [#3](https://sepolia.basescan.org/tx/0x2aeed6010ced165f66c26ea0f34e7068421a327cac0c6375d72ef7b794f41672) · [#4](https://sepolia.basescan.org/tx/0x7e675d8f94946db1d02a40c1eff87ac5a0ca29b65730751cf0d902d767d2b0d1) |
+| 11 real policies: #1–#4 on 30 Oct 2026 (settled by the keeper), #5–#11 on 31 Oct (settle on pitch day, see [EVIDENCE](docs/EVIDENCE.md)) | [#1](https://sepolia.basescan.org/tx/0xbfd3ae73074ff63a3ef5f7e56b211d1ffb7223e2db944d0cc38ed069d1958b8d) · [#2](https://sepolia.basescan.org/tx/0x7e71c55b970b96fb1588ddde1da029060d805c9b87691280ca2504098d4e69d2) · [#3](https://sepolia.basescan.org/tx/0x2aeed6010ced165f66c26ea0f34e7068421a327cac0c6375d72ef7b794f41672) · [#4](https://sepolia.basescan.org/tx/0x7e675d8f94946db1d02a40c1eff87ac5a0ca29b65730751cf0d902d767d2b0d1) |
 | Nobody files a claim: a keeper buys the outcome and settles them | [keeper runs in GitHub Actions](https://github.com/womp-maindev/aeroguard/actions/workflows/keeper.yml) · settlement txs: see [Live evidence](#live-evidence-base-sepolia-real-aerodatabox-data) |
 
 **2 · Why the oracle data is load-bearing (60 s).** The contract decides the payout from signed fields only, so each forgery has its own revert. All of these are Foundry tests:
@@ -30,15 +32,15 @@ Parametric flight-delay cover that settles itself. A smart contract pays out **o
 | genuine, but for another flight / date / projection | `WrongRequest` | [`Tamper3_RejectOtherRequest`](contracts/test/FlightDelayCover.t.sol#L151) |
 | signed by any other key | `NotSignedByAirnode` | [`Tamper4_RejectUnexpectedSigner`](contracts/test/FlightDelayCover.t.sol#L162) |
 | cover bought for a flight already delayed / landed | `NotBuyable` | [`Buy_RejectOutcomeAlreadyKnown`](contracts/test/FlightDelayCover.t.sol#L287) |
-| on-chain request hash ≠ AirnodeHub's | — | [`RequestHashMatchesAirnodeHubScheme`](contracts/test/FlightDelayCover.t.sol#L82) · [`Fixture_RealAeroDataBoxCapture`](contracts/test/Fixtures.t.sol#L105) (real Airnode signature) |
-| all 4 live policies replayed on their **real** Airnode signatures (real `buyPolicy` + `settle`, no test signer; proofs read back from the purchase calldata) | `NotFinal(Expected)`, `Stale(1793378516)` as on-chain | [`LiveReplay.t.sol`](contracts/test/LiveReplay.t.sol) |
+| on-chain request hash ≠ AirnodeHub's | — | [`RequestHashMatchesAirnodeHubScheme`](contracts/test/FlightDelayCover.t.sol#L82) · [`Fixture_RealAeroDataBoxCapture`](contracts/test/Fixtures.t.sol#L111) (real Airnode signature) |
+| policies #1–#4 (30 Oct) replayed on their **real** Airnode signatures (real `buyPolicy` + `settle`, no test signer; proofs read back from the purchase calldata) | `NotFinal(Expected)`, `Stale(1793378516)` as on-chain | [`LiveReplay.t.sol`](contracts/test/LiveReplay.t.sol) |
 
 The same forgeries were also run against the **deployed** contract with a real Airnode response: see the [tamper table](#tamper-test-for-judges).
 
 **3 · Run it yourself (90 s, no keys, no funds).**
 ```bash
 git clone --recurse-submodules https://github.com/womp-maindev/aeroguard && cd aeroguard
-cd contracts && forge test                       # 86 tests, incl. all 4 live policies replayed, purchase to settlement, on their real Airnode signatures
+cd contracts && forge test                       # 86 tests, incl. policies #1–#4 (30 Oct) replayed, purchase to settlement, on their real Airnode signatures
 cd ../keeper && npm ci && npm test
 anvil --chain-id 84532 & npm run rehearse        # local deploy, 5 signed purchases, 4 attacks + valid, keeper settles all
 ```
@@ -160,7 +162,7 @@ Node ≥ 22.18 and [Foundry](https://getfoundry.sh).
 git clone --recurse-submodules https://github.com/womp-maindev/aeroguard && cd aeroguard
 cp .env.example .env                    # set KEEPER_PK (Base Sepolia ETH + aUSD)
 
-cd contracts && forge test              # 86 tests incl. the full live lifecycle of all 4 policies
+cd contracts && forge test              # 86 tests incl. the full live lifecycle of policies #1–#4 (30 Oct)
 forge script script/Deploy.s.sol --rpc-url $BASE_SEPOLIA_RPC --broadcast --private-key $DEPLOYER_PK
 
 cd ../keeper && npm i
@@ -185,7 +187,7 @@ In PowerShell, put `REHEARSE=on` and `FLIGHT_COVER_ADDRESS=…` in `.env` instea
 Open <http://localhost:8787> and find **Local rehearsal → Run the full rehearsal**. The API starts a fresh anvil on `:8545` and runs the same script. The page shows the phases, the purchases, every attack with the contract's answer, the keeper's settlements and the expiry, then links to the rehearsal chain in the same dashboard. `REHEARSE=on` starts processes, so use it on your own laptop only. It answers pages on `localhost` only, runs one fixed script, keeps private keys out of that script's environment, and refuses to run if something else already serves `:8545`.
 
 ### What the rehearsal proves, and what it doesn't
-It shows a whole day of AeroGuard compressed into 20 seconds. The **same contract and the same keeper code** run on a private local chain where two things are under our control. The **clock** jumps from 06:00 (buying) to 22:00 (landed) to three days later. And a **local test key** stands in for the Airnode, so any outcome can be produced on demand. Real flights can't be fast-forwarded, and all four live policies happened to close with no payout. Think of a flight simulator next to the real flight.
+It shows a whole day of AeroGuard compressed into 20 seconds. The **same contract and the same keeper code** run on a private local chain where two things are under our control. The **clock** jumps from 06:00 (buying) to 22:00 (landed) to three days later. And a **local test key** stands in for the Airnode, so any outcome can be produced on demand. Real flights can't be fast-forwarded, and policies #1–#4 (30 Oct) happened to close with no payout. Think of a flight simulator next to the real flight.
 
 | It proves | How |
 |---|---|
@@ -201,13 +203,20 @@ It shows a whole day of AeroGuard compressed into 20 seconds. The **same contrac
 | Evidence | Shows |
 |---|---|
 | [Live on Base Sepolia](#live-evidence-base-sepolia-real-aerodatabox-data) | **authenticity**: the real Airnode signature, real x402 payments, the deployed contract, the tamper test with a real response, real settlements |
-| Foundry tests (86) | **edge cases**: every boundary and attack, a real Airnode capture checked byte for byte, all 4 live policies replayed |
+| Foundry tests (86) | **edge cases**: every boundary and attack, a real Airnode capture checked byte for byte, policies #1–#4 (30 Oct) replayed |
 | Local rehearsal | **completeness**: the whole lifecycle and every outcome, in 20 seconds, on demand |
 
 So the rehearsal is not the qualifying tamper test: the track asks for **real** responses (edited, too old, for another request, wrong signer), which the live evidence and the dashboard's tamper lab provide.
 
 ## Cardano: pay per request via x402
-Agents pay per request on Cardano for flight outcomes any contract can verify. `GET /verdict?flight=&date=` answers 402 with 1–2 tADA on `cardano:preprod` (`@x402/cardano` `exact` scheme, `@x402/express`, Blockfrost); once paid it returns the verdict plus the Airnode-signed proof that `FlightDelayCover` verifies unchanged. The same proof also settles an Aiken (Plutus V3) flight cover validator that checks the Airnode's secp256k1 signature on Cardano (44 Aiken tests incl. real Airnode signatures — the four final landings settle it exactly as they settled policies #1–#4 on Base — and the freshness rules; open/settle/reclaim executed with Aiken's UPLC evaluator). Plus `GET /policy` (tADA buys a FlightDelayCover policy on Base, linked by `cardanoJobRef`), a budgeted claims agent, an MCP tool and `npm run qualify` for a one-command preprod run. First paid request on preprod: [tx e2ef922b…](https://preprod.cardanoscan.io/transaction/e2ef922be71ba61da9431f1a5f56f4c56f5d61348c4945194cf390dd0acd7864). Details: [`cardano/README.md`](cardano/README.md) · all paid txs: [`cardano/EVIDENCE.md`](cardano/EVIDENCE.md). Presentation: [`presentation/cardano/`](presentation/cardano/) · video clips: [`cardano/video/`](cardano/video/) · changes: [`cardano/CHANGELOG.md`](cardano/CHANGELOG.md).
+Agents pay per request on Cardano for flight outcomes any contract can verify. Details: [`cardano/README.md`](cardano/README.md).
+
+- **Live on preprod:** `GET /verdict?flight=&date=` answers 402 with 1–2 tADA (`@x402/cardano` `exact` scheme, `@x402/express`, Blockfrost). Once paid, it returns the verdict plus the Airnode-signed proof that `FlightDelayCover` verifies unchanged. First paid request: [tx e2ef922b…](https://preprod.cardanoscan.io/transaction/e2ef922be71ba61da9431f1a5f56f4c56f5d61348c4945194cf390dd0acd7864); all paid requests are listed in [`cardano/EVIDENCE.md`](cardano/EVIDENCE.md).
+- **Same proof on Cardano (tested, not deployed):** an Aiken (Plutus V3) flight cover checks the Airnode's secp256k1 signature. Its 44 tests include the four real final landings, which settle it exactly as they settled policies #1–#4 on Base. Open, settle and reclaim run in Aiken's UPLC evaluator.
+- **tADA buys Base cover (tested offline):** `GET /policy` buys a `FlightDelayCover` policy only after the Cardano payment settles, and writes `cardanoJobRef = keccak256("cardano:<payment tx>")` into it.
+- **Agents:** a budgeted claims agent, an MCP tool for LLM agents, and `npm run qualify` for a one-command preprod run.
+
+Presentation: [`presentation/cardano/`](presentation/cardano/) · video clips: [`cardano/video/`](cardano/video/) · changes: [`cardano/CHANGELOG.md`](cardano/CHANGELOG.md).
 
 ## Repo
 ```
@@ -226,9 +235,9 @@ What the deployed contract does not handle yet, with the production fix. Each fi
 | **Several flights share a number on one date** | AeroDataBox answers with a list (multi-leg flights, or the same number twice), and the projections read the first item (`/0/…`). The request doesn't say whether the date is the departure or the arrival date, so overnight flights add ambiguity. | Pass the departure airport and `dateLocalRole: Departure`, so the signed request names exactly one leg |
 | **Diverted flight** | `Diverted` is not a final status, so the policy can't settle and only expires after 3 days: no payout for a real disruption | Treat `Diverted` as final and pay it, like a cancellation |
 | **The airline changes the schedule** | The signed schedule at settlement must equal the one at purchase (`ScheduleMismatch`), so the policy expires and the premium stays in the pool | Refund the premium on expiry, or allow a bounded schedule change |
-| **No signed evidence within 3 days** (keeper down, quota used up, Airnode offline) | The policy expires even if the flight really was late; the traveller carries the data-availability risk. GitHub runs the keeper's schedule best-effort: it first fired on its own at 22:55Z on 30 Oct, and again at 02:14Z on 31 Oct (both runs successful), far less often than every 15 min, so manual passes fill the gaps | Refund the premium when a policy expires without evidence; run the keeper on a reliable scheduler (anyone can, `settle` is permissionless) |
+| **No signed evidence within 3 days** (keeper down, quota used up, Airnode offline) | The policy expires even if the flight really was late; the traveller carries the data-availability risk. GitHub's schedule for the keeper fires only sporadically (2 runs overnight), so passes are also started by hand | Refund the premium when a policy expires without evidence; run the keeper on a reliable scheduler (anyone can, `settle` is permissionless) |
 | **Many policies on one flight** | No cap per flight, so one cancelled flight can take a large share of the pool's capacity (solvency still holds: every sale checks free capital) | An exposure cap per flight and date |
-| **No live payout yet** | All 4 live flights landed early or less than 2 h late, so each closed with no payout. The signed arrival still decided the on-chain outcome; the payout tiers are shown by the Foundry tests and the rehearsal. The live contract trusts only the real Airnode, so a payout cannot be staged | Buy more live policies on the day; a 2 h delay or a cancellation pays on its own |
+| **No live payout yet** | Policies #1–#4 (30 Oct) landed early or less than 2 h late, so each closed with no payout; #5–#11 settle on pitch day. The signed arrival still decided the on-chain outcome; the payout tiers are shown by the Foundry tests and the rehearsal. The live contract trusts only the real Airnode, so a payout cannot be staged | Done: 7 more live policies on 31 Oct flights; a 2 h delay or a cancellation pays on its own |
 
 ## Security notes
 - Checks‑effects‑interactions + `ReentrancyGuard`, `SafeERC20`; reserved capital tracked so the owner can only withdraw capital **not** backing active policies.

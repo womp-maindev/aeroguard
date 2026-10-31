@@ -13,6 +13,8 @@ cd cardano && npm i && npm test     # 53 tests: real signed Cardano txs, x402 ro
 cd onchain && aiken check           # 44 tests, incl. real AeroDataBox Airnode signatures verified with Plutus builtins
 ```
 
+**What runs live and what is tested offline:** [the table in the Devfolio text](../docs/DEVFOLIO-cardano.md#what-runs-live-vs-what-is-tested-offline).
+
 **Paid on preprod:** 2 tADA over x402 for the final IB1314 verdict, tx [`e2ef922b…`](https://preprod.cardanoscan.io/transaction/e2ef922be71ba61da9431f1a5f56f4c56f5d61348c4945194cf390dd0acd7864); all paid requests in [EVIDENCE.md](EVIDENCE.md). Live run: `npm run qualify` (needs a Blockfrost preprod key and a
 faucet-funded wallet, see below).
 
@@ -34,7 +36,7 @@ facilitator runs in the server process (no keys, no funds); set `FACILITATOR_URL
 | Endpoint | Cost | What |
 |---|---|---|
 | `GET /verdict?flight=&date=[&requestId=]` | 1 or 2 tADA | verdict + Airnode proof + payment receipt |
-| `GET /policy?flight=&date=&holder=0x…&coverage=` | premium in tADA | buys a `FlightDelayCover` policy on Base Sepolia after the Cardano payment settles |
+| `GET /policy?flight=&date=&holder=0x…&coverage=` | premium in tADA | buys a `FlightDelayCover` policy on Base Sepolia after the Cardano payment settles (tested offline, not run live) |
 | `GET /orders/:tx` | free | that order: `buying` → `bought` (policy id, Basescan) or `failed` (refund due) |
 | `GET /flights` | free | flights with evidence, kind and price |
 | `GET /sales` | free | settled sales with Cardanoscan links (and anchor tx) |
@@ -44,7 +46,7 @@ facilitator runs in the server process (no keys, no funds); set `FACILITATOR_URL
   without evidence gets a free 404, never a charge.
 - **Quota-safe.** Evidence comes from disk only (`evidence/`, then `keeper/.cache/`); this service never calls the Airnode.
   It resells what the keeper already bought: `npm run import-evidence -- keeper.json` imports the keeper's published
-  answers (`keeper-data` branch) after checking each signature. Today's catalog: live answers for all four policies
+  answers (`keeper-data` branch) after checking each signature. Today's catalog: live answers for the four policies of 30 Oct
   (IB1314, LH1816, EI357, BA955); the newest answer per request wins.
 - **On-chain anchor** (`ANCHOR=true`, seller wallet needs ≥ 2 tADA from the faucet): after each sale the seller writes the sold proof into Cardano tx metadata (label
   674 message + label 8402 proof bytes), so the evidence is findable on Cardano itself.
@@ -132,8 +134,8 @@ npm run cover -- reclaim --open <openTx>                         # after the dea
 Every build runs the validator locally with Aiken's UPLC evaluator (`@evolution-sdk/aiken-uplc`), so a transaction the
 script would reject is never submitted.
 
-**One signed answer, the same verdict on two chains, for all four live policies.** The keeper's signed `Arrived`
-answers settled every live EVM policy; the very same signatures, checked with Plutus builtins, settle an Aiken cover the
+**One signed answer, the same verdict on two chains, for the four policies of 30 Oct.** The keeper's signed `Arrived`
+answers settled policies #1–#4 on Base; the very same signatures, checked with Plutus builtins, settle an Aiken cover the
 same way, and paying the holder with them is refused (`onchain/lib/aeroguard/real_final_*_test.ak`, generated from
 `evidence/`; the TS lifecycle tests build and execute each settlement transaction).
 
@@ -149,6 +151,16 @@ Real Airnode signatures in the Aiken tests: the IB1314 pre-departure status and 
 relabelling the en-route answer as `Arrived` breaks the signature. Final-outcome paths use a public test key until the
 keeper buys a final answer; then `npm run vectors` writes `real_final_test.ak` and the TS lifecycle test settles a cover
 on the real signature automatically.
+
+## Live Aiken cover on preprod, settled by a verdict bought over x402
+```bash
+sh live-cover.sh now                              # LH1816 (landed): pay 2 tADA for the verdict, open a 5 tADA cover, settle it
+sh live-cover.sh open EI352 2026-10-31 7          # a flight landing today; its scheduled arrival comes from Base policy #7
+sh live-cover.sh settle EI352 2026-10-31 <openTx> # after landing: import the keeper's signed answer, pay for it, settle
+```
+The buyer wallet pays and also funds the cover, and the holder is the seller address. The signed answer may be up to 24 h
+old when it settles. Every tx goes to [`COVER-EVIDENCE.md`](COVER-EVIDENCE.md). If the flight has not landed in time,
+anyone can settle later, and the insurer can `npm run cover -- reclaim --open <openTx>` after the 48 h deadline.
 
 ## Test without network or funds
 

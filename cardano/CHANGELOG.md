@@ -5,6 +5,25 @@ Everything in the Cardano track, newest first. Times are UTC, 30–31 Oct 2026. 
 only the short "Cardano" section in the root `README.md`, `docs/DEVFOLIO-cardano.md` and the dashboard file
 `web/data/cardano-run.json`.
 
+## 31 Oct — the Aiken cover live on preprod in one command
+- **`sh live-cover.sh now`** pays 2 tADA over x402 for a final verdict (LH1816) and opens a 5 tADA Aiken cover. It
+  then settles the cover with that same verdict body: the script checks the Airnode signature on chain. Every tx goes
+  to `COVER-EVIDENCE.md`. The run was rehearsed offline on the fake Blockfrost: three txs, and the settle passed
+  Aiken's UPLC evaluator.
+- **Today's flights:** `sh live-cover.sh open <flight> 2026-10-31 <policy id>` reads the scheduled arrival from the Base
+  policy. After landing, `settle` imports the keeper's signed answer, pays for it and settles. `claims.json` now lists
+  policies #5–#11.
+- **Docs:**
+  - "Agent hires agent" in the Devfolio text.
+  - `GET /policy` is marked as tested offline.
+  - The README links the live-vs-tested table.
+  - The demo budget points to `npm run preflight`.
+- **Voice-over:** the Aiken line now says "escrow … pays only on a signed result".
+
+## 31 Oct — wording after policies #5–#11
+- Main now has 11 policies (7 fly today). The Cardano docs and speaker notes say "the four policies of 30 Oct" /
+  "our first four policies" where they meant #1–#4, so nobody reads it as "all our policies". No code changes.
+
 ## 31 Oct — presentation: video and what to say, in one place
 - `presentation/cardano/aeroguard-cardano-full.mp4`: the full video now sits next to the slides.
 - `presentation/cardano/VIDEO-SCRIPT.md`: what to say over the video, block by block with timecodes. Each block has

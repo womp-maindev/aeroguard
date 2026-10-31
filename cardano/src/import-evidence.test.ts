@@ -23,10 +23,10 @@ test('keeper responses are imported only when the Airnode signed them for a know
   assert.equal((await importEvidence(real, flights, dir)).saved.length, 0);
 });
 
-test('the live catalog: four policies, the newest signed answer per request wins', () => {
+test('the live catalog: the four policies of 30 Oct (and any imported since), the newest signed answer per request wins', () => {
   const listed = listEvidence([EVIDENCE]);
-  const flightsListed = [...new Set(listed.map((l) => l.flight))].sort();
-  assert.deepEqual(flightsListed, ['BA955', 'EI357', 'IB1314', 'LH1816']);
+  const flightsListed = new Set(listed.map((l) => l.flight));
+  for (const f of ['BA955', 'EI357', 'IB1314', 'LH1816']) assert.ok(flightsListed.has(f), f);
   const ib = findEvidence('IB1314', '2026-10-30', [EVIDENCE])!;
   assert.equal(ib.kind, 'arrival');
   // Two IB1314 arrival answers were bought; the later one (Approaching) replaces EnRoute.

@@ -1,6 +1,6 @@
 # Status — Fri 30 Oct 2026, 22:40 CET (final handoff before the night)
 
-Tracks: **one project, two tracks** (confirmed by the organizers): **API3 "Any API in your contract"** (€2,000, this repo's oracle/keeper work) + **Cardano** (Masumi/Sokosumi payment for policies, handled in the Cardano session; on-chain link = `cardanoJobRef` per policy).
+Tracks: **one project, two tracks** (confirmed by the organizers): **API3 "Any API in your contract"** (€2,000, this repo's oracle/keeper work) + **Cardano** (x402 in tADA on preprod: `GET /verdict` sells signed verdicts, `GET /policy` sells Base cover and writes `cardanoJobRef = keccak256("cardano:<payment tx>")`; Aiken cover verifies the same Airnode signature; see `cardano/README.md`).
 
 ## Live (Base Sepolia, chain 84532)
 - FlightDelayCover `0x257054204c4Cd43846C4553eBe6D709841980a80` (Sourcify-verified). Owner/keeper wallet `0xd9b446FbC743f2D592b8699fbfC80443af00Be24`.
@@ -13,7 +13,7 @@ Tracks: **one project, two tracks** (confirmed by the organizers): **API3 "Any A
 - On-chain tamper results (policy #1, real Airnode data): edit → NotSignedByAirnode, wrongreq → WrongRequest, wrongsigner → NotSignedByAirnode, stale → Stale(1793378516), genuine pre-departure → NotFinal(Expected).
 
 ## Done
-- **Contract**: purchase proof, private commit-reveal policies, per-policy settlement; 98.8 % line / 86.8 % branch coverage. **86 tests pass** (incl. 27 hardening tests by Eskender), incl. the full live lifecycle (purchase + settlement) of all 4 policies on their real Airnode signatures. All 4 policies settled by the keeper on 30 Oct (#1 21:58 UTC, #2–#4 22:27 UTC), all `ClosedNoPayout`: every flight landed early or < 2 h late: includes all 4 live policies replayed on their real Airnode signatures (`LiveReplay.t.sol`, proofs read back from the purchase calldata via `keeper cli proof` / `proofs.yml`).
+- **Contract**: purchase proof, private commit-reveal policies, per-policy settlement; 98.8 % line / 86.8 % branch coverage. **86 tests pass** (incl. 27 hardening tests by Eskender), incl. the full live lifecycle (purchase + settlement) of policies #1–#4 (30 Oct) on their real Airnode signatures. Policies #1–#4 (30 Oct) settled by the keeper on 30 Oct (#1 21:58 UTC, #2–#4 22:27 UTC), all `ClosedNoPayout`: every flight landed early or < 2 h late: includes policies #1–#4 (30 Oct) replayed on their real Airnode signatures (`LiveReplay.t.sol`, proofs read back from the purchase calldata via `keeper cli proof` / `proofs.yml`).
 - **Keeper**: x402, off-chain signature check, phase schedule (tested), simulate-then-settle, never looks up private policies, expires after 3 days, `--policy N` / `force`, publishes log + every signed response to `keeper-data`, writes each settling response as a Solidity fixture. `keeper/README.md`.
 - **CI** (`ci.yml`): forge test · keeper typecheck + tests · anvil rehearsal (5 policies + 1 private, 4 forgeries, settlements, expiry; exits 1 on any mismatch). Green.
 - **Docs for judges**: README (quickstart with a link per claim, architecture SVG, screenshots, tamper table with live results), `docs/EVIDENCE.md` (every policy, proof, lookup, x402 receipt), `docs/DEVFOLIO.md` (incl. feedback for API3), `docs/PITCH.md` (2-min + Q&A + on-stage purchase runbook), `docs/VIDEO.md` (shot list). All relative links/anchors/line refs checked.

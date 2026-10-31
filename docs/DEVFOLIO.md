@@ -18,7 +18,7 @@ Flight delays are common, and getting compensation is slow. A traveller fills in
 - **An autonomous keeper** (`keeper/`). It pays for signed data over **x402** (0.05 aUSD per call), decides when a lookup is worth its cost, and settles: nobody files or approves a claim. It runs as a plain `npm run keeper` loop or as passes in GitHub Actions (scheduled best-effort: on 30 Oct GitHub's scheduler did not fire at first, so the first passes were started by hand; it first fired on its own at 22:55Z on 30 Oct, and again at 02:14Z on 31 Oct (both runs successful), though less often than the cron asks). Anyone can run it, because `settle` gives the caller no special power.
 - **Private policies.** Commit–reveal hides which flight is insured until settlement.
 - **A judge toolkit.** A tamper CLI runs forgeries against the deployed contract, a dashboard has an in-browser Security Inspector, and a local rehearsal needs no funds.
-- **Live on testnet with real data.** 4 policies on real flights from Munich on 30 Oct 2026, each bought with a real signed AeroDataBox proof.
+- **Live on testnet with real data.** 11 policies on real flights, each bought with a real signed AeroDataBox proof: #1–#4 on 30 Oct (all settled by the keeper), #5–#11 on 31 Oct, settling on pitch day.
 
 ## Why AeroGuard
 
@@ -53,7 +53,7 @@ FlightDelayCover
   │         simulates settle, then sends it. The payout always goes to the stored holder.
 ```
 
-The contract builds the AirnodeHub request hash itself, `keccak256(JSON.stringify([operation, sortedParams, sortedProjection]))`, from the policy's own flight and date. Even the agent that sold the policy cannot settle it with data about another flight, day or projection. A real AirnodeHub capture is checked byte for byte in Solidity ([`Fixture_RealAeroDataBoxCapture`](https://github.com/womp-maindev/aeroguard/blob/main/contracts/test/Fixtures.t.sol#L105)).
+The contract builds the AirnodeHub request hash itself, `keccak256(JSON.stringify([operation, sortedParams, sortedProjection]))`, from the policy's own flight and date. Even the agent that sold the policy cannot settle it with data about another flight, day or projection. A real AirnodeHub capture is checked byte for byte in Solidity ([`Fixture_RealAeroDataBoxCapture`](https://github.com/womp-maindev/aeroguard/blob/main/contracts/test/Fixtures.t.sol#L111)).
 
 Two small projections keep the signed payload tiny:
 - **arrival** `{actual, scheduled, status}`: proves the delay;
@@ -131,7 +131,7 @@ Full analysis, with assumptions, the worst case and sources: [docs/BUSINESS.md](
 
 ## Links
 - Evidence for every policy, signed response and x402 payment: https://github.com/womp-maindev/aeroguard/blob/main/docs/EVIDENCE.md
-- All 4 policies settled by the keeper on Airnode-signed "Arrived" responses (every flight landed early or < 2 h late → no payout, premiums stay in the pool): #1 https://sepolia.basescan.org/tx/0xf0aa5db2e08a9b9aa7298c92853642b39d7ff330fe3e42cd8b441aa136246b44 · #2 https://sepolia.basescan.org/tx/0x5270aa58d63db79af041e74bb40115a801381f28caca028d90c285280594c535 · #3 https://sepolia.basescan.org/tx/0x5a5e4fc750464b0f4043aa2318da55705ae0eb94603adf17d417068de4f2ff9a · #4 https://sepolia.basescan.org/tx/0x973e29d8195ce6bfe7bde0b749b308cfe1e8200e2465c849810a0a01dd01c7ee
+- Policies #1–#4 (30 Oct) settled by the keeper on Airnode-signed "Arrived" responses (every flight landed early or < 2 h late → no payout, premiums stay in the pool): #1 https://sepolia.basescan.org/tx/0xf0aa5db2e08a9b9aa7298c92853642b39d7ff330fe3e42cd8b441aa136246b44 · #2 https://sepolia.basescan.org/tx/0x5270aa58d63db79af041e74bb40115a801381f28caca028d90c285280594c535 · #3 https://sepolia.basescan.org/tx/0x5a5e4fc750464b0f4043aa2318da55705ae0eb94603adf17d417068de4f2ff9a · #4 https://sepolia.basescan.org/tx/0x973e29d8195ce6bfe7bde0b749b308cfe1e8200e2465c849810a0a01dd01c7ee
 - Repo: https://github.com/womp-maindev/aeroguard
 - Contract: https://sepolia.basescan.org/address/0x257054204c4Cd43846C4553eBe6D709841980a80
 - x402 payment for signed data: https://sepolia.basescan.org/tx/0x76d334da55c86bbf61d37762f8ee843f4920bc874477a82d06852247b4e2054f

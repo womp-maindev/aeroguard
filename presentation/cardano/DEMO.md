@@ -3,8 +3,68 @@
 Agents pay per request on Cardano for flight outcomes any contract can verify. This page is the runbook for showing it
 live; the deck (`index.html`) and the videos are the fallback.
 
+## Main demo: Claude Desktop pays tADA for a signed verdict (MCP)
+
+Paths below use `~/aeroguard-run`. On any machine, any clone of the repo works: `cd cardano` in it.
+
+**Set up once (Mac), all in one block.** It writes the MCP entry into Claude Desktop's config and keeps any servers
+already there:
+```bash
+cd ~/aeroguard-run && git fetch -q origin main && git checkout -q -f FETCH_HEAD && cd cardano && npm i --silent && node -v && python3 - <<'PY'
+import json, os, shutil
+cfg = os.path.expanduser('~/Library/Application Support/Claude/claude_desktop_config.json')
+os.makedirs(os.path.dirname(cfg), exist_ok=True)
+data = json.load(open(cfg)) if os.path.exists(cfg) else {}
+home = os.path.expanduser('~/aeroguard-run/cardano')
+data.setdefault('mcpServers', {})['aeroguard-cardano'] = {
+    'command': shutil.which('node'),
+    'args': ['--env-file=' + home + '/.env', home + '/src/mcp.ts'],
+    'env': {'SERVER_URL': 'http://localhost:4021'},
+}
+json.dump(data, open(cfg, 'w'), indent=2)
+print('written:', cfg)
+PY
+```
+`node -v` must print **v22.18 or newer**. The entry points Claude Desktop at that exact `node`, not whatever is on
+Claude's PATH.
+
+**Before you go on stage:**
+1. Terminal 1: `cd ~/aeroguard-run/cardano && npm run server` (keep it open; it is the paid endpoint).
+2. Quit Claude Desktop completely (⌘Q), then open it again. 🔨 → **aeroguard-cardano** should show 3 tools:
+   `list_flights`, `get_flight_verdict`, `buy_flight_cover`.
+
+**On stage, ask Claude:**
+> Use the aeroguard-cardano tools. List the flights you can buy, then buy the signed verdict for IB1314 on 2026-10-30
+> and tell me whether a delay policy pays out. Give me the Cardano transaction link.
+
+**Expected:**
+- Claude calls `list_flights`, which is free. It shows IB1314 and the other three flights.
+- Then it calls `get_flight_verdict`. Approve the tool call when Claude Desktop asks.
+- After about 20–60 s (one block) it answers: **arrived 21:00Z, 25 min early, so no payout**. The answer is signed by
+  the AeroDataBox Airnode `0x83FE…F2Ec`, and comes with a `preprod.cardanoscan.io/transaction/…` link. Open the link.
+- Each call is a real payment of 2 tADA plus a fee. Terminal 1 logs the sale.
+
+**If MCP does not come up (no 🔨 tools, or an error):**
+- Run the same purchase from a terminal: `cd ~/aeroguard-run/cardano && npm run buy` (the server must be running).
+  It prints the 402 offer, the verdict, the tx and the Cardanoscan link.
+- Last resort: slide 4 of the deck (video of the real run) and the Cardanoscan tab.
+- Logs to check: `~/Library/Logs/Claude/mcp-server-aeroguard-cardano.log`. Typical causes are an old `node`, a missing
+  `.env` (it needs `BUYER_MNEMONIC` and `BLOCKFROST_PROJECT_ID`), or the server not running.
+
+**Budget:** each demo costs about 2.2 tADA. Run `npm run preflight` for the current balance.
+
+## Aiken cover live on preprod (before the pitch, ~3 min)
+Run this in `~/aeroguard-run/cardano` (it starts its own endpoint on a free port):
+```bash
+sh live-cover.sh now
+```
+It pays 2 tADA for the final LH1816 verdict and locks a 5 tADA cover at the Aiken script. Then it settles the cover
+with that verdict: the script checks the Airnode signature on chain, and the cover goes back to the insurer (11 min late
+pays nothing). It prints three Cardanoscan links and writes them to `COVER-EVIDENCE.md`. Commit `EVIDENCE.md`,
+`COVER-EVIDENCE.md` and `evidence/`.
+
 ## The evening before / 30 min before
-1. In `~/aeroguard-run` check out the branch (or `main` once PR #1 is merged), then:
+1. In `~/aeroguard-run` update to `main`, then:
    ```bash
    cd cardano && npm i && npm run preflight
    ```

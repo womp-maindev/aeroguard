@@ -26,7 +26,7 @@ jobs:
         if: env.CLOUDFLARE_API_TOKEN != ''
       - name: bake in the latest keeper.json
         if: env.CLOUDFLARE_API_TOKEN != ''
-        run: git fetch -q --depth=1 origin keeper-data && git show FETCH_HEAD:keeper.json > web/data/keeper.json || echo "no keeper-data yet, keeping the committed snapshot"
+        run: git fetch -q --depth=1 origin keeper-data && git show FETCH_HEAD:keeper.json > web/data/keeper.json || echo "no keeper-data yet, keeping the committed snapshot" ; node .github/scripts/data-bundle.cjs
       - name: create the pages project (fine if it exists)
         if: env.CLOUDFLARE_API_TOKEN != ''
         run: npx --yes wrangler@3 pages project create aeroguard --production-branch main || true

@@ -3,7 +3,7 @@
 // Deploys MockUSD + FlightDelayCover (airnode = local FIXTURE signer), buys 5 policies with signed purchase proofs,
 // runs the 4 tamper attacks + valid against the deployed bytecode, runs the keeper (fixture mode), then 3 days later
 // checks that the keeper expires a private policy it must never look up. Exits 1 on any mismatch (CI runs it).
-import { mkdtempSync, readFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createWalletClient, createPublicClient, http, type Hex, keccak256, parseAbi, toHex } from 'viem';
@@ -50,6 +50,26 @@ process.env.FIXTURE_SIGNER_PK = FIXTURE_SIGNER;
 process.env.KEEPER_STATE_FILE = join(mkdtempSync(join(tmpdir(), 'aeroguard-rehearse-')), 'keeper-state.json');
 console.log('deployed MockUSD', usd, 'cover', cover);
 
+// The scenario is written for BASE_DAY. anvil starts at the wall clock and time can only move forward, so once
+// BASE_DAY 06:00Z has passed, the whole day (fixtures, purchases, outcomes, expiry) moves forward by whole days.
+const BASE_DAY = '2026-10-31';
+const DAY_MS = 86_400_000;
+const chainNow = Number((await p.getBlock()).timestamp) * 1000;
+const baseStart = Date.parse(`${BASE_DAY}T06:00:00Z`);
+const shift = chainNow < baseStart ? 0 : (Math.floor((chainNow - baseStart) / DAY_MS) + 1) * DAY_MS;
+const shifted = (iso: string) => new Date(Date.parse(iso) + shift).toISOString().replace('.000Z', 'Z');
+const DAY = shifted(`${BASE_DAY}T00:00:00Z`).slice(0, 10);
+const fixtures = JSON.parse(readFileSync(new URL('../fixtures/flights.json', import.meta.url), 'utf8')) as Record<string, Record<string, string>>;
+const moved = Object.fromEntries(
+  Object.entries(fixtures).map(([k, v]) => [
+    k.replace(BASE_DAY, DAY),
+    Object.fromEntries(Object.entries(v).map(([f, x]) => [f, /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}Z$/.test(x) ? shifted(x.replace(' ', 'T').replace('Z', ':00Z')).slice(0, 16).replace('T', ' ') + 'Z' : x])),
+  ]),
+);
+process.env.FIXTURE_FLIGHTS = join(mkdtempSync(join(tmpdir(), 'aeroguard-fixtures-')), 'flights.json');
+writeFileSync(process.env.FIXTURE_FLIGHTS, JSON.stringify(moved, null, 2));
+if (shift) console.log(`scenario day ${DAY} (${BASE_DAY} is already past on this chain)`);
+
 const { cover: buyCover, keeperTick, log: keeperLog } = await import('./keeper.ts');
 const { tamper } = await import('./cli.ts');
 const holder = '0x000000000000000000000000000000000000bEEF' as Hex;
@@ -60,10 +80,10 @@ const at = async (iso: string) => {
   Date.now = () => t + 30_000; // fixtures are signed "now"; keep wall clock = chain clock
 };
 // 1) PURCHASE PHASE — 06:00Z, every flight still pre-departure; the contract checks a signed status proof
-await at('2026-10-31T06:00:00Z');
+await at(shifted('2026-10-31T06:00:00Z'));
 const ids: Record<string, bigint> = {};
 for (const f of ['LH1234', 'LH2002', 'BA117', 'KL1395', 'LH1234']) {
-  const r = await buyCover({ flight: f, date: '2026-10-31', holder, coverage: 2_000_000n });
+  const r = await buyCover({ flight: f, date: DAY, holder, coverage: 2_000_000n });
   ids[f] = r.policyId;
   console.log('bought', f, 'policy', r.policyId, 'scheduled', r.scheduled);
 }
@@ -72,13 +92,13 @@ for (const f of ['LH1234', 'LH2002', 'BA117', 'KL1395', 'LH1234']) {
 const PRIVATE_ID = 6n;
 const privateAbi = parseAbi(['function buyPrivatePolicy(bytes32 commitment, uint128 coverage, address holder, bytes32 cardanoJobRef, uint64 scheduledArrival) returns (uint256)']);
 await p.waitForTransactionReceipt({
-  hash: await w.writeContract({ address: cover, abi: privateAbi, functionName: 'buyPrivatePolicy', args: [keccak256(toHex('rehearsal: private policy')), 2_000_000n, holder, `0x${'0'.repeat(64)}`, BigInt(Date.parse('2026-10-31T20:00:00Z') / 1000)] }),
+  hash: await w.writeContract({ address: cover, abi: privateAbi, functionName: 'buyPrivatePolicy', args: [keccak256(toHex('rehearsal: private policy')), 2_000_000n, holder, `0x${'0'.repeat(64)}`, BigInt(Date.parse(shifted('2026-10-31T20:00:00Z')) / 1000)] }),
 });
 console.log('bought private policy', PRIVATE_ID);
 // buying a flight that already left must fail on-chain too
 // 2) OUTCOME PHASE — 22:00Z, flights landed / cancelled
-await at('2026-10-31T22:00:00Z');
-try { await buyCover({ flight: 'LH1234', date: '2026-10-31', holder }); } catch (e) { console.log('late purchase rejected:', String((e as Error).message).slice(0, 90)); }
+await at(shifted('2026-10-31T22:00:00Z'));
+try { await buyCover({ flight: 'LH1234', date: DAY, holder }); } catch (e) { console.log('late purchase rejected:', String((e as Error).message).slice(0, 90)); }
 // 3) CHECKS — the rehearsal fails (exit 1) if any of these is wrong, so CI can run it
 const problems: string[] = [];
 const expectRevert: Record<string, string> = { edit: 'NotSignedByAirnode', wrongreq: 'WrongRequest', wrongsigner: 'NotSignedByAirnode', stale: 'Stale' };
@@ -102,7 +122,7 @@ if (balance !== 7) problems.push(`holder balance ${balance} aUSD, expected 7 (2 
 if ((await statusOf(PRIVATE_ID)) !== 'Active') problems.push(`private policy: ${await statusOf(PRIVATE_ID)} before the window ended`);
 if (keeperLog.some((l) => l.msg.includes(`policy #${PRIVATE_ID}`))) problems.push('keeper touched the private policy');
 // 4) EXPIRY — 3 days on, the private policy was never revealed: the keeper expires it (gas only), capital is released
-await at('2026-11-04T00:00:00Z');
+await at(shifted('2026-11-04T00:00:00Z'));
 await keeperTick();
 if ((await statusOf(PRIVATE_ID)) !== 'Expired') problems.push(`private policy: ${await statusOf(PRIVATE_ID)} after the window, expected Expired`);
 const reserved = await p.readContract({ address: cover, abi: status, functionName: 'reserved' });

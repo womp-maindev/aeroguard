@@ -30,7 +30,7 @@ About 280 words, so it fits at a calm pace. Have the screen ready as in [Run of 
 | Live evidence: purchases, settlements, x402 receipts on Base Sepolia | **Authenticity.** The real AeroDataBox Airnode signed it, the deployed contract accepted it, real money moved | "These are real policies on real flights, settled from real Airnode signatures." |
 | Tamper lab (`eth_call`), or **Send it for real** (real transactions) | **The qualifier.** Real responses that were edited, too old, for another request or from the wrong signer are rejected by the deployed contract | "A real Airnode response, one value changed: rejected." |
 | **Local rehearsal** | **Completeness.** Every payout rule, the late-purchase guard, keeper autonomy and expiry, in 20 seconds | "Same contract and keeper, local chain, test signer, fast-forwarded clock, so you can see every outcome." |
-| Foundry tests (86) | **Edge cases.** Every boundary and attack, a real Airnode capture byte for byte, all 4 live policies replayed | "Every rejection has a test, and the live policies are replayed in Solidity." |
+| Foundry tests (86) | **Edge cases.** Every boundary and attack, a real Airnode capture byte for byte, policies #1–#4 (30 Oct) replayed | "Every rejection has a test, and the live policies are replayed in Solidity." |
 
 The rehearsal is a flight simulator next to the real flight: same controls, scenarios we cannot wait for. Never present it as the tamper test, because the track asks for **real** responses.
 
@@ -70,7 +70,13 @@ Only a commitment `keccak256(flight, date, salt)` is stored, so nobody can see w
 - All tests and the rehearsal use captured fixtures (`contracts/test/fixtures`, `keeper/fixtures`), so CI never calls the API.
 
 **"You're also in the Cardano track. What's the link?"**
-Same project, two tracks, confirmed by the organizers. On Cardano a traveller or their agent pays for the cover (Masumi/Sokosumi job). Every policy on Base Sepolia stores `cardanoJobRef`, the hash of the Cardano job that paid for it, so the two sides can be matched. The API3 part does not depend on it: the payout is decided only by AirnodeHub-signed data, whoever paid.
+Same project, two tracks, confirmed by the organizers. On Cardano preprod an agent pays over **x402 in tADA**: `GET /verdict` sells an Airnode-signed flight verdict (first paid request: [tx e2ef922b…](https://preprod.cardanoscan.io/transaction/e2ef922be71ba61da9431f1a5f56f4c56f5d61348c4945194cf390dd0acd7864)), and `GET /policy` sells cover. Only after the Cardano payment settles, the server buys the policy on Base through the keeper's own path (fresh signed proof, `buyPolicy`) and writes `cardanoJobRef = keccak256("cardano:<payment tx>")`, so each Base policy names the Cardano payment that bought it. The same signed AeroDataBox response is verified by `FlightDelayCover` on Base and by the Aiken cover on Cardano (44 Aiken tests). The API3 part does not depend on Cardano: the payout is decided only by AirnodeHub-signed data, whoever paid.
+
+**"Etherisc (2017) and AXA fizzy already did flight-delay insurance on-chain."**
+They relied on an oracle relay or on the insurer itself to post the outcome, and nothing stopped cover from being bought on a flight that was already late. Here the contract checks the data source's own signature (the AeroDataBox Airnode), purchase needs a signed pre-departure proof, `settle` has no privileged caller, and the same signed response is verified on Base (Solidity) and on Cardano (Aiken).
+
+**"No policy has paid out yet?"**
+No. Every flight so far landed on time or early, so 0 is the correct result, and anyone can check it against the Airnode's signature (`docs/EVIDENCE.md`). The payout path (50 % / 100 % / cancellation) is covered by the contract tests and by the anvil rehearsal. The Saturday policies are still open and settle during and after judging, so a real delay would pay live.
 
 **"Why Base Sepolia, why x402?"**
 AirnodeHub's x402 payments use aUSD on Base Sepolia, so the data and the contract sit on the same chain. With x402, an autonomous agent pays per call without an API key or an account, and it needs no ETH for the payment, because the facilitator submits the transfer. That is what a keeper needs.

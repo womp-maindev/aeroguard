@@ -63,7 +63,8 @@ export const spendLog: PaidCall[] = [];
 // the contract rejects them with NotSignedByAirnode — which is itself a live demonstration of the signer check.
 type FixtureFlight = { status: string; scheduled: string; actual?: string; before?: string };
 const fixtureFlights = (): Record<string, FixtureFlight> => {
-  const f = fileURLToPath(new URL('../fixtures/flights.json', import.meta.url));
+  // FIXTURE_FLIGHTS: the rehearsal passes a copy shifted to a day that is still ahead of the local chain's clock
+  const f = process.env.FIXTURE_FLIGHTS || fileURLToPath(new URL('../fixtures/flights.json', import.meta.url));
   return existsSync(f) ? JSON.parse(readFileSync(f, 'utf8')) : {};
 };
 const signFixture = async (flight: string, date: string, kind: Kind): Promise<CachedResponse | undefined> => {

@@ -48,6 +48,17 @@ Open <http://localhost:8787>. If 8787 is taken: `PORT=8788 npm run api` and open
 - *Keeper log*: read from `keeper.json` on the `keeper-data` branch (written by every keeper run). While the repo is
   private the page cannot fetch it; the link to the Actions runs always works.
 
+## For the pitch
+
+- **Try to steal from this contract** (top of the tamper lab): runs the four forgeries on a live policy with a real
+  signed proof and shows the score. QR to `#lab` next to it; a PNG for slides is `docs/img/qr-try-to-cheat.png`.
+- New policies and payouts pop up as notes in the corner while the page is open (it re-reads the chain every 20 s).
+
+## Screenshots
+
+Actions → **Dashboard screenshots** → Run workflow. It opens the page against the live contract in Chromium and pushes
+the PNGs to the `screenshots` branch; copy the ones you want into `docs/img/`.
+
 ## Hosting
 
 | Where | How |
