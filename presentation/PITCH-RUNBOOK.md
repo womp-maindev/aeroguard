@@ -46,6 +46,8 @@
 **1:15 — Почему Cardano** *(слайд Aiken / escrow)*
 > "Payment is tied to the result. Our Aiken escrow verifies the same AirnodeHub signature on Cardano — Plutus has no ecrecover, so we rebuild the signed bytes and use the secp256k1 builtin. 44 Aiken tests on real signatures. The exact bytes the agent buys are the redeemer that settles the cover."
 
+*Опционально, только если есть время (~2 мин):* `cd cardano && sh live-cover.sh now` — живой Aiken escrow, см. `presentation/cardano/DEMO.md` → «Bonus block». Не успели или упало → "Built and tested on real signatures, 44 Aiken tests; deployment is next."
+
 **1:45 — Финал**
 > "One signed answer, the same verdict on two chains. Agents pay only for truth a contract can check."
 

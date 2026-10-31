@@ -30,6 +30,8 @@
 
 **A:** One signature, two chains. Last night four flights landed. The same signed answers closed our policies on Base and settle the Aiken cover on Cardano exactly the same way. No bridge. No relayer.
 
+*[Optional bonus, only if time: run live-cover on stage — see DEMO.md, "Bonus block"]*
+
 **[Slide 4 · Business]**
 
 **B:** The business compounds. A final arrival never changes, so we buy each signed answer once — about five cents — and resell it to every agent that asks. Our customers: EU261 claim firms, travel insurers, corporate travel tools, and agent marketplaces like Masumi.
