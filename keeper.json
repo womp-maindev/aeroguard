@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-10-31T08:31:01.342Z",
+  "updatedAt": "2026-10-31T09:43:02.403Z",
   "contract": "0x257054204c4Cd43846C4553eBe6D709841980a80",
   "runs": [
     {
@@ -289,6 +289,72 @@
           "msg": "policy #11 LH2476: nothing due, next check ≥ 12:50Z"
         }
       ]
+    },
+    {
+      "startedAt": "2026-10-31T09:42:56.306Z",
+      "finishedAt": "2026-10-31T09:43:02.403Z",
+      "event": "workflow_dispatch",
+      "url": "https://github.com/womp-maindev/aeroguard/actions/runs/41189790809",
+      "log": [
+        {
+          "at": "2026-10-31T09:42:56.306Z",
+          "level": "info",
+          "msg": "policy #5 LH1866: nothing due, next check ≥ 10:50Z"
+        },
+        {
+          "at": "2026-10-31T09:42:56.307Z",
+          "level": "info",
+          "msg": "policy #6 LH2472: nothing due, next check ≥ 10:55Z"
+        },
+        {
+          "at": "2026-10-31T09:42:56.307Z",
+          "level": "info",
+          "msg": "policy #7: EI352 2026-10-31 sched 09:10Z, check 1/20"
+        },
+        {
+          "at": "2026-10-31T09:42:58.402Z",
+          "level": "pay",
+          "msg": "bought signed arrival for EI352 via x402",
+          "link": "https://sepolia.basescan.org/tx/0x22c90b0ad73cc6d93415f005d82c46f5651edbca40b2b33c94ffa0df259409dc"
+        },
+        {
+          "at": "2026-10-31T09:42:59.268Z",
+          "level": "chain",
+          "msg": "policy #7 settled ClosedNoPayout: Arrived, 0 min late, payout 0 aUSD",
+          "link": "https://sepolia.basescan.org/tx/0xa74101c2e2482306712716deda11727893dcd10d448148dbaa3db5888dbb66c1"
+        },
+        {
+          "at": "2026-10-31T09:42:59.269Z",
+          "level": "info",
+          "msg": "policy #8 LH1810: nothing due, next check ≥ 10:30Z"
+        },
+        {
+          "at": "2026-10-31T09:42:59.269Z",
+          "level": "info",
+          "msg": "policy #9 LH1814: nothing due, next check ≥ 13:35Z"
+        },
+        {
+          "at": "2026-10-31T09:42:59.269Z",
+          "level": "info",
+          "msg": "policy #10: LH1868 2026-10-31 sched 12:15Z, early look for a cancellation"
+        },
+        {
+          "at": "2026-10-31T09:43:00.540Z",
+          "level": "pay",
+          "msg": "bought signed arrival for LH1868 via x402",
+          "link": "https://sepolia.basescan.org/tx/0x364e2368b6ed75e47edd3aa41cfa906b421e90a2b3772bc34c270905e65625fc"
+        },
+        {
+          "at": "2026-10-31T09:43:00.540Z",
+          "level": "info",
+          "msg": "policy #10: CheckIn, 0 min late — not final, next check ≥ 12:45Z"
+        },
+        {
+          "at": "2026-10-31T09:43:00.541Z",
+          "level": "info",
+          "msg": "policy #11 LH2476: nothing due, next check ≥ 12:50Z"
+        }
+      ]
     }
   ],
   "evidence": [
@@ -440,6 +506,32 @@
       "signature": "0x4e98c4d692e19ea4652ed0f3038f6894ad320ec3ec72c8812c4a70a6407297c3212df0788b772389ca8936bebc92bf54f8ff461fe2e785856e1235a0790ce2891b",
       "fetchedAt": 1793435459,
       "paymentTx": "0x7f978b01db4728b9ff9aa6ec2a7d69466271ddb49530af9d3bf564bf32935796"
+    },
+    {
+      "airnode": "0x83FE2E8F24E66520B1902C3507De4F471248f2Ec",
+      "requestHash": "0x71d52b067e3ece9ac983c0e1493618b4795ac466bcbfe52a7dcfac9327c9c6c9",
+      "timestamp": 1793439777,
+      "data": "{\"actual\":\"2026-10-31 08:45Z\",\"scheduled\":\"2026-10-31 09:10Z\",\"status\":\"Arrived\"}",
+      "signature": "0x64ea1bdd64a97e2efd2b918dd9f2cd4d7e11a24f14ef4d89b8fea5eacb71698d1b692d8b14eee105ed2952d545d872e63b50b05c62850ddae692a8e6673da03d1c",
+      "fetchedAt": 1793439778,
+      "paymentTx": "0x22c90b0ad73cc6d93415f005d82c46f5651edbca40b2b33c94ffa0df259409dc",
+      "policyId": 7,
+      "flight": "EI352",
+      "date": "2026-10-31",
+      "kind": "arrival",
+      "settleTx": "0xa74101c2e2482306712716deda11727893dcd10d448148dbaa3db5888dbb66c1",
+      "outcome": "ClosedNoPayout",
+      "payout": 0,
+      "delayMinutes": 0
+    },
+    {
+      "airnode": "0x83FE2E8F24E66520B1902C3507De4F471248f2Ec",
+      "requestHash": "0xcb1c0a52e4b3b38dce61a62c95b45782a99bfe582160932c044ad1504c9b29f1",
+      "timestamp": "1793439779",
+      "data": "{\"actual\":\"2026-10-31 12:15Z\",\"scheduled\":\"2026-10-31 12:15Z\",\"status\":\"CheckIn\"}",
+      "signature": "0xd5a0c3bbb038ca24df900e0c670ae0f7683134efc2cc0b27123771f57deec7d94a1a2de6480a6d039e706a6a952f5172db108ccdb1e428ccc93b3f90eb82ffd91c",
+      "fetchedAt": 1793439780,
+      "paymentTx": "0x364e2368b6ed75e47edd3aa41cfa906b421e90a2b3772bc34c270905e65625fc"
     }
   ]
 }
