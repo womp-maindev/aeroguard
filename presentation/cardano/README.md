@@ -2,6 +2,8 @@
 
 **▶ Video (2:04, voiced): [`AeroGuard-Cardano-video.mp4`](AeroGuard-Cardano-video.mp4)**, right here in this folder.
 
+**Submission texts:** [`UPDATED-cardano-narrative.md`](UPDATED-cardano-narrative.md) (the story in 6 sections, for the site and Devfolio) · [`UPDATED-cardano-pitch-2-speakers.md`](UPDATED-cardano-pitch-2-speakers.md) (3-min pitch for two speakers, Mihail and Eskender).
+
 ## What's in this folder
 | File | What it is | When to use it |
 |---|---|---|
