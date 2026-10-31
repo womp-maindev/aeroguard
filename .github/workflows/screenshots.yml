@@ -4,6 +4,11 @@ name: Dashboard screenshots
 
 on:
   workflow_dispatch:
+    inputs:
+      url:
+        description: "Page to shoot, e.g. https://womp-maindev.github.io/aeroguard/ (empty = web/ from this commit)"
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -23,9 +28,8 @@ jobs:
           npx playwright install --with-deps chromium
       - name: take screenshots
         run: |
-          (cd web && python3 -m http.server 8080 >/dev/null 2>&1 &)
-          sleep 1
-          NODE_PATH=/tmp/pw/node_modules OUT=$RUNNER_TEMP/shots node .github/scripts/screenshots.cjs
+          if [ -z "${{ inputs.url }}" ]; then (cd web && python3 -m http.server 8080 >/dev/null 2>&1 &); sleep 1; fi
+          BASE_URL="${{ inputs.url || 'http://localhost:8080/' }}" NODE_PATH=/tmp/pw/node_modules OUT=$RUNNER_TEMP/shots node .github/scripts/screenshots.cjs
       - name: push to the screenshots branch
         run: |
           cd "$RUNNER_TEMP/shots"
