@@ -2,11 +2,11 @@
 
 🎤 **Full 3-min speech for each track (with timecodes and what to click): [`PITCH-3MIN.md`](PITCH-3MIN.md)**
 
-▶ **Videos in this folder:** [API3 track (2:15)](api3/AeroGuard-API3-video.mp4) · [Overview, both tracks (1:47)](AeroGuard-overview-video.mp4) · Cardano track (1:57): [`../web/media/cardano.mp4`](../web/media/cardano.mp4)
+▶ **Videos in this folder:** [API3 track (2:15)](api3/AeroGuard-API3-video.mp4) · [Overview, both tracks (1:47)](AeroGuard-overview-video.mp4) · Cardano track (2:04): [`../web/media/cardano.mp4`](../web/media/cardano.mp4)
 
 ## 🎬 Videos
 - **API3 track (2:15):** [`../web/media/api3.mp4`](../web/media/api3.mp4)
-- **Cardano track (1:57):** [`../web/media/cardano.mp4`](../web/media/cardano.mp4)
+- **Cardano track (2:04):** [`../web/media/cardano.mp4`](../web/media/cardano.mp4)
 - **Overview, both tracks (1:47):** [`../web/media/demo.mp4`](../web/media/demo.mp4)
 
 After Pages is live: `https://womp-maindev.github.io/aeroguard/media/<file>` (e.g. [api3.mp4](https://womp-maindev.github.io/aeroguard/media/api3.mp4)).

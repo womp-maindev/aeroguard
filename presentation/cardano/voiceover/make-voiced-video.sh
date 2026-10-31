@@ -3,7 +3,7 @@
 #
 #   ELEVENLABS_API_KEY=sk_... sh make-voiced-video.sh          # ElevenLabs (best); VOICE_ID picks the voice
 #   sh make-voiced-video.sh                                    # no key: macOS `say` (VOICE=Samantha, Daniel, …)
-#   sh make-voiced-video.sh my-recording.m4a                   # your own recording (one file, 1:57, over the video)
+#   sh make-voiced-video.sh my-recording.m4a                   # your own recording (one file, 2:04, over the video)
 #
 # Needs ffmpeg (Mac: brew install ffmpeg). Lines and timecodes: lines.tsv (start, end, text) — same text as VIDEO-SCRIPT.md.
 # The key is read from the environment only; it is never written anywhere.
