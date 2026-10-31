@@ -5,6 +5,15 @@ Everything in the Cardano track, newest first. Times are UTC, 30–31 Oct 2026. 
 only the short "Cardano" section in the root `README.md`, `docs/DEVFOLIO-cardano.md` and the dashboard file
 `web/data/cardano-run.json`.
 
+## 31 Oct — video polish: hero title, live site clip, smooth playback
+- **01-title** is redrawn as the site's hero: a light sky with a dot grid, planes with dashed trails drifting across, soft
+  clouds, and a 0.5 s still lead-in.
+- **New 01b-site** (6 s): the live site, from the hero with its moving planes to the Cardano x402 panel. It is rendered
+  frame by frame: CSS animations are paused and set to each frame's time.
+- **`src/assemble.sh`**: 0.3 s dips between clips (every clip keeps its length), constant 30 fps, a keyframe every
+  second, faststart. The new timings are in `SHOTLIST.md`. The silent cut `cardano/video/aeroguard-cardano-full.mp4`
+  is committed for the voice-over rebuild.
+
 ## 31 Oct — the voiced video is the only full cut
 - `web/media/cardano.mp4` is the full cut, voiced with `voiceover/lines.tsv`. The silent copy in
   `presentation/cardano/` is removed (−6 MB), and every link points to the voiced one.

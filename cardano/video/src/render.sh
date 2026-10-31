@@ -12,12 +12,10 @@ i=1
 for c in title arch qualify response tx; do node capture.cjs $c "$OUT/$(printf %02d $i)-$c.mp4"; i=$((i+1)); done
 (cd ../../../web && python3 -m http.server 8099 >/dev/null 2>&1 & echo $! > /tmp/aeroguard-web.pid)
 sleep 1
+node site.cjs "$OUT/01b-site.mp4"
 node dash.cjs "$OUT/06-dashboard.mp4"
 kill "$(cat /tmp/aeroguard-web.pid)" 2>/dev/null || true
 i=7
 for c in aiken chains policy outro; do node capture.cjs $c "$OUT/$(printf %02d $i)-$c.mp4"; i=$((i+1)); done
-cd "$OUT"
-ls [0-9]*.mp4 | sed "s/^/file '/; s/$/'/" > list.txt
-ffmpeg -loglevel error -y -f concat -safe 0 -i list.txt -c:v libx264 -crf 18 -pix_fmt yuv420p -r 30 -movflags +faststart aeroguard-cardano-full.mp4
-rm list.txt
+sh assemble.sh
 echo "rendered into cardano/video/ (the voiced cut in the repo is web/media/cardano.mp4)"
