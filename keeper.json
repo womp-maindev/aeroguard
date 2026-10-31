@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-10-31T12:48:11.971Z",
+  "updatedAt": "2026-10-31T14:42:09.614Z",
   "contract": "0x257054204c4Cd43846C4553eBe6D709841980a80",
   "runs": [
     {
@@ -497,6 +497,46 @@
           "msg": "policy #11 LH2476: nothing due, next check ≥ 12:50Z"
         }
       ]
+    },
+    {
+      "startedAt": "2026-10-31T14:42:04.011Z",
+      "finishedAt": "2026-10-31T14:42:09.614Z",
+      "event": "schedule",
+      "url": "https://github.com/womp-maindev/aeroguard/actions/runs/41211317351",
+      "log": [
+        {
+          "at": "2026-10-31T14:42:04.011Z",
+          "level": "info",
+          "msg": "policy #9: LH1814 2026-10-31 sched 16:35Z, early look for a cancellation"
+        },
+        {
+          "at": "2026-10-31T14:42:06.334Z",
+          "level": "pay",
+          "msg": "bought signed arrival for LH1814 via x402",
+          "link": "https://sepolia.basescan.org/tx/0x264fcf8e99398d106e3f85b68adad9b04d5b25ce42e0e185822f0945e779a84f"
+        },
+        {
+          "at": "2026-10-31T14:42:06.334Z",
+          "level": "info",
+          "msg": "policy #9: Boarding, 0 min late — not final, next check ≥ 17:05Z"
+        },
+        {
+          "at": "2026-10-31T14:42:06.334Z",
+          "level": "info",
+          "msg": "policy #11: LH2476 2026-10-31 sched 15:50Z, early look for a cancellation"
+        },
+        {
+          "at": "2026-10-31T14:42:07.632Z",
+          "level": "pay",
+          "msg": "bought signed arrival for LH2476 via x402",
+          "link": "https://sepolia.basescan.org/tx/0xe83ca88a58f0fe43815d94b90af2d86f06c71e3a78b0b9c7b813389467d7b1ad"
+        },
+        {
+          "at": "2026-10-31T14:42:07.632Z",
+          "level": "info",
+          "msg": "policy #11: EnRoute, 12 min late — not final, next check ≥ 16:20Z"
+        }
+      ]
     }
   ],
   "evidence": [
@@ -742,6 +782,24 @@
       "outcome": "ClosedNoPayout",
       "payout": 0,
       "delayMinutes": 10
+    },
+    {
+      "airnode": "0x83FE2E8F24E66520B1902C3507De4F471248f2Ec",
+      "requestHash": "0x09c0ee6e206fb6db34593584506e219cd3151fd393530c54b8fcfd6a11722171",
+      "timestamp": "1793457725",
+      "data": "{\"actual\":\"2026-10-31 16:22Z\",\"scheduled\":\"2026-10-31 16:35Z\",\"status\":\"Boarding\"}",
+      "signature": "0x9fa76935796d081c5152524a6d74ff2b7282f3f2b9ba8ae05df3018b2d9a118915ae7b65e9ec353280f0e7ca2e1c8bb3ae2b7b0114082c028bbfa581ea8ed24e1b",
+      "fetchedAt": 1793457726,
+      "paymentTx": "0x264fcf8e99398d106e3f85b68adad9b04d5b25ce42e0e185822f0945e779a84f"
+    },
+    {
+      "airnode": "0x83FE2E8F24E66520B1902C3507De4F471248f2Ec",
+      "requestHash": "0xc6ea3130c5520cab40c196d3f1b36e2039f69edb139aa2bd57226998816114b6",
+      "timestamp": "1793457727",
+      "data": "{\"actual\":\"2026-10-31 16:02Z\",\"scheduled\":\"2026-10-31 15:50Z\",\"status\":\"EnRoute\"}",
+      "signature": "0xde246356650ebd70d498119b7d38d7a58b52ad084bd15767eaa763d06baf14e638add9ec4607517bf4e20bd27e56a9dfe50fe261e2680520dc916fa0d6a43fcb1b",
+      "fetchedAt": 1793457727,
+      "paymentTx": "0xe83ca88a58f0fe43815d94b90af2d86f06c71e3a78b0b9c7b813389467d7b1ad"
     }
   ]
 }
