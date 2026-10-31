@@ -216,6 +216,39 @@
   .pulse { display: inline-block; width: 8px; height: 8px; margin: 0 8px 1px 0; border-radius: 50%; background: var(--ok); box-shadow: 0 0 0 0 rgba(23,120,77,.5); animation: pulse 2s infinite; }
   @keyframes pulse { 70% { box-shadow: 0 0 0 8px rgba(23,120,77,0); } 100% { box-shadow: 0 0 0 0 rgba(23,120,77,0); } }
   @media (prefers-reduced-motion: reduce) { .pulse { animation: none; } }
+  .watch { margin-top: 14px; background: none; border: 0; padding: 4px 0; font: 600 15px var(--sans); color: var(--text); display: inline-flex; align-items: center; gap: 10px; }
+  .watch .play { width: 30px; height: 30px; border-radius: 50%; background: var(--accent-hi); color: #fff; display: inline-grid; place-items: center; font-size: 11px; padding-left: 2px; }
+  .watch:hover { color: var(--accent); }
+  dialog.demo { padding: 0; border: 0; border-radius: 14px; background: #000; width: min(1100px, 94vw); max-width: none; overflow: visible; }
+  dialog.demo::backdrop { background: rgba(10, 14, 22, .78); }
+  dialog.demo video { display: block; width: 100%; height: auto; border-radius: 14px; }
+  .demo-x { position: absolute; top: -44px; right: 0; background: #fff; color: var(--text); border-radius: 50%; width: 36px; height: 36px; justify-content: center; padding: 0; }
+  .today { display: flex; flex-wrap: wrap; gap: 8px 10px; align-items: center; margin: 0 0 12px; font-size: 13.5px; }
+  .today .t-head { font: 500 12px var(--sans); letter-spacing: .18em; text-transform: uppercase; color: var(--ok); }
+  .today .t-item { background: var(--card); border: 1px solid var(--line); border-radius: 99px; padding: 6px 12px; color: var(--mute); }
+  .today .t-item b { color: var(--text); }
+  .today .t-item.paid { background: var(--ok-soft); border-color: rgba(23,120,77,.4); }
+  .today .t-item.paid b { color: var(--ok); }
+  /* pitch view: ?pitch=1, for the projector */
+  .pitch { position: fixed; inset: 0; z-index: 40; background: var(--bg); display: grid; grid-template-columns: 1.4fr 1fr; gap: 5vw; align-items: center; padding: 6vh 6vw; overflow: auto; }
+  .pitch::before { content: ""; position: absolute; inset: 0; z-index: -1; background: radial-gradient(1100px 520px at 70% -8%, #fff 0, rgba(255,255,255,0) 70%), radial-gradient(circle, #cdd2da 1px, transparent 1.3px) 0 0 / 26px 26px; }
+  .pitch h1 { font-size: clamp(48px, 5.6vw, 110px); }
+  .pitch-lede { font-size: clamp(18px, 1.5vw, 28px); color: var(--mute); margin: 0 0 4vh; }
+  .pitch-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 4vh; }
+  .pitch-stats div { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 18px 22px; box-shadow: var(--shadow); }
+  .pitch-stats b { display: block; font: 700 clamp(36px, 3.6vw, 68px)/1 var(--mono); }
+  .pitch-stats span { color: var(--mute); font-size: clamp(13px, 1vw, 18px); }
+  .pitch-go { display: grid; gap: 14px; justify-items: start; }
+  .pitch-go button { font-size: clamp(18px, 1.4vw, 26px); padding: 20px 30px; border-radius: 14px; }
+  .pitch-out .score { font: 400 clamp(34px, 3vw, 56px)/1.1 var(--display); color: var(--ok); }
+  .pitch-out .why { font-size: clamp(14px, 1.1vw, 20px); }
+  .pitch .next-up { font-size: clamp(14px, 1.05vw, 19px); margin-top: 3vh; }
+  .pitch-qr { display: grid; justify-items: center; gap: 12px; text-align: center; font-size: clamp(16px, 1.3vw, 24px); }
+  .pitch-qr img { width: min(30vw, 46vh); height: auto; border-radius: 16px; border: 1px solid var(--line); box-shadow: var(--shadow); }
+  .pitch-qr code { color: var(--mute); font-size: .8em; }
+  .pitch-x { position: absolute; top: 18px; right: 18px; border-radius: 50%; width: 40px; height: 40px; justify-content: center; padding: 0; background: var(--card); border: 1px solid var(--line2); }
+  body.pitching { overflow: hidden; }
+  @media (max-width: 900px) { .pitch { grid-template-columns: 1fr; } .pitch-qr { display: none; } .pitch-stats { grid-template-columns: 1fr 1fr 1fr; } }
   /* try to cheat (pitch) */
   .cheat { display: flex; gap: 20px; align-items: center; justify-content: space-between; padding: 20px; margin-bottom: 16px; }
   .cheat-main { display: grid; gap: 10px; flex: 1; min-width: 0; }
@@ -422,6 +455,7 @@
           <a class="btn btn-primary" href="#inspector" onclick="setTimeout(loadFixture, 350)">Open the security inspector →</a>
           <a class="btn btn-ghost" href="#lab" onclick="setTimeout(cheat, 450)">Try to steal from this contract</a>
         </div>
+        <button class="watch" type="button" onclick="openDemo()"><span class="play" aria-hidden="true">▶</span> Watch the 1:47 demo</button>
       </div>
       <aside class="pass" aria-label="Payout rules">
         <header><span>Boarding pass · payout rule</span><span>FlightDelayCover</span></header>
@@ -627,6 +661,7 @@
 
     <section class="block" id="policies">
       <div class="sh"><div><span class="num">04 · POLICIES</span><h2>Live from Base Sepolia</h2><p>Read straight from the contract with <code>eth_call</code>, from your browser, every 20 s<span class="fresh" id="fresh"></span>. Click <b>Inspect</b> to check a policy's evidence against its on-chain request hashes.</p></div><a class="btn btn-ghost btn-sm" id="contractLink" href="https://sepolia.basescan.org/address/0x257054204c4Cd43846C4553eBe6D709841980a80" target="_blank" rel="noopener">Contract on Basescan ↗</a></div>
+      <div class="today" id="today" hidden></div>
       <div class="card scroll" tabindex="0" role="region" aria-label="Policies table">
         <table class="tbl"><thead><tr><th>#</th><th>Flight</th><th>Date</th><th>Sched. arrival</th><th>Cover</th><th>Premium</th><th>Status</th><th>Holder</th><th>Txs</th><th><span class="sr-only">Actions</span></th></tr></thead>
         <tbody id="pol"><tr><td colspan="10"><div class="empty">Reading Base Sepolia…</div></td></tr></tbody></table>
@@ -659,6 +694,28 @@
   </div>
 </main>
 <div class="toasts" id="toasts" aria-live="polite"></div>
+<section class="pitch" id="pitchView" hidden aria-label="Pitch view">
+  <button class="pitch-x" type="button" onclick="closePitch()" aria-label="Close pitch view">✕</button>
+  <div class="pitch-main">
+    <p class="eyebrow"><span>AeroGuard · API3 + Cardano</span><span>Live · Base Sepolia</span></p>
+    <h1>Your flight is late.<br /><em>You're already paid.</em></h1>
+    <p class="pitch-lede">Pays only on flight data signed by the AeroDataBox Airnode. Nobody can fake it. Try.</p>
+    <div class="pitch-stats">
+      <div><b id="pPol">–</b><span>policies on-chain</span></div>
+      <div><b id="pSet">–</b><span>settled by the keeper</span></div>
+      <div><b id="pBlk">0</b><span>forgeries blocked here</span></div>
+    </div>
+    <div class="pitch-go"><button class="btn-primary" type="button" onclick="cheat()">Try to steal from this contract</button><div class="pitch-out" id="pOut"></div></div>
+    <p class="next-up" id="pNext"></p>
+  </div>
+  <div class="pitch-qr"><img src="img/qr-lab.svg" alt="QR code to the tamper lab" width="380" height="380" /><span>Scan it. Try it yourself.</span><code>womp-maindev.github.io/aeroguard</code></div>
+</section>
+<dialog class="demo" id="demoDlg" aria-label="AeroGuard demo video">
+  <button class="demo-x" type="button" onclick="closeDemo()" aria-label="Close">✕</button>
+  <video id="demoVid" controls playsinline preload="none" data-poster="media/demo-poster.jpg" width="1920" height="1080">
+    <source src="media/demo.mp4" type="video/mp4" />
+  </video>
+</dialog>
 
 <footer class="site">
   <div class="wrap credit">
@@ -1355,9 +1412,20 @@ function renderNext(ps) {
   el.hidden = false;
   el.innerHTML = `<span class="pulse"></span>Next to settle: <b>#${esc(p.id)} ${esc(p.flight)}</b> ${when}. ${act.length > 1 ? `${act.length - 1} more after it. ` : ''}A delay of 2 h+ pays 50%, 3 h+ or a cancellation 100%, straight to the holder.`;
 }
+function renderPitch(ps) {
+  if ($('pitchView').hidden) return;
+  $('pPol').textContent = ps.length;
+  $('pSet').textContent = ps.filter((p) => Number(p.status) > 1).length;
+  $('pNext').innerHTML = $('nextUp').innerHTML;
+}
+function openPitch() { $('pitchView').hidden = false; document.body.classList.add('pitching'); renderPitch(S.policies); }
+function closePitch() { $('pitchView').hidden = true; document.body.classList.remove('pitching'); }
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('pitchView').hidden) closePitch(); });
 function renderPolicies(ps, free) {
-  renderNext(ps);
   S.policies = ps;
+  renderNext(ps);
+  if (S.keeper || S.apiLog.length) renderToday();
+  renderPitch(ps);
   if (S.policy) S.policy = ps.find((p) => String(p.id) === String(S.policy.id)) || null;
   const paid = ps.reduce((a, p) => a + (p.statusName === 'PaidFull' ? Number(p.coverage) : p.statusName === 'PaidHalf' ? Number(p.coverage) / 2 : 0), 0) / 1e6;
   $('sPol').textContent = ps.length;
@@ -1446,7 +1514,24 @@ async function refreshKeeper() {
   $('fetchBtn').disabled = !S.online && !S.evidence.length;
 }
 const logLine = (l) => `<div class="ln"><span class="ts">${esc(String(l.at).slice(11, 19))}</span><span class="lv ${esc(l.level)}">${esc(l.level)}</span><span>${esc(l.msg)} ${l.link && /^https:/.test(l.link) ? `<a target="_blank" rel="noopener" href="${esc(l.link)}" style="white-space:nowrap">basescan ↗</a>` : ''}</span></div>`;
+// settlements from today's keeper runs, newest first: "#7 EI352 settled 10:43 · 5 min late · payout 0 aUSD"
+function renderToday() {
+  const today = new Date().toISOString().slice(0, 10), seen = new Set(), items = [];
+  const lines = [...(S.keeper?.runs ?? []).flatMap((r) => r.log ?? []), ...S.apiLog].filter((l) => String(l.at).startsWith(today));
+  for (const l of lines.reverse()) {
+    const m = /^policy #(\d+) settled (\w+): (.*?)(?:, payout ([\d.]+) aUSD)?$/.exec(l.msg);
+    if (!m || seen.has(m[1])) continue;
+    seen.add(m[1]);
+    const p = S.policies.find((x) => x.id === m[1]), paid = Number(m[4] || 0);
+    const at = new Date(l.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+    items.push(`<span class="t-item${paid ? ' paid' : ''}"><b>#${esc(m[1])}${p ? ' ' + esc(p.flight) : ''}</b> settled ${esc(at)} · ${esc(m[3].replace(/^Arrived, /, ''))} · ${paid ? `<b>paid ${paid} aUSD</b>` : 'payout 0'}${l.link && /^https:/.test(l.link) ? ` · <a href="${esc(l.link)}" target="_blank" rel="noopener">tx ↗</a>` : ''}</span>`);
+  }
+  const el = $('today');
+  el.hidden = !items.length;
+  el.innerHTML = items.length ? `<span class="t-head"><span class="pulse"></span>Live today</span>${items.join('')}` : '';
+}
 function renderLog() {
+  renderToday();
   const runs = S.keeper?.runs ?? [];
   if (S.online && S.apiLog.length) {
     $('logCount').textContent = `${S.apiLog.length} events · local`;
@@ -1560,7 +1645,7 @@ async function runMode(m) {
 // one button for the pitch: pick a live policy with real evidence, run the 4 forgeries, show the score big
 async function cheat() {
   const b = $('cheatBtn'), out = $('cheatOut');
-  if (!S.policies.length) { out.hidden = false; out.className = 'cheat-out'; out.innerHTML = '<b>Can\'t reach Base Sepolia right now.</b> Try again in a moment.'; return; }
+  if (!S.policies.length) { out.hidden = false; out.className = 'cheat-out'; out.innerHTML = '<b>Can\'t reach Base Sepolia right now.</b> Try again in a moment.'; $('pOut').innerHTML = out.innerHTML; return; }
   await loadPurchaseProofs();
   const hasReal = (p) => allEvidence().some((x) => [p.arrivalRequestHash, p.statusRequestHash].map((h) => String(h).toLowerCase()).includes(String(x.requestHash).toLowerCase()));
   const active = S.policies.filter((p) => Number(p.status) === 1);
@@ -1568,12 +1653,15 @@ async function cheat() {
   $('tPolicy').value = p.id; $('tUseInsp').checked = false; $('tReopen').checked = true; labNote();
   b.disabled = true; b.textContent = 'Attacking…';
   out.hidden = false; out.className = 'cheat-out'; out.innerHTML = `Attacking policy <b>#${esc(p.id)} ${esc(p.flight)}</b>…`;
+  $('pOut').innerHTML = out.innerHTML;
   try { await runAttacks(); } finally { b.disabled = false; b.textContent = 'Try again'; }
   const modes = ['edit', 'wrongreq', 'wrongsigner', 'stale'];
   const blocked = modes.filter((m) => $(`res-${m}`).classList.contains('blk'));
   const why = modes.map((m) => $(`res-${m}`).querySelector('.t')?.textContent || 'skipped');
   out.className = 'cheat-out ' + (blocked.length === modes.length ? 'all' : '');
+  S.blocked = (S.blocked || 0) + blocked.length; $('pBlk').textContent = S.blocked;
   out.innerHTML = `<div class="score">🛡 ${blocked.length} / ${modes.length} BLOCKED</div><div class="why">${why.map(esc).join(' · ')}</div><div class="pol">policy #${esc(p.id)} ${esc(p.flight)} · ${esc(p.statusName)} · details below</div>`;
+  $('pOut').innerHTML = out.innerHTML.replace(' · details below', '');
 }
 async function runAttacks() {
   const b = $('runAll'); b.disabled = true;
@@ -1700,11 +1788,18 @@ async function loadCardano() {
   renderCardano();
 }
 
+// demo video in a dialog. preload=none, so nothing is downloaded until someone presses play
+function openDemo() { const v = $('demoVid'); if (!v.poster) v.poster = v.dataset.poster; const d = $('demoDlg'); if (d.showModal) d.showModal(); else d.setAttribute('open', ''); $('demoVid').play().catch(() => {}); }
+function closeDemo() { $('demoVid').pause(); $('demoDlg').close?.(); }
+$('demoDlg').addEventListener('close', () => $('demoVid').pause());
+$('demoDlg').addEventListener('click', (e) => { if (e.target === $('demoDlg')) closeDemo(); });
+
 // --- boot
 window.addEventListener('DOMContentLoaded', () => {
   setStatus();
   render();
   renderCardano();
+  if (QS.has('pitch')) openPitch();
   probeApi().finally(() => { refreshChain(); refreshKeeper(); });
   loadCardano();
   setInterval(refreshChain, 20000);
